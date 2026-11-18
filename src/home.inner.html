@@ -1,0 +1,237 @@
+<title>TechCo Trainer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="One home screen for the factory software trainers: Bizerba, Hellenic and Ishida.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a plant equipment list — header band, then square machine plates in a responsive grid.
+   Single light theme on purpose: every trainer behind these plates is a light-mode replica of
+   factory software, so the home screen stays in the same world instead of flipping to dark. */
+:root{
+  --bg:#eaeef2; --plate:#ffffff; --plate2:#f6f8fa;
+  --ink:#111922; --muted:#5a6775; --line:#c9d2db; --line2:#dde4ea;
+  --accent:#0b5fa5; --signal:#d4671f; --ok:#1f9d55;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--sans);
+  -webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 28px;
+}
+.wrap{max-width:1180px;margin:0 auto}
+
+/* ---- header band ---- */
+header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 24px;padding-block:26px 18px;border-bottom:2px solid var(--ink)}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand .mark{width:40px;height:40px;flex:none;color:var(--accent)}
+.brand h1{font:700 27px/1.05 var(--sans);letter-spacing:-.015em;margin:0;text-wrap:balance}
+.brand p{margin:3px 0 0;font:500 12px/1.3 var(--mono);color:var(--muted);letter-spacing:.02em}
+.hbits{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bit{font:500 11.5px/1 var(--mono);letter-spacing:.03em;color:var(--muted);border:1px solid var(--line);background:var(--plate);border-radius:999px;padding:7px 11px;white-space:nowrap}
+.bit b{color:var(--ink);font-weight:600}
+.bit .led{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:6px;vertical-align:1px}
+
+/* ---- machine plates ---- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:16px;padding-block:22px}
+.plate{
+  position:relative;display:flex;flex-direction:column;aspect-ratio:1/1;min-height:300px;
+  background:var(--plate);border:1px solid var(--line);border-radius:4px;
+  text-decoration:none;color:inherit;overflow:hidden;
+  box-shadow:0 1px 0 #ffffff inset,0 1px 2px rgba(17,25,34,.06);
+  transition:border-color .14s,box-shadow .14s,transform .14s;
+}
+.plate:hover,.plate:focus-visible{border-color:var(--accent);box-shadow:0 2px 10px rgba(11,95,165,.16);transform:translateY(-2px);outline:none}
+.plate:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.plate .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:16px 16px 0}
+.plate .ico{width:58px;height:44px;color:var(--accent);flex:none}
+.plate:hover .ico{color:var(--signal)}
+kbd{font:500 11px/1 var(--mono);color:var(--muted);background:var(--plate2);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:4px 6px}
+.plate .body{padding:12px 16px 0;display:flex;flex-direction:column;gap:2px;min-width:0}
+.plate h2{margin:0;font:700 21px/1.1 var(--sans);letter-spacing:-.01em}
+.plate .model{font:500 11.5px/1.35 var(--mono);color:var(--muted);letter-spacing:.01em}
+.plate ul{list-style:none;margin:11px 0 0;padding:0;display:flex;flex-direction:column;gap:5px;min-width:0}
+.plate li{font:500 13px/1.3 var(--sans);color:var(--ink);display:flex;gap:8px;align-items:baseline;min-width:0}
+.plate li::before{content:"";width:5px;height:5px;flex:none;border-radius:1px;background:var(--accent);transform:translateY(-2px)}
+.plate li span{min-width:0;overflow-wrap:anywhere}
+.plate .what{margin:10px 0 0;font:400 12.5px/1.45 var(--sans);color:var(--muted);text-wrap:pretty}
+.plate .strip{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;border-top:1px solid var(--line2);background:var(--plate2);font:500 11px/1.3 var(--mono);color:var(--muted);letter-spacing:.02em}
+.plate .strip .go{color:var(--accent);font-weight:600;white-space:nowrap}
+.plate .last{display:block;color:var(--signal)}
+
+/* ---- placeholder plate for the next machine ---- */
+.plate.next{background:transparent;border-style:dashed;box-shadow:none;cursor:default}
+.plate.next:hover{transform:none;border-color:var(--line);box-shadow:none}
+.plate.next .ico{color:var(--muted)}
+.plate.next h2{color:var(--muted);font-size:18px}
+.plate.next .strip{background:transparent;border-top-color:var(--line)}
+.plate.next p{margin:10px 0 0;font:400 13px/1.45 var(--sans);color:var(--muted)}
+
+footer{border-top:1px solid var(--line);padding-block:14px;display:flex;flex-wrap:wrap;gap:6px 18px;font:400 12.5px/1.5 var(--sans);color:var(--muted)}
+footer code{font:500 12px/1 var(--mono);background:var(--plate);border:1px solid var(--line2);border-radius:3px;padding:2px 5px}
+@media (max-width:460px){
+  .plate{aspect-ratio:auto;min-height:0}
+  .brand h1{font-size:23px}
+}
+@media (prefers-reduced-motion:reduce){.plate{transition:none}.plate:hover{transform:none}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="28" width="42" height="9" rx="2"></rect>
+      <path d="M9 37v5M39 37v5M17 28V17h14v11"></path>
+      <path d="M21 9h14M24 13V9"></path>
+      <circle cx="35" cy="9" r="4"></circle>
+    </svg>
+    <div>
+      <h1>TechCo Trainer</h1>
+      <p>Factory software trainers · 2SFG Scunthorpe</p>
+    </div>
+  </div>
+  <div class="hbits">
+    <span class="bit"><span class="led"></span><b>3</b> machines · <b>11</b> programs</span>
+    <span class="bit">Runs offline</span>
+  </div>
+</header>
+
+<main class="grid">
+
+  <a class="plate" href="apps/bizerba/index.html" data-n="1" data-id="bizerba">
+    <div class="top">
+      <svg class="ico" viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="16" cy="13" r="9"></circle><circle cx="16" cy="13" r="2.2"></circle>
+        <path d="M27 11h20v12H31"></path>
+        <path d="M31 23l-4 6h12l-4-6"></path>
+        <path d="M4 40h56"></path>
+        <rect x="24" y="31" width="16" height="9" rx="1"></rect>
+        <path d="M28 31v-2h8v2"></path>
+      </svg>
+      <kbd>1</kbd>
+    </div>
+    <div class="body">
+      <h2>Bizerba</h2>
+      <div class="model">GLM-I 40 / 70 · C-Wrap applicator</div>
+      <ul>
+        <li><span>GLM-I scale terminal</span></li>
+        <li><span>Bizerba Brain 2</span></li>
+        <li><span>Data Management</span></li>
+      </ul>
+      <p class="what">Weigh-price labelling: PLUs, weight classes, label formats and the two PC programs behind them.</p>
+    </div>
+    <div class="strip"><span>FP2 L3–L6 · FP1 L3<span class="last" data-last="bizerba"></span></span><span class="go">Open →</span></div>
+  </a>
+
+  <a class="plate" href="apps/hellenic/index.html" data-n="2" data-id="hellenic">
+    <div class="top">
+      <svg class="ico" viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="6" y="6" width="26" height="18" rx="2"></rect>
+        <path d="M10 11h12M10 15h18M10 19h8"></path>
+        <path d="M19 24v8"></path>
+        <path d="M6 32h52"></path>
+        <path d="M40 32V14h14"></path>
+        <rect x="38" y="4" width="18" height="10" rx="1"></rect>
+        <path d="M10 38h44M14 42h36"></path>
+      </svg>
+      <kbd>2</kbd>
+    </div>
+    <div class="body">
+      <h2>Hellenic</h2>
+      <div class="model">Hellenic Systems · OCM Requiem v9</div>
+      <ul>
+        <li><span>Scale terminal</span></li>
+        <li><span>FOPS 8</span></li>
+        <li><span>FOPSX Web Editors</span></li>
+        <li><span>Comms (VNC) · Label Designer</span></li>
+      </ul>
+      <p class="what">Box weighing on the terminal, order lines in the scheduler, label formats on the web side.</p>
+    </div>
+    <div class="strip"><span>Scales · box labelling<span class="last" data-last="hellenic"></span></span><span class="go">Open →</span></div>
+  </a>
+
+  <a class="plate" href="apps/ishida/index.html" data-n="3" data-id="ishida">
+    <div class="top">
+      <svg class="ico" viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="6" y="6" width="20" height="14" rx="1"></rect>
+        <path d="M16 20v6M10 26h12"></path>
+        <rect x="34" y="6" width="24" height="13" rx="2"></rect>
+        <path d="M38 19v6h16v-6"></path>
+        <rect x="40" y="25" width="12" height="8" rx="1"></rect>
+        <path d="M43 29h6"></path>
+        <path d="M4 41h56"></path>
+        <rect x="14" y="33" width="14" height="8" rx="1"></rect>
+      </svg>
+      <kbd>3</kbd>
+    </div>
+    <div class="body">
+      <h2>Ishida</h2>
+      <div class="model">WPL · ICE Zodiac Hawk printer</div>
+      <ul>
+        <li><span>Office PC: CommsBridge, CLARiSOFT</span></li>
+        <li><span>Line 4 WPL</span></li>
+        <li><span>ICE Hawk printer</span></li>
+      </ul>
+      <p class="what">Label jobs built on the office PC, sent to the weigher, printed by the ICE Hawk.</p>
+    </div>
+    <div class="strip"><span>Line 4<span class="last" data-last="ishida"></span></span><span class="go">Open →</span></div>
+  </a>
+
+  <div class="plate next">
+    <div class="top">
+      <svg class="ico" viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" aria-hidden="true">
+        <rect x="8" y="8" width="48" height="32" rx="3"></rect>
+        <path d="M32 18v12M26 24h12" stroke-dasharray="0"></path>
+      </svg>
+    </div>
+    <div class="body">
+      <h2>Next machine</h2>
+      <p>Each trainer is one folder under <code>apps/</code> with its own <code>index.html</code>. Add the folder, add a plate here.</p>
+    </div>
+    <div class="strip"><span>Slot free</span><span></span></div>
+  </div>
+
+</main>
+
+<footer>
+  <span>Settings, passwords and drill progress are saved in this browser, separately for each machine.</span>
+  <span>Press <kbd>1</kbd>–<kbd>3</kbd> to open a trainer.</span>
+</footer>
+</div>
+
+<script>
+(function(){
+  var LS="techco.last";
+  function read(){try{return JSON.parse(localStorage.getItem(LS)||"{}")}catch(e){return{}}}
+  function ago(t){
+    var m=Math.round((Date.now()-t)/60000);
+    if(m<1)return"just now";
+    if(m<60)return m+" min ago";
+    var h=Math.round(m/60);if(h<24)return h+(h===1?" hour ago":" hours ago");
+    var d=Math.round(h/24);if(d<7)return d+(d===1?" day ago":" days ago");
+    return new Date(t).toLocaleDateString();
+  }
+  var seen=read();
+  document.querySelectorAll("[data-last]").forEach(function(el){
+    var t=seen[el.getAttribute("data-last")];
+    if(t)el.textContent="Opened "+ago(t);
+  });
+  function mark(id){
+    try{var s=read();s[id]=Date.now();localStorage.setItem(LS,JSON.stringify(s))}catch(e){}
+  }
+  var plates=[].slice.call(document.querySelectorAll(".plate[data-id]"));
+  plates.forEach(function(a){a.addEventListener("click",function(){mark(a.getAttribute("data-id"))})});
+  document.addEventListener("keydown",function(e){
+    if(e.altKey||e.ctrlKey||e.metaKey)return;
+    var t=e.target;if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))return;
+    var a=plates.filter(function(p){return p.getAttribute("data-n")===e.key})[0];
+    if(a){e.preventDefault();mark(a.getAttribute("data-id"));location.href=a.getAttribute("href")}
+  });
+})();
+</script>

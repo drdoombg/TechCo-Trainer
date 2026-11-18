@@ -1,0 +1,2080 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ishida Line Trainer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Training simulator for Ishida CommsBridge Desktop, CLARiSOFT and the ICE Zodiac Hawk labeller printer.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon-192.png">
+<style>
+:root{
+  --bg:#f3f5f8; --panel:#ffffff; --ink:#1d2430; --muted:#5d6878; --line:#d6dbe3;
+  --accent:#0b5fa5; --accent2:#e0662a; --ok:#1f9d55; --warn:#d99a06; --bad:#d23b3b;
+  --tag-photo:#1f7a46; --tag-inf:#9a6a00; --tag-ass:#7a4bb3;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0;color-scheme:light;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+button{font:inherit;cursor:pointer}
+input,select{font:inherit}
+.it-top{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:#fff;border-bottom:1px solid var(--line);padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.it-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px}
+.it-brand img{width:28px;height:28px;border-radius:6px}
+.it-brand small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.it-tabs{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+.it-tab{border:1px solid var(--line);background:#f7f9fb;border-radius:8px;padding:6px 10px;color:var(--ink)}
+.it-tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.it-tab .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;background:var(--ok);vertical-align:middle}
+.it-tab .dot.amber{background:var(--warn)} .it-tab .dot.red{background:var(--bad)}
+.it-reset{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px}
+.it-reset.arm{background:var(--bad);border-color:var(--bad);color:#fff}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:#fff}
+.it-main{padding-block:14px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1500px;margin:0 auto}
+.it-panel{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}
+@media (max-width:980px){.it-panel{grid-template-columns:minmax(0,1fr)}}
+.it-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.it-card h3{margin:0 0 6px;font-size:15px}
+.it-card h4{margin:10px 0 4px;font-size:13px}
+.it-card ul{margin:4px 0 0;padding-left:18px}
+.it-card li{margin:2px 0}
+.it-side{display:flex;flex-direction:column;gap:12px}
+.it-tag{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;color:#fff;margin-right:6px;vertical-align:middle}
+.it-tag.photo{background:var(--tag-photo)} .it-tag.inf{background:var(--tag-inf)} .it-tag.ass{background:var(--tag-ass)}
+.it-tasks li{list-style:none;margin-left:-18px}
+.it-tasks li::before{content:"☐ ";color:var(--muted)}
+.it-tasks li.done::before{content:"☑ ";color:var(--ok)}
+.it-tasks li.done{color:var(--muted);text-decoration:line-through}
+.it-stagewrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;overflow:hidden}
+.it-fit{position:relative;overflow:hidden;width:100%}
+.it-fit>.it-scaled{position:absolute;left:0;top:0;transform-origin:0 0}
+.it-strip{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.it-chip{border:1px solid var(--line);border-radius:999px;padding:5px 12px;background:#fff}
+.it-chip.on{background:#e8f4ec;border-color:#9fd3b2}
+.it-chip.off{background:#fbecec;border-color:#efb3b3}
+.it-btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:8px;padding:6px 12px}
+.it-btn.ghost{background:#fff;color:var(--accent)}
+.it-small{font-size:12px;color:var(--muted)}
+.it-toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#1d2430;color:#fff;padding:9px 16px;border-radius:10px;z-index:999;max-width:90vw;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.it-labels{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.it-labels .lab{border:1px solid var(--line);border-radius:8px;padding:6px;background:#fff;width:100%;max-width:330px}
+.it-labels svg{width:100%;height:auto;display:block}
+.it-log{max-height:220px;overflow:auto;font-size:12px;font-family:Consolas,monospace;background:#f7f9fb;border:1px solid var(--line);border-radius:8px;padding:6px}
+.it-log div{border-bottom:1px dashed #e3e7ee;padding:2px 0}
+
+/* ===== Windows desktop (office PC) ===== */
+.w-desk{width:1280px;height:800px;position:relative;background:linear-gradient(135deg,#3b2fa8,#5a2fb5 55%,#2f4ec9);overflow:hidden;font-family:"Segoe UI",Arial,sans-serif;font-size:12px;color:#111}
+.w-desk .w-wall{position:absolute;right:60px;top:300px;color:#fff;text-align:right;opacity:.9}
+.w-desk .w-wall b{font-size:30px;display:block;letter-spacing:1px}
+.w-icons{position:absolute;left:10px;top:10px;display:grid;grid-template-columns:repeat(2,78px);gap:8px}
+.w-ico{width:78px;color:#fff;text-align:center;font-size:11px;border:1px solid transparent;border-radius:4px;padding:4px 2px;background:none}
+.w-ico:hover{background:rgba(255,255,255,.15)}
+.w-ico i{display:block;width:34px;height:34px;margin:0 auto 3px;border-radius:6px;font-style:normal;font-weight:700;line-height:34px;font-size:15px}
+.w-task{position:absolute;left:0;right:0;bottom:0;height:44px;background:rgba(235,238,245,.92);display:flex;justify-content:center;align-items:center;gap:6px;border-top:1px solid #c9cfd9}
+.w-task button{height:36px;min-width:40px;border:none;border-radius:6px;background:transparent;padding:0 10px;font-size:12px}
+.w-task button.act{background:#fff;box-shadow:inset 0 -3px 0 #0b5fa5}
+.w-task .clock{position:absolute;right:12px;text-align:right;font-size:11px;line-height:1.2}
+.w-win{position:absolute;background:#f0f0f0;border:1px solid #6b7a90;box-shadow:0 8px 28px rgba(0,0,0,.35);display:flex;flex-direction:column}
+.w-win.focus{border-color:#0b5fa5}
+.w-title{height:30px;background:#fff;display:flex;align-items:center;padding-left:8px;gap:6px;font-size:12px;cursor:move;user-select:none;border-bottom:1px solid #ddd}
+.w-title span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w-title button{width:44px;height:30px;border:none;background:transparent;font-size:14px}
+.w-title button.x:hover{background:#e81123;color:#fff}
+.w-body{flex:1;position:relative;overflow:hidden}
+
+/* ===== CommsBridge ===== */
+.cb{position:absolute;inset:0;background:#f4efe6;font-family:Tahoma,Arial,sans-serif;font-size:12px}
+.cb-tool{display:flex;align-items:center;gap:4px;padding:6px 8px;border-bottom:1px solid #cbbfa8}
+.cb-tool button{width:38px;height:32px;border:1px solid #bfb39c;background:linear-gradient(#fff,#e9e2d4);border-radius:3px;font-size:16px;padding:0}
+.cb-tool .lang{width:auto;padding:0 10px;font-size:12px;border:none;background:none}
+.cb-tabs{display:flex;gap:2px;padding:4px 8px 0}
+.cb-tabs button{border:1px solid #bfb39c;border-bottom:none;background:#e9e2d4;padding:3px 7px;font-size:12px;border-radius:3px 3px 0 0}
+.cb-tabs button.on{background:#fff}
+.cb-list{position:absolute;left:8px;top:84px;width:410px;bottom:8px;background:#fff;border:1px solid #9c907a;overflow:auto}
+.cb-list table{border-collapse:collapse;width:100%}
+.cb-list td{border:1px solid #c9c2b4;padding:1px 4px;white-space:nowrap;font-size:12px;cursor:default}
+.cb-list td:first-child{width:56px}
+.cb-list tr.sel td{background:#2a6fc0;color:#fff}
+.cb-list tr:hover td{background:#e5eefb}
+.cb-list tr.sel:hover td{background:#2a6fc0}
+.cb-lines{position:absolute;left:426px;top:8px;right:8px}
+.cb-line{display:flex;gap:8px;border:1px solid #d5ccba;background:#f7f3ec;margin-bottom:6px;padding:4px}
+.cb-line .pic{width:100px;height:66px;background:#dfe3e8;border:1px solid #b9c0c9;display:flex;align-items:center;justify-content:center;font-size:10px;color:#556}
+.cb-line b{font-weight:400;font-size:12px}
+.cb-line .st{font-size:12px;line-height:1.35}
+.cb-line .st i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.cb-line .st i.g{background:#1fa64a} .cb-line .st i.r{background:#d62d2d}
+.cb-line .pend{font-size:11px;color:#a35a00}
+.cb-ed{position:absolute;left:0;top:44px;right:0;bottom:0;background:#f1ece2;border:1px solid #8aa0b8;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.cb-ed .hd{background:#1e88c8;color:#fff;padding:3px 8px;font-size:11px}
+.cb-ed .grid{position:absolute;left:8px;top:28px;right:74px;bottom:46px;border:1px solid #b9b0a0;display:grid;grid-template-columns:1fr 1fr;gap:0 8px;padding:4px;align-content:start}
+.cb-f{display:flex;align-items:center;border:1px solid #c7bfae;background:#ece6da;margin:2px 0;height:25px}
+.cb-f label{flex:1;padding-left:5px;font-size:12px;white-space:nowrap;overflow:hidden}
+.cb-f input,.cb-f select{width:52%;height:21px;border:1px solid #b5ab98;background:#fbf9f5;text-align:right;font-size:12px;padding:0 4px;margin-right:2px}
+.cb-f select{text-align:left}
+.cb-f.red label{color:#c4241c}
+.cb-f.dis label{color:#8e8a82}
+.cb-f.dis input{color:#8e8a82}
+.cb-f.wide input{text-align:left}
+.cb-gap{height:25px;margin:2px 0}
+.cb-pages{position:absolute;left:8px;bottom:8px;display:flex;gap:4px}
+.cb-pages button{width:92px;height:30px;border:1px solid #b8ad98;background:#f6f2ea;font-size:13px}
+.cb-pages button.red{color:#d0281d}
+.cb-pages button.on{background:#a69c8a;color:#111}
+.cb-side{position:absolute;right:8px;top:28px;width:56px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.cb-side button{width:50px;height:46px;border:1px solid #9fb2c9;background:#e9f1fb;font-size:20px;border-radius:4px}
+.cb-side .rank{font-size:12px;margin-top:6px}
+.cb-side .rn{font-size:20px;font-weight:700}
+.cb-dlg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#f1ece2;border:1px solid #6d7f96;box-shadow:0 10px 30px rgba(0,0,0,.35);width:440px;z-index:5}
+.cb-dlg .hd{background:#1e88c8;color:#fff;padding:4px 8px;font-size:12px}
+.cb-dlg .bd{padding:10px;font-size:12px}
+.cb-dlg .ft{display:flex;justify-content:flex-end;gap:6px;padding:8px}
+.cb-dlg .ft button{min-width:80px;height:26px;border:1px solid #9c907a;background:#fbf9f5}
+.cb-ph{position:absolute;left:8px;top:84px;width:410px;bottom:8px;background:#fff;border:1px solid #9c907a;padding:12px;color:#555}
+
+/* ===== CLARiSOFT ===== */
+.cs{position:absolute;inset:0;background:#f0f0f0;font-family:"Segoe UI",Tahoma,Arial,sans-serif;font-size:12px}
+.cs-menu{display:flex;gap:2px;padding:2px 4px;background:#fff;border-bottom:1px solid #ddd;position:relative;z-index:4}
+.cs-menu>div{position:relative}
+.cs-menu>div>button{border:none;background:none;padding:2px 8px}
+.cs-menu>div>button:hover{background:#e5f1fb}
+.cs-dd{position:absolute;left:0;top:22px;background:#fff;border:1px solid #aaa;box-shadow:2px 3px 8px rgba(0,0,0,.2);min-width:190px;z-index:6}
+.cs-dd button{display:block;width:100%;text-align:left;border:none;background:none;padding:4px 18px}
+.cs-dd button:hover{background:#e5f1fb}
+.cs-dd button:disabled{color:#aaa}
+.cs-tb{display:flex;align-items:center;gap:3px;padding:3px 4px;border-bottom:1px solid #ddd;background:#f7f7f7}
+.cs-tb button{width:24px;height:22px;border:1px solid transparent;background:none;font-size:13px;padding:0}
+.cs-tb button:hover{border-color:#9ac}
+.cs-tb select{height:22px;font-size:12px}
+.cs-tb .sep{width:1px;height:18px;background:#ccc;margin:0 3px}
+.cs-box{position:absolute;left:0;top:56px;width:92px;bottom:22px;background:#6e6e6e;color:#eee}
+.cs-box .t{background:#d9d9d9;color:#111;font-size:11px;padding:3px 4px}
+.cs-box button{display:block;width:100%;border:none;background:none;color:#f0f0f0;font-size:10px;padding:5px 0 4px;text-align:center}
+.cs-box button i{display:block;font-style:normal;font-size:18px;line-height:20px}
+.cs-box button:hover{background:#7f7f7f}
+.cs-work{position:absolute;left:92px;top:56px;right:0;bottom:22px;background:#d97d3a;overflow:auto}
+.cs-ruler{position:sticky;top:0;height:18px;background:#fff;border-bottom:1px solid #aaa;z-index:2}
+.cs-vruler{position:absolute;left:0;top:18px;width:18px;background:#fff;border-right:1px solid #aaa}
+.cs-status{position:absolute;left:0;right:0;bottom:0;height:22px;background:#f0f0f0;border-top:1px solid #ccc;display:flex;gap:30px;align-items:center;padding:0 8px;font-size:11px}
+.cs-el{cursor:move}
+.cs-el.sel{outline:none}
+.cs-splash{position:absolute;left:50%;top:50%;width:300px;height:340px;transform:translate(-50%,-50%);background:linear-gradient(#fff 0 26%,#e8873e 26%);border:1px solid #ccc;box-shadow:0 6px 24px rgba(0,0,0,.35);z-index:9;font-family:Arial}
+.cs-splash .l{position:absolute;right:16px;top:20px;font-weight:700;color:#333;font-size:15px;text-align:right}
+.cs-splash .l small{display:block;font-size:8px;font-weight:400}
+.cs-splash .m{position:absolute;left:12px;bottom:40px;color:#fde;font-family:"Courier New",monospace;font-size:19px;line-height:1.1}
+.cs-splash .i{position:absolute;left:4px;top:80px;font-size:9px;color:#333}
+.cs-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.cs-dlg{position:absolute;background:#f0f0f0;border:1px solid #2d6db5;box-shadow:0 10px 30px rgba(0,0,0,.35);z-index:8;font-size:12px}
+.cs-dlg .hd{background:#1f6fc5;color:#fff;padding:5px 8px;display:flex;justify-content:space-between}
+.cs-dlg .hd button{border:none;background:none;color:#fff;font-size:14px;line-height:1}
+.cs-dlg .tabs{display:flex;gap:2px;padding:6px 8px 0}
+.cs-dlg .tabs button{border:1px solid #bbb;border-bottom:none;background:#e7e7e7;padding:2px 8px}
+.cs-dlg .tabs button.on{background:#fff}
+.cs-dlg .bd{background:#fff;border:1px solid #bbb;margin:0 8px;padding:8px;min-height:380px}
+.cs-dlg .ft{display:flex;justify-content:flex-end;gap:6px;padding:8px}
+.cs-dlg .ft button{min-width:72px;height:24px;border:1px solid #adadad;background:#e1e1e1}
+.cs-dlg label.f{display:block;margin:6px 0 2px;color:#222}
+.cs-dlg input[type=text],.cs-dlg input[type=number],.cs-dlg select{height:22px;border:1px solid #9a9a9a;width:100%}
+.cs-dlg .row{display:flex;gap:10px}
+.cs-dlg .row>div{flex:1}
+.cs-dlg .grp{border-top:1px solid #ccc;margin-top:8px;padding-top:2px;font-weight:600;color:#333}
+.cs-dlg .ck{display:block;margin:4px 0}
+.cs-dlg .prev{border:1px solid #ccc;background:#fafafa;padding:3px 6px;min-height:22px;font-family:Arial}
+.cs-dlg .lst{height:150px;border:1px solid #9a9a9a;overflow:auto;background:#fff}
+.cs-dlg .lst div{padding:1px 4px;cursor:default}
+.cs-dlg .lst div.on{background:#0078d7;color:#fff}
+.cs-msg{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);width:420px;background:#fff;border:1px solid #888;box-shadow:0 10px 30px rgba(0,0,0,.35);z-index:10}
+.cs-msg .hd{padding:6px 10px;border-bottom:1px solid #ddd;font-size:12px}
+.cs-msg .bd{padding:14px 12px;display:flex;gap:10px;font-size:12px}
+.cs-msg .bd i{font-style:normal;font-size:26px}
+.cs-msg .ft{background:#f0f0f0;padding:8px;display:flex;justify-content:flex-end;gap:6px}
+.cs-msg .ft button{min-width:80px;height:24px}
+
+/* ===== File Explorer ===== */
+.ex{position:absolute;inset:0;background:#202124;color:#e8e8e8;font-family:"Segoe UI",Arial;font-size:12px}
+.ex-bar{display:flex;gap:6px;align-items:center;padding:6px 8px;border-bottom:1px solid #3a3a3a}
+.ex-bar button{background:#2d2e31;color:#ddd;border:1px solid #444;border-radius:4px;padding:2px 8px}
+.ex-path{flex:1;background:#2d2e31;border:1px solid #444;border-radius:4px;padding:3px 8px}
+.ex-nav{position:absolute;left:0;top:38px;bottom:0;width:150px;border-right:1px solid #3a3a3a;padding:6px}
+.ex-nav div{padding:3px 6px;border-radius:4px;cursor:default}
+.ex-nav div.on{background:#3a3b3e}
+.ex-list{position:absolute;left:150px;right:0;top:38px;bottom:0;overflow:auto}
+.ex-list table{border-collapse:collapse;width:100%}
+.ex-list th{font-weight:400;color:#aaa;text-align:left;padding:4px 8px;border-bottom:1px solid #3a3a3a}
+.ex-list td{padding:3px 8px;white-space:nowrap}
+.ex-list tr.r:hover td{background:#2f3033}
+.ex-list tr.sel td{background:#3d4a5c}
+
+/* ===== ICE Zodiac Hawk CLARiTY ===== */
+.hk{width:1024px;height:600px;background:#e9edf2;font-family:Arial,Helvetica,sans-serif;position:relative;overflow:hidden;color:#1a2433}
+.hk-top{height:52px;background:#1c3b5e;color:#fff;display:flex;align-items:center;gap:14px;padding:0 14px}
+.hk-top .nm{font-weight:700;font-size:17px}
+.hk-top .st{padding:4px 12px;border-radius:4px;font-weight:700}
+.hk-top .st.run{background:#22a35a} .hk-top .st.stop{background:#c43a3a} .hk-top .st.idle{background:#c98a10}
+.hk-top .clk{margin-left:auto;font-size:14px;text-align:right}
+.hk-fault{height:34px;display:flex;align-items:center;padding:0 14px;font-weight:700;font-size:14px;cursor:pointer}
+.hk-fault.none{background:#d9e7d9;color:#245b2a;cursor:default}
+.hk-fault.f{background:#d93a3a;color:#fff}
+.hk-fault.w{background:#f2c94c;color:#3b2c00}
+.hk-body{position:absolute;left:0;right:0;top:86px;bottom:84px;display:flex}
+.hk-main{flex:1;padding:10px 14px;overflow:auto}
+.hk-nav{width:190px;padding:10px;display:flex;flex-direction:column;gap:8px;background:#d6dde6}
+.hk-nav button{height:58px;border:none;border-radius:8px;background:#2a5c8f;color:#fff;font-size:15px;font-weight:700}
+.hk-nav button.on{background:#e0662a}
+.hk-ctrl{position:absolute;left:0;right:0;bottom:0;height:84px;background:#c9d2dd;display:flex;align-items:center;gap:12px;padding:0 14px}
+.hk-ctrl button{height:60px;min-width:150px;border:none;border-radius:8px;font-size:17px;font-weight:700;color:#fff;background:#4a6e94}
+.hk-ctrl .start{background:#22a35a} .hk-ctrl .stop{background:#c43a3a}
+.hk-ribbon{margin-left:auto;width:170px;font-size:12px}
+.hk-ribbon .bar{height:14px;border-radius:7px;background:#fff;border:1px solid #889;overflow:hidden}
+.hk-ribbon .bar i{display:block;height:100%}
+.hk-prev{background:#fff;border:1px solid #9aa7b6;border-radius:6px;padding:8px;display:inline-block}
+.hk-list{background:#fff;border:1px solid #9aa7b6;border-radius:6px;max-height:300px;overflow:auto}
+.hk-list div{padding:9px 12px;border-bottom:1px solid #e1e6ec;font-size:15px;cursor:pointer}
+.hk-list div.on{background:#2a5c8f;color:#fff}
+.hk-btn{height:46px;min-width:120px;border:none;border-radius:8px;background:#2a5c8f;color:#fff;font-size:15px;font-weight:700;padding:0 14px}
+.hk-btn.alt{background:#7d8ea3}
+.hk-btn.ok{background:#22a35a}
+.hk-btn:disabled,.hk-ctrl button:disabled{opacity:.4;cursor:not-allowed}
+.hk-row{display:flex;gap:10px;align-items:center;margin:8px 0;flex-wrap:wrap}
+.hk-in{height:42px;font-size:18px;border:2px solid #2a5c8f;border-radius:6px;padding:0 10px;width:200px}
+.hk-kv{display:grid;grid-template-columns:220px 1fr;gap:6px 12px;font-size:15px}
+.hk-kv div:nth-child(odd){color:#4b5a6d}
+.hk-tile{display:inline-flex;flex-direction:column;justify-content:center;align-items:center;width:150px;height:96px;margin:6px;border:none;border-radius:10px;background:#2a5c8f;color:#fff;font-weight:700;font-size:15px}
+.hk-h{font-size:18px;font-weight:700;margin:0 0 8px}
+
+/* ===== Ishida WPL line screen ===== */
+.wl{width:1024px;height:600px;background:#eef2f6;font-family:Arial,Helvetica,sans-serif;position:relative;color:#1a2433;overflow:hidden}
+.wl-top{height:48px;background:#c8102e;color:#fff;display:flex;align-items:center;padding:0 14px;gap:16px;font-weight:700}
+.wl-top .md{margin-left:auto;font-weight:400}
+.wl-l{position:absolute;left:12px;top:60px;width:560px;bottom:12px}
+.wl-r{position:absolute;right:12px;top:60px;width:430px;bottom:12px;display:flex;flex-direction:column;gap:10px}
+.wl-box{background:#fff;border:1px solid #b8c3d0;border-radius:8px;padding:10px}
+.wl-wt{font-family:"Consolas",monospace;font-size:64px;text-align:right;background:#0d1a26;color:#7cf29a;border-radius:6px;padding:4px 14px}
+.wl-j{font-size:22px;font-weight:700;text-align:center;padding:6px;border-radius:6px}
+.wl-j.ok{background:#d8f2df;color:#1b6b33} .wl-j.rej{background:#fadada;color:#9b1c1c} .wl-j.idle{background:#e5e9ee;color:#555}
+.wl-btns{display:flex;gap:8px;flex-wrap:wrap}
+.wl-btns button{height:54px;min-width:120px;border:none;border-radius:8px;font-weight:700;font-size:15px;color:#fff;background:#4a6e94}
+.wl-btns .go{background:#22a35a} .wl-btns .st{background:#c43a3a}
+.wl-sel{width:100%;height:36px;font-size:15px}
+.wl-kv{display:grid;grid-template-columns:170px 1fr;gap:3px 10px;font-size:14px}
+.wl-kv div:nth-child(odd){color:#596779}
+.wl-msg{font-size:13px;max-height:140px;overflow:auto}
+.wl-msg div{padding:2px 0;border-bottom:1px dashed #dde}
+
+/* ===== How it connects ===== */
+.cx-chain{display:flex;flex-wrap:wrap;gap:6px;align-items:stretch}
+.cx-node{flex:1 1 150px;border:2px solid var(--line);border-radius:10px;padding:8px;background:#fff;min-width:140px}
+.cx-node.ok{border-color:#9fd3b2;background:#f1faf4}
+.cx-node.amber{border-color:#f0cf7a;background:#fff9e8}
+.cx-node.red{border-color:#efb3b3;background:#fdf0f0}
+.cx-node b{display:block;font-size:13px}
+.cx-node span{font-size:12px;color:var(--muted)}
+.cx-arrow{align-self:center;color:var(--muted);font-size:18px}
+.cx-drill{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;background:#fff}
+.cx-drill.active{border-color:var(--accent);box-shadow:0 0 0 2px #cfe2f5}
+.cx-drill ol{margin:6px 0 0;padding-left:20px}
+.cx-drill li.done{color:var(--ok)}
+.cx-drill li.done::marker{content:"✔ "}
+.cx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+</style>
+</head>
+<body>
+<header class="it-top">
+  <div class="it-brand"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAChklEQVR42u3avW8TMRQAcD/b99EmtEkESYkgpRSJqoCy8CFBJQYGJDYQA1IrwQp/QBEIpA6sLEiMLBUVAytCYmGhAx0o7VCBGGgqhYo0XFsSUvJx9mNjYcjd5XxHwZ6jy/vZz8/vPiBxfY7s5kHJLh8aoAEaoAEaoAEaoAEaoAHxDe7xdxKx3ZESMYKYAMDklFEIDeAK2W/xK6cLR/cPqo+erH1rvFgsO/WWyWkIACEwN9g3e2vi/HgussRYXtuaevzm03rN6GboTnQlzlwtRhk9IaQ4nH44dZIzij1uYiFx34B1sZiPfndOjGVHskkhZK8rYHHqJRdDHwzAMnpeAUIIEhJJ7Qn4v9zvdd+XNp16i3qrcf4iRkza/NToXgoQ/jnwe9x5tvhq+YtlsNABHSGPH0wvPLhk+7k4DzBPBIlUkFQSSYCD0jdgJJs8UUhzBdtaSjwytAdAMeDRjTPqGgoAsHxOjW9ALCU1TIDcqaHoEBKsCiEYNrUTcQKc2XvND2+Bm0HC77SSZy+nr92NEyDqW66zDqYdBND6KRrbMaeQkS2I4WPAjWArwDP5mAGZyRmCsodbQBYzINjc/0VV6PtOu+1KVdEwSCUsUAq4+WTh9cpX26AKeiEcyw+8vH3BUtoLVWvNitNgCpo5IWSq30DVKTSaS1YOZXQvpHuh/+vRIsQUHIQCcCWKOO7qkZCOlL0CGIVqrTn/cSN6wFJps1RtcEpDSKH7z5dWyttRRl92GtNz75pt0bWqgpevVdquHErZk+cOjx9IRfBwd3Xjx9P51c+VuuXhvAePn9sIiepaoD+yH03GOIMwzwFGoc9khOg3NBqgARqgARqgARqgARqgAf8O4Bd4i9onw2exigAAAABJRU5ErkJggg==" alt=""><div>Ishida Line Trainer<small>CommsBridge · CLARiSOFT · ICE Zodiac Hawk</small></div></div>
+  <nav class="it-tabs" id="itTabs" role="tablist"></nav>
+  <button class="it-reset" id="itReset" type="button">Reset trainer</button>
+</header>
+<main class="it-main" id="itMain"></main>
+<script>
+
+/* ---- p2-hx.js ---- */
+/* ===== p2-hx.js — shared data model, events, label renderer ===== */
+(function(){
+'use strict';
+const KEY = 'ishidaTrainer.v1';   // change the version when the data shape changes
+const clone = o => JSON.parse(JSON.stringify(o));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MON = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const DOW = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+/* ---------- date helpers ---------- */
+function dayOfYear(d){ const s = new Date(d.getFullYear(),0,0); return Math.floor((new Date(d.getFullYear(),d.getMonth(),d.getDate()) - s)/864e5); }
+function addDays(d,n){ const x = new Date(d.getTime()); x.setDate(x.getDate()+n); return x; }
+function ddmmm(d){ return String(d.getDate()).padStart(2,'0')+' '+MON[d.getMonth()]; }
+/* Advanced Date Builder formats. First 8 + "y (2010 = 0)" + "JulDayZ(060)" seen in photos; the rest are assumed. */
+const DATE_FORMATS = [
+  ['d', d=>String(d.getDate())],
+  ['Day of Month Code', d=>'ABCDEFGHIJKLMNOPQRSTUVWXYZ12345'[d.getDate()-1]],
+  ['Day of Week Code', d=>'GABCDEF'[d.getDay()]],
+  ['DayOfWeek(1-7)', d=>String(d.getDay()===0?7:d.getDay())],
+  ['DayOfWeek(A-G)', d=>'GABCDEF'[d.getDay()]],
+  ['dd', d=>String(d.getDate()).padStart(2,'0')],
+  ['DDD', d=>DOW[d.getDay()]],
+  ['ddd', d=>DOW[d.getDay()].charAt(0)+DOW[d.getDay()].slice(1).toLowerCase()],
+  ['JulDay(60)', d=>String(dayOfYear(d))],
+  ['JulDayZ(060)', d=>String(dayOfYear(d)).padStart(3,'0')],
+  ['M', d=>String(d.getMonth()+1)],
+  ['MM', d=>String(d.getMonth()+1).padStart(2,'0')],
+  ['MMM', d=>MON[d.getMonth()]],
+  ['WW', d=>{const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-dn);const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1));return String(Math.ceil(((t-y0)/864e5+1)/7)).padStart(2,'0');}],
+  ['y (2010 = 0)', d=>String((d.getFullYear()-2010)%10)],
+  ['yy', d=>String(d.getFullYear()).slice(2)],
+  ['yyyy', d=>String(d.getFullYear())]
+];
+const DATE_FN = Object.fromEntries(DATE_FORMATS);
+const SEPS = {'None':'', 'Space':' ', 'Slash(/)':'/', 'Dash(-)':'-', 'Dot(.)':'.'};
+function fmtDateParts(d, parts, sep){
+  return parts.map(p => p.startsWith('"') ? p.slice(1,-1) : (DATE_FN[p] ? DATE_FN[p](d) : '?')).join(SEPS[sep] || '');
+}
+function fmtTime(d, fmt, sep){
+  const s = ({'Colon(:)':':','None':'','Dot(.)':'.'})[sep] ?? ':';
+  const H = String(d.getHours()).padStart(2,'0'), m = String(d.getMinutes()).padStart(2,'0'), ss = String(d.getSeconds()).padStart(2,'0');
+  if (fmt === 'HHmmss') return H+s+m+s+ss;
+  if (fmt === 'hhmm') return String(((d.getHours()+11)%12)+1).padStart(2,'0')+s+m;
+  return H+s+m;
+}
+
+/* ---------- EAN-13 ---------- */
+const EAN_L = ['0001101','0011001','0010011','0111101','0100011','0110001','0101111','0111011','0110111','0001011'];
+const EAN_G = ['0100111','0110011','0011011','0100001','0011101','0111001','0000101','0010001','0001001','0010111'];
+const EAN_R = ['1110010','1100110','1101100','1000010','1011100','1001110','1010000','1000100','1001000','1110100'];
+const EAN_P = ['LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG','LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'];
+function eanCheck(d12){ let s=0; for(let i=0;i<12;i++) s += (+d12[i])*(i%2?3:1); return String((10 - s%10)%10); }
+function eanModules(code){
+  const d = code.split('').map(Number), p = EAN_P[d[0]];
+  let m = '101';
+  for (let i=1;i<=6;i++) m += (p[i-1]==='L'?EAN_L:EAN_G)[d[i]];
+  m += '01010';
+  for (let i=7;i<=12;i++) m += EAN_R[d[i]];
+  return m + '101';
+}
+
+/* ---------- label jobs (CIFF) ---------- */
+/* Element geometry in mm. ASDALARGE is from photos (JulianDate X 6.83 / Y 16.67 / W 4.58 / H 2.50 read directly). */
+function baseJob(name, o){
+  o = o || {};
+  const els = [
+    {id:'cook', kind:'text', name:'CookTime', x:4.6, y:2.4, size:3.4, bold:true, font:'Arial Narrow',
+      text:{type:'Merge Field', value:'', mergeKey:'COOKTIME', sample:'1hr 46mins', maxChars:10, fixedLen:false, justify:'Left Justified', atCoder:false, promptVal:'Default Value', promptMsg:''}},
+    {id:'hm', kind:'logo', name:'HealthMark', x:24.4, y:0.9, w:9.0, h:6.8, size:2.3, logo:{l1:'GB', l2:'2037'}},
+    {id:'lineref', kind:'text', name:'LineRef', x:2.6, y:16.67, size:2.5, font:'Arial',
+      text:{type:'Line Reference', value:'L1', maxChars:2, fixedLen:false, justify:'Left Justified', atCoder:true, promptVal:'Default Value', promptMsg:'Line number'}},
+    {id:'julian', kind:'date', name:'JulianDate', x:6.83, y:16.67, size:2.5, font:'Arial',
+      date:{fmt:'User Defined', parts:['y (2010 = 0)','JulDayZ(060)'], sep:'None', use:'Coder Date', dtype:'Current Date', offset:0, lang:'English', pad:false}},
+    {id:'time', kind:'time', name:'PackTime', x:12.4, y:16.67, size:2.5, font:'Arial',
+      time:{fmt:'HHmm', sep:'Colon(:)', use:'Coder Time', ttype:'Current Time', lang:'English'}},
+    {id:'site', kind:'text', name:'SiteCode', x:19.0, y:16.3, size:2.9, font:'Arial',
+      text:{type:'Fixed Text', value:'HDV', maxChars:3, fixedLen:false, justify:'Left Justified', atCoder:true, promptVal:'Default Value', promptMsg:'Site code'}},
+    {id:'rule', kind:'line', name:'Rule', x:1.7, y:19.7, w:22.8, t:0.25},
+    {id:'ean', kind:'barcode', name:'EAN13', x:1.6, y:20.4, size:2,
+      bc:{sym:'EAN13', data:o.ean || '5057172354801', type:'Fixed Text', mergeKey:'', mag:75.7, height:10.75, hr:true, autoCheck:false, guard:true, quiet:false}},
+    {id:'useby', kind:'text', name:'UseBy', x:28.3, y:20.1, size:3.9, bold:true, font:'Arial Narrow',
+      text:{type:'Merge Field', value:'', mergeKey:'USEBY', sample:'23 SEP', maxChars:6, fixedLen:false, justify:'Left Justified', atCoder:false, promptVal:'Default Value', promptMsg:''}},
+    {id:'weight', kind:'text', name:'Weight', x:39.6, y:20.1, size:3.6, bold:true, font:'Arial Narrow',
+      text:{type:'Merge Field', value:'', mergeKey:'WEIGHT', sample:'2,148kg', maxChars:8, fixedLen:false, justify:'Left Justified', atCoder:false, promptVal:'Default Value', promptMsg:''}}
+  ];
+  if (o.price !== '') els.push({id:'price', kind:'text', name:'PricePerKg', x:43.6, y:29.0, size:4.3, bold:true, font:'Arial Narrow',
+      text:{type:'Fixed Text', value:o.price || '5.22', maxChars:4, fixedLen:false, justify:'Left Justified', atCoder:false, promptVal:'Default Value', promptMsg:''}});
+  return {name, printer:'Zodiac Hawk(53mm)', w:53, h:42, subImage:1, rev:1, els};
+}
+const JOB_LIST = [ // from the JOBS folder photo (Figure 4); "ALDI WB HWC - PZ NEW" is the job named in product 3024 (Figure 22)
+  'ALDI WB (no price) NEW','ALDI WB (no price)','Iceland WB NEW-Not For EU - small','Iceland WB NEW-Not For EU','Iceland WB NEW-Not For EU no circle',
+  'ALDI PCO RIB (Blank Price)','Cherrywood BWC - PZ SQUARE','Lidl WB - PZ SQUARE','TESCO WC (No price) - PZ SQUARE','TESCO WF WC- PZ SQUARE',
+  'ASDA CHERRYWOOD','PZ SQUARE','ASDA PRICE','JS WB','JS XL WB','STAFF SHOP','WB TRIAL','ALDI WB (fixed price)','CO-OP WB',
+  'JACKS WC (fixed price)','JACKS WC (variable price)','TESCO EL WC','TESCO WC (fixed price)','ALDI WB','Cherrywood BWC','Iceland WB','Lidl WB',
+  'TESCO RoomToRoam WB','ALDI WB HWC - PZ NEW'
+];
+function initialPen(){
+  const f = {};
+  f['JOBS/ASDAPRICE UPDATE 2026/ASDALARGE.ciff']  = baseJob('ASDALARGE', {price:'5.22'});
+  f['JOBS/ASDAPRICE UPDATE 2026/ASDAMEDIUM.ciff'] = baseJob('ASDAMEDIUM', {price:'5.22'});
+  f['JOBS/ASDAPRICE UPDATE 2026/ASDAXL.ciff']     = baseJob('ASDAXL', {price:'5.22'});
+  JOB_LIST.forEach(n => {
+    const noPrice = /no price|blank price/i.test(n);
+    f['JOBS/'+n+'.ciff'] = baseJob(n, {price: noPrice ? '' : '4.99', ean:'5000000000000'.slice(0,12)+eanCheck('500000000000')});
+  });
+  return f;
+}
+
+/* ---------- products (CommsBridge) ---------- */
+const PRODUCT_NAMES = [ // from the product list photo (Figure 20)
+  [4,'test average weighing'],[3007,'ALDI Medium W/Bird 1.40-1.80Kg Variable weight'],[3008,'ALDI Medium W/Bird 1.40-1.80Kg Variable weight'],
+  [3014,'ALDI Large W/Bird 1.70-1.999Kg Variable weight'],[3015,'ALDI Large W/Bird 1.70-1.99Kg Variable weight'],
+  [3023,'ALDI Extra Large W/Bird 2.00-2.30Kg Variable weight'],[3024,'ALDI Extra Large W/Bird 2.00-2.30Kg Variable weight'],
+  [3065,'WB Large Plain CIB 1.65KG'],[5033,'CO-OP Large Whole Chicken 1.50-1.90KG CW'],[5035,'CO-OP MEDIUM Whole Chicken 1.46-1.75KG CW'],
+  [5037,'CO-OP EXTRA LARGE Whole Chicken 1.91-2.30KG CW'],[5151,'CO-OP EXTRA LARGE Whole Chicken 1.91-2.30KG CW'],[5161,'CO-OP LARGE Whole Chicken 1.50-1.90KG CW'],
+  [6018,'ASDA EXTRA LARGE 1.800 - 2.66KG'],[6121,'ASDA MEDIUM 1.450 - 1.69 KG<BR/>'],[6162,'ASDA MED 1.3-1.69KG'],[6163,'ASDA BS EXTRA LARGE 2.0 - 2.8KG'],
+  [6164,'PZ ASDA MED 1.3-1.69KG'],[6165,'PZ ASDA BS EXTRA LARGE 2.0 - 2.8KG'],[6171,'ASDA LARGE 1.7 - 1.99KG'],[6172,'PZ ASDA LARGE 1.7 - 1.99KG'],
+  [6173,'ASDA LARGE 1.7 - 1.99KG'],[6271,'ICELAND WHOLE BIRD SMALL 1.1-1.3KG'],[6272,'ICELAND WHOLE BIRD SMALL 1.1-1.3KG'],[6273,'ICELAND WHOLE BIRD SMALL 1.1-1.3KG'],
+  [6281,'ICELAND WHOLE BIRD MEDIUM 1.3-1.7KG']
+];
+function guessJob(plu, name){
+  if (plu === 3024 || plu === 3023) return 'ALDI WB HWC - PZ NEW';
+  if (/^ALDI/.test(name)) return 'ALDI WB';
+  if (/CO-OP/.test(name)) return 'CO-OP WB';
+  if (/ASDA/.test(name)) return /EXTRA/.test(name) ? 'ASDAXL' : /MED/.test(name) ? 'ASDAMEDIUM' : 'ASDALARGE';
+  if (/ICELAND/.test(name)) return 'Iceland WB';
+  if (plu === 3065) return 'WB TRIAL';
+  return '';
+}
+function makeProduct(plu, name){
+  const m = name.match(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*K/i);
+  const lo = m ? Math.round(+m[1]*1000) : 0, hi = m ? Math.round(+m[2]*1000) : 0;
+  const ext = guessJob(plu, name);
+  const asda = /ASDA/.test(name);
+  const p = {
+    plu, name, customer:'', orderNo:1, orderQty:1000, tray:1, tare:8, md:1,
+    packDate:'No print', packTime:'No print', sellByDate:'No print', sellByTime:'No print', useByDate:'Add days',
+    conveyor:'6 (auto)', countMode:'Good packs only', extPrinter: ext ? 'In use' : 'Not in use', timeToPrint:0, sellByDays:1, timeToPrint2:0, useByDays: asda ? 7 : 10,
+    cookFixed:20, cookPerKg: asda ? 40 : 45, drained:0, itemCode:0, extJob:ext, free:{},
+    printerSwitching:'Do not switch', up1cas:0, up2cas:0, un1cas:0, un2cas:0,
+    rank:'Yes', unitPrice:0, unitPer:'1kg', fixedPrice:0, fixedWeight:0, mdFlag:'No markdown', mdAmount:0,
+    prodMode: lo ? 'Catch-weight' : 'Fixed weight', lower:lo, upper:hi, nominal:0, upperTol:0, t1:0, t2:0, printedQty:0,
+    lot:'', img1:'', img2:'', img3:'', img4:'', img5:'', imgSel:'Not in use',
+    up1p:'No print', up1f:1, up2p:'No print', up2f:1, un1p:'No print', un1f:1, un2p:'No print', un2f:1, colour:'Not in use',
+    bcType:'Fixed GS1-13', bcStruct:'1: FFCCCCCxPPPPx', bcPrefix:'40', bcData:'8860016888', ean5Type:'Date/Time', ean5Data:'', trayBc:0
+  };
+  if (plu === 4){ p.prodMode='Catch-weight'; p.lower=500; p.upper=3000; }
+  return p;
+}
+function initialProducts(){ const o = {}; PRODUCT_NAMES.forEach(([plu,n]) => o[plu] = makeProduct(plu,n)); return o; }
+
+function initialState(){
+  const products = initialProducts();
+  const pen = initialPen();
+  const hawkDb = {};
+  Object.values(pen).forEach(j => hawkDb[j.name] = clone(j));
+  return {
+    v:1,
+    products,
+    lines:{
+      L4:{name:'Line 4', conn:{pack:true, ctrl:true, cas:false}, products:clone(products), current:null, running:false, packs:0, rejects:0, last:null, msgs:[], printer:'HAWK'},
+      L2:{name:'Line 2', conn:{pack:true, ctrl:true, cas:false}, products:clone(products), current:null, running:false, packs:0, rejects:0, last:null, msgs:[], printer:null},
+      SIM:{name:'Simulator', conn:{pack:false, ctrl:false, cas:false}, products:{}, current:null, running:false, packs:0, rejects:0, last:null, msgs:[], printer:null}
+    },
+    usb:{dongle:'pc', pen:'pc'},
+    pen,
+    cs:{running:false, doc:null, path:null, dirty:false},
+    hawk:{db:hawkDb, current:null, running:false, prompts:{}, pendingPrompt:false, faults:[], ribbon:820, ribbonWidth:55, clockOffsetMin:0,
+          darkness:'Normal', printSpeed:300, printDelay:0, printed:0, lastLabel:null, mode:'Intermittent'},
+    labels:[], log:[], done:{}, drill:null, cbLevel:4
+  };
+}
+
+/* ---------- store ---------- */
+let S;
+try { S = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(e){ S = null; }
+if (!S || S.v !== 1) S = initialState();
+const subs = [];
+let saveT = null;
+const HX = window.HX = {
+  get s(){ return S; },
+  clone, esc, MON, addDays, ddmmm, dayOfYear, DATE_FORMATS, fmtDateParts, fmtTime, eanCheck, baseJob, makeProduct,
+  save(){ clearTimeout(saveT); saveT = setTimeout(()=>{ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }, 60); },
+  emit(type, data){ HX.save(); subs.slice().forEach(fn => { try{ fn(type, data); } catch(e){ console.error(e); } }); },
+  on(fn){ subs.push(fn); },
+  reset(){ S = initialState(); try{ localStorage.removeItem(KEY); }catch(e){} HX.emit('reset'); },
+  log(src, msg){ const t = new Date(); if (HX._logHook) HX._logHook('['+src+'] '+msg); S.log.unshift(t.toTimeString().slice(0,8)+'  ['+src+'] '+msg); S.log.length = Math.min(S.log.length, 200); },
+  done(id){ if (!S.done[id]){ S.done[id] = Date.now(); HX.emit('task', id); } },
+  isDone(id){ return !!S.done[id]; },
+  toast(msg){ let t = document.querySelector('.it-toast'); if (!t){ t = document.createElement('div'); t.className = 'it-toast'; document.body.appendChild(t); } t.textContent = msg; t.hidden = false; clearTimeout(t._h); t._h = setTimeout(()=> t.hidden = true, 3200); },
+  hawkNow(){ return new Date(Date.now() + S.hawk.clockOffsetMin*60000); },
+  /* ---- copies and pending checks ---- */
+  productPending(lineId, plu){ const L = S.lines[lineId]; if (!L.products[plu]) return true; return JSON.stringify(L.products[plu]) !== JSON.stringify(S.products[plu]); },
+  linePendingCount(lineId){ return Object.keys(S.products).filter(p => HX.productPending(lineId, p)).length; },
+  penJobByName(name){ return Object.entries(S.pen).find(([p,j]) => j.name === name); },
+  jobPending(name){ const pj = HX.penJobByName(name); const hj = S.hawk.db[name]; if (!pj) return false; if (!hj) return true; return JSON.stringify(pj[1]) !== JSON.stringify(hj); },
+  hawkPendingCount(){ return Object.values(S.pen).filter(j => HX.jobPending(j.name)).length; },
+  docDirty(){ return !!(S.cs.doc && S.cs.dirty); },
+  /* ---- Ishida merge data ---- */
+  buildMerge(p, grams, when){
+    const kg = grams/1000;
+    const mins = grams > 0 ? Math.round(p.cookFixed + p.cookPerKg*kg) : 0;
+    const m = {
+      WEIGHT: kg.toFixed(3).replace('.', ',') + 'kg',
+      COOKTIME: Math.floor(mins/60) + 'hr ' + String(mins%60).padStart(2,'0') + 'mins',
+      USEBY: p.useByDate === 'Add days' ? ddmmm(addDays(when, +p.useByDays||0)) : '',
+      SELLBY: p.sellByDate === 'Add days' ? ddmmm(addDays(when, +p.sellByDays||0)) : '',
+      PRICE: p.unitPrice > 0 ? (p.unitPrice*kg).toFixed(2) : ''
+    };
+    return m;
+  }
+};
+
+/* ---------- element value + renderer ---------- */
+HX.elValue = function(el, ctx){
+  const print = ctx.mode === 'print';
+  if (el.kind === 'text'){
+    const t = el.text;
+    if (t.type === 'Merge Field') return print ? (ctx.merge && ctx.merge[t.mergeKey] != null ? ctx.merge[t.mergeKey] : '') : (t.sample || '['+t.mergeKey+']');
+    let v = t.value;
+    if (print && t.atCoder && ctx.prompts && ctx.prompts[el.id] != null) v = ctx.prompts[el.id];
+    return t.maxChars ? String(v).slice(0, t.maxChars) : v;
+  }
+  if (el.kind === 'date'){
+    const d = addDays(ctx.date || new Date(), +el.date.offset || 0);
+    if (el.date.fmt === 'User Defined') return fmtDateParts(d, el.date.parts, el.date.sep);
+    if (el.date.fmt === 'DD MMM') return ddmmm(d);
+    if (el.date.fmt === 'dd/MM/yy') return fmtDateParts(d, ['dd','MM','yy'], 'Slash(/)');
+    return fmtDateParts(d, ['dd','MMM','yy'], 'Space');
+  }
+  if (el.kind === 'time') return fmtTime(ctx.date || new Date(), el.time.fmt, el.time.sep);
+  if (el.kind === 'barcode'){
+    const b = el.bc;
+    let v = b.type === 'Merge Field' ? (print ? (ctx.merge && ctx.merge[b.mergeKey]) || '' : b.data) : b.data;
+    return String(v);
+  }
+  return '';
+};
+/* Character pitch measured from the photos: JulianDate "6311" at 2.50 mm high is 4.58 mm wide (0.458 × height). Narrow font ≈ 0.40.
+   Text is drawn with textLength so it looks the same whatever fonts the viewer has installed. */
+function textWidth(str, size, bold, font){ const k = /Narrow/.test(font) ? 0.40 : 0.458; return String(str).length * size * k; }
+HX.elBox = function(el, ctx){
+  if (el.kind === 'logo') return {x:el.x, y:el.y, w:el.w, h:el.h};
+  if (el.kind === 'line') return {x:el.x, y:el.y-0.6, w:el.w, h:1.2};
+  if (el.kind === 'barcode'){ const mod = 0.33*el.bc.mag/100; return {x:el.x, y:el.y, w:(95+ (el.bc.hr?7:0))*mod, h:el.bc.height + (el.bc.hr ? 2.4 : 0)}; }
+  const v = HX.elValue(el, ctx);
+  return {x:el.x, y:el.y, w:Math.max(1.5, textWidth(v, el.size, el.bold, el.font)), h:el.size};
+};
+HX.renderJobSVG = function(job, ctx, opts){
+  opts = opts || {};
+  const W = job.w, H = job.h, sel = opts.sel;
+  let s = '';
+  job.els.forEach(el => {
+    const hide = el.printed === false && ctx.mode === 'print';
+    if (hide) return;
+    const ghost = el.printed === false ? ' opacity="0.35"' : '';
+    let g = '';
+    const rot = el.orient ? ` transform="rotate(${el.orient} ${el.x} ${el.y})"` : '';
+    if (el.kind === 'text' || el.kind === 'date' || el.kind === 'time'){
+      const v = HX.elValue(el, ctx);
+      const fam = /Narrow/.test(el.font) ? "'Arial Narrow','Roboto Condensed','Helvetica Neue',Arial,sans-serif" : "Arial,Helvetica,sans-serif";
+      const stretch = /Narrow/.test(el.font) ? ' font-stretch="condensed"' : '';
+      g = `<text x="${el.x}" y="${(el.y + el.size*0.82).toFixed(2)}" font-size="${el.size}" font-family="${fam}"${stretch} font-weight="${el.bold?700:400}"${String(v).length?` textLength="${textWidth(v, el.size, el.bold, el.font).toFixed(2)}" lengthAdjust="spacingAndGlyphs"`:''} fill="#000"${el.inverse?' style="paint-order:stroke" stroke="#000"':''}>${esc(v)}</text>`;
+    } else if (el.kind === 'logo'){
+      const cx = el.x + el.w/2, cy = el.y + el.h/2;
+      g = `<ellipse cx="${cx}" cy="${cy}" rx="${el.w/2-0.2}" ry="${el.h/2-0.2}" fill="none" stroke="#000" stroke-width="0.35"/>`+
+          `<text x="${cx}" y="${cy-0.25}" font-size="${el.size}" text-anchor="middle" font-family="Arial" font-weight="700">${esc(el.logo.l1)}</text>`+
+          `<text x="${cx}" y="${cy+el.size*0.95}" font-size="${el.size}" text-anchor="middle" font-family="Arial" font-weight="700">${esc(el.logo.l2)}</text>`;
+    } else if (el.kind === 'line'){
+      g = `<rect x="${el.x}" y="${el.y}" width="${el.w}" height="${el.t}" fill="#000"/>`;
+    } else if (el.kind === 'barcode'){
+      let code = HX.elValue(el, ctx).replace(/\D/g,'');
+      const mod = 0.33*el.bc.mag/100, b = el.bc;
+      if (b.autoCheck && code.length >= 12) code = code.slice(0,12) + eanCheck(code.slice(0,12));
+      if (code.length !== 13){
+        g = `<rect x="${el.x}" y="${el.y}" width="${95*mod}" height="${b.height}" fill="#fff" stroke="#c00" stroke-width="0.2"/><text x="${el.x+1}" y="${el.y+b.height/2}" font-size="1.8" fill="#c00">Invalid EAN13 data</text>`;
+      } else {
+        const ms = eanModules(code), x0 = el.x + (b.hr ? 7*mod : 0);
+        let bars = '';
+        for (let i=0;i<95;i++){ if (ms[i]==='1'){ const guard = b.guard && (i<3 || (i>=45&&i<50) || i>=92); bars += `<rect x="${(x0+i*mod).toFixed(3)}" y="${el.y}" width="${(mod+0.004).toFixed(3)}" height="${(b.height + (guard?1.2:0)).toFixed(2)}"/>`; } }
+        let hr = '';
+        if (b.hr){
+          const ty = el.y + b.height + 2.0;
+          hr += `<text x="${el.x}" y="${ty}" font-size="2.1" font-family="'OCR B',Consolas,monospace">${code[0]}</text>`;
+          for (let i=0;i<6;i++) hr += `<text x="${(x0+(4+i*7)*mod).toFixed(2)}" y="${ty}" font-size="2.1" font-family="'OCR B',Consolas,monospace">${code[1+i]}</text>`;
+          for (let i=0;i<6;i++) hr += `<text x="${(x0+(50+i*7)*mod).toFixed(2)}" y="${ty}" font-size="2.1" font-family="'OCR B',Consolas,monospace">${code[7+i]}</text>`;
+        }
+        g = `<g fill="#000">${bars}</g>${hr}`;
+        if (code.slice(12) !== eanCheck(code.slice(0,12)) && opts.warnCheck !== false) g += `<text x="${el.x}" y="${el.y-0.4}" font-size="1.6" fill="#c00">check digit wrong</text>`;
+      }
+    }
+    let selBox = '';
+    if (sel === el.id){ const bx = HX.elBox(el, ctx); selBox = `<rect x="${bx.x-0.3}" y="${bx.y-0.3}" width="${bx.w+0.6}" height="${bx.h+0.6}" fill="none" stroke="#0a5bd8" stroke-width="0.18" stroke-dasharray="0.6 0.4"/>`; }
+    const hit = opts.hit ? (()=>{ const bx = HX.elBox(el, ctx); return `<rect class="cs-el" data-el="${el.id}" x="${bx.x-0.3}" y="${bx.y-0.3}" width="${bx.w+0.6}" height="${bx.h+0.6}" fill="transparent"/>`; })() : '';
+    s += `<g${rot}${ghost}>${g}</g>${selBox}${hit}`;
+  });
+  return s;
+};
+/* A printed label: generic pre-printed stock (simulated) with the 53 mm coder block overprinted. */
+HX.printedLabelSVG = function(rec){
+  const job = rec.job;
+  const ctx = {mode:'print', merge:rec.merge, prompts:rec.prompts, date:new Date(rec.t)};
+  return `<svg viewBox="-4 -9 61 56" xmlns="http://www.w3.org/2000/svg" font-family="Arial">
+    <rect x="-4" y="-9" width="61" height="56" rx="1.5" fill="#fff7e8" stroke="#c9a96a" stroke-width="0.3"/>
+    <rect x="-4" y="-9" width="61" height="6" fill="#e8b24a"/>
+    <text x="26.5" y="-4.6" font-size="3" text-anchor="middle" font-weight="700" fill="#5a3a00">PRE-PRINTED LABEL STOCK (simulated)</text>
+    <rect x="0" y="0" width="53" height="42" fill="#fff" stroke="#bbb" stroke-width="0.15" stroke-dasharray="0.8 0.6"/>
+    <text x="0.4" y="-0.6" font-size="1.6" fill="#888">Cook time</text><text x="28.3" y="19.6" font-size="1.6" fill="#888">Use By</text><text x="39.4" y="19.6" font-size="1.6" fill="#888">Weight/kg</text><text x="39.4" y="28.6" font-size="1.6" fill="#888">£/kg</text>
+    ${HX.renderJobSVG(job, ctx, {warnCheck:false})}
+    <text x="0" y="45.6" font-size="1.7" fill="#666">${esc(rec.line)} · PLU ${esc(rec.plu)} · job "${esc(job.name)}" · ${new Date(rec.t).toLocaleTimeString()}</text>
+  </svg>`;
+};
+
+/* ---------- fit helper (fixed-size replicas, uniform scale) ---------- */
+HX.fit = function(wrap, W, H, maxH){
+  const inner = wrap.querySelector('.it-scaled');
+  const cw = wrap.clientWidth || W;
+  const mh = maxH || Math.max(320, window.innerHeight - 150);
+  const k = Math.min(cw / W, mh / H, 1.25);
+  inner.style.width = W+'px'; inner.style.height = H+'px';
+  inner.style.transform = 'scale('+k+')';
+  wrap.style.height = Math.ceil(H*k)+'px';
+  wrap._k = k;
+};
+
+/* ---------- notes + tasks registries ---------- */
+HX.notes = {};
+HX.tasks = {};
+HX.apps = [];
+HX.note = (key, o) => HX.notes[key] = o;
+HX.tag = t => `<span class="it-tag ${t}">${t==='photo'?'From photo':t==='inf'?'Inferred':'Assumed'}</span>`;
+})();
+
+
+/* ---- p3-desk.js ---- */
+/* ===== p3-desk.js — Office PC: Windows desktop, window manager, File Explorer, USB keys ===== */
+(function(){
+'use strict';
+const S = () => HX.s, esc = HX.esc;
+const W = HX.winApps = {};
+const D = { open:{}, min:{}, pos:{}, z:[], focus:null };
+let root = null, wrap = null;
+
+HX.desk = {
+  open(id){ D.open[id] = true; D.min[id] = false; HX.desk.focus(id); if (W[id].onOpen) W[id].onOpen(); render(); },
+  close(id){ D.open[id] = false; if (W[id].onClose) W[id].onClose(); render(); },
+  focus(id){ D.z = D.z.filter(x => x !== id); D.z.push(id); D.focus = id; },
+  isOpen: id => !!D.open[id] && !D.min[id],
+  render: () => render(),
+  rerenderBody(id){ const b = root && root.querySelector(`[data-win="${id}"] .w-body`); if (b){ b.innerHTML = W[id].html(); if (W[id].after) W[id].after(b); } }
+};
+
+function frame(id){
+  const m = W[id], p = D.pos[id] || {x:m.x, y:m.y};
+  const zi = 10 + D.z.indexOf(id);
+  return `<div class="w-win${D.focus===id?' focus':''}" data-win="${id}" style="left:${p.x}px;top:${p.y}px;width:${m.w}px;height:${m.h}px;z-index:${zi}">
+    <div class="w-title" data-drag="${id}"><span>${m.iconHtml||''} ${esc(m.title())}</span><button data-a="w-min" title="Minimise">─</button><button data-a="w-max" title="Maximise">☐</button><button class="x" data-a="w-close" title="Close">✕</button></div>
+    <div class="w-body">${m.html()}</div></div>`;
+}
+function render(){
+  if (!root) return;
+  const now = new Date();
+  const icons = [
+    ['cb','<i style="background:#fff;color:#c8102e">⏃</i>','CommsBridge Desktop'],
+    ['cs','<i style="background:#e8873e;color:#fff">C</i>','CLARiSOFT'],
+    ['ex','<i style="background:#f3c33c;color:#5a4000">📁</i>','USB Drive (F:)'],
+    ['', '<i style="background:#d33;color:#fff">PDF</i>','Device Statistics'],
+    ['', '<i style="background:#2a7;color:#fff">T</i>','T-TEC Logger'],
+    ['', '<i style="background:#1a73e8;color:#fff">e</i>','Microsoft Edge']
+  ];
+  let h = `<div class="w-desk" id="wDesk"><div class="w-wall"><b>2SFG IT Service Desk</b>desktop wallpaper (simulated)</div><div class="w-icons">`;
+  icons.forEach(([id,i,l]) => h += `<button class="w-ico" data-a="w-launch" data-id="${id}" title="Double-click or tap to open">${i}${esc(l)}</button>`);
+  h += `</div>`;
+  D.z.forEach(id => { if (D.open[id] && !D.min[id]) h += frame(id); });
+  h += `<div class="w-task"><button data-a="w-start" title="Start">⊞</button>`;
+  ['cb','cs','ex'].forEach(id => { if (D.open[id]) h += `<button data-a="w-tb" data-id="${id}" class="${D.focus===id&&!D.min[id]?'act':''}">${esc(W[id].short)}</button>`; });
+  h += `<div class="clock">${now.toTimeString().slice(0,5)}<br>${now.toLocaleDateString('en-GB')}</div></div></div>`;
+  root.innerHTML = h;
+  D.z.forEach(id => { if (D.open[id] && !D.min[id] && W[id].after){ const b = root.querySelector(`[data-win="${id}"] .w-body`); if (b) W[id].after(b); } });
+}
+
+function onClick(e){
+  const t = e.target.closest('[data-a]'); if (!t || !root.contains(t)) return;
+  const winEl = t.closest('[data-win]'); const wid = winEl && winEl.dataset.win;
+  const a = t.dataset.a;
+  if (wid && D.focus !== wid && !a.startsWith('w-')){ HX.desk.focus(wid); }
+  if (a === 'w-launch'){ const id = t.dataset.id; if (!id){ HX.toast('Not part of this trainer.'); return; } if (W[id].launch) W[id].launch(); else HX.desk.open(id); return; }
+  if (a === 'w-tb'){ const id = t.dataset.id; if (D.focus === id && !D.min[id]) D.min[id] = true; else { D.min[id] = false; HX.desk.focus(id); } render(); return; }
+  if (a === 'w-start'){ HX.toast('Start menu: CommsBridge Desktop and CLARiSOFT are listed (photo 19). Use the desktop icons.'); return; }
+  if (a === 'w-close'){ HX.desk.close(wid); return; }
+  if (a === 'w-min'){ D.min[wid] = true; render(); return; }
+  if (a === 'w-max'){ D.pos[wid] = {x:0, y:0}; render(); return; }
+  let isDbl = false;
+  if (t.dataset.dbl){
+    const key = a + '|' + (t.dataset.p || t.dataset.plu || ''), now = Date.now();
+    isDbl = D.lastClick && D.lastClick.key === key && now - D.lastClick.t < 450;
+    D.lastClick = isDbl ? null : {key, t:now};
+  }
+  if (wid && W[wid].click){ W[wid].click(a, t, e); }
+  if (isDbl && wid && W[wid].dbl){ const again = root.querySelector(`[data-win="${wid}"] [data-a="${a}"][data-${t.dataset.p!=null?'p':'plu'}="${CSS.escape(t.dataset.p || t.dataset.plu || '')}"]`) || t; W[wid].dbl(again, e); }
+}
+function onChange(e){
+  const t = e.target; const winEl = t.closest('[data-win]'); if (!winEl) return;
+  const wid = winEl.dataset.win; if (W[wid].change) W[wid].change(t, e);
+}
+function onDblClick(e){
+  const t = e.target.closest('[data-dbl]'); if (!t) return;
+  const winEl = t.closest('[data-win]'); if (winEl && W[winEl.dataset.win].dbl) W[winEl.dataset.win].dbl(t, e);
+}
+let drag = null;
+function onDown(e){
+  const tb = e.target.closest('[data-drag]');
+  if (tb && !e.target.closest('button')){
+    const id = tb.dataset.drag; const p = D.pos[id] || {x:W[id].x, y:W[id].y};
+    drag = {id, sx:e.clientX, sy:e.clientY, ox:p.x, oy:p.y, k:wrap._k || 1};
+    HX.desk.focus(id);
+    root.querySelectorAll('.w-win').forEach(w => w.classList.toggle('focus', w.dataset.win === id));
+    const el = root.querySelector(`[data-win="${id}"]`); if (el) el.style.zIndex = 99;
+    e.preventDefault(); return;
+  }
+  const winEl = e.target.closest('[data-win]');
+  if (winEl){ const id = winEl.dataset.win; if (D.focus !== id){ HX.desk.focus(id); root.querySelectorAll('.w-win').forEach(w => { w.classList.toggle('focus', w.dataset.win === id); w.style.zIndex = 10 + D.z.indexOf(w.dataset.win); }); } if (W[id].down) W[id].down(e); }
+}
+function onMove(e){
+  if (drag){
+    const x = Math.round(drag.ox + (e.clientX-drag.sx)/drag.k), y = Math.max(0, Math.round(drag.oy + (e.clientY-drag.sy)/drag.k));
+    D.pos[drag.id] = {x, y};
+    const el = root.querySelector(`[data-win="${drag.id}"]`); if (el){ el.style.left = x+'px'; el.style.top = y+'px'; }
+    return;
+  }
+  if (D.focus && W[D.focus] && W[D.focus].move) W[D.focus].move(e);
+}
+function onUp(e){ if (drag){ drag = null; render(); return; } if (D.focus && W[D.focus] && W[D.focus].up) W[D.focus].up(e); }
+
+/* ---------- File Explorer (USB Drive F:) ---------- */
+let exPath = 'JOBS', exSel = null;
+function listDir(path){
+  const pre = path ? path + '/' : '';
+  const dirs = new Set(), files = [];
+  Object.keys(S().pen).forEach(k => {
+    if (!k.startsWith(pre)) return;
+    const rest = k.slice(pre.length);
+    if (rest.includes('/')) dirs.add(rest.split('/')[0]); else files.push(rest);
+  });
+  if (!path){ ['Backup','Graphics','Images','FPP LABELS'].forEach(d => dirs.add(d)); }
+  return {dirs:[...dirs].sort(), files:files.sort()};
+}
+W.ex = {
+  title: () => S().usb.pen === 'pc' ? (exPath ? exPath.split('/').pop() : 'USB Drive (F:)') : 'This PC',
+  short:'File Explorer', x:200, y:70, w:820, h:540,
+  html(){
+    if (S().usb.pen !== 'pc') return `<div class="ex"><div class="ex-bar"><div class="ex-path">This PC</div></div><div style="padding:20px">USB Drive (F:) is not plugged in. Use the <b>Pen drive</b> buttons under the desktop to plug it into this PC.</div></div>`;
+    const {dirs, files} = listDir(exPath);
+    let rows = '';
+    if (exPath) rows += `<tr class="r" data-dbl="1" data-a="ex-up"><td>⬑ ..</td><td></td><td>File folder</td><td></td></tr>`;
+    dirs.forEach(d => rows += `<tr class="r" data-dbl="1" data-a="ex-dir" data-p="${esc((exPath?exPath+'/':'')+d)}"><td>📁 ${esc(d)}</td><td>${d==='ASDAPRICE UPDATE 2026'?'06/11/2026 16:44':'31/07/2023 10:09'}</td><td>File folder</td><td></td></tr>`);
+    files.forEach(f => { const p = (exPath?exPath+'/':'')+f; rows += `<tr class="r${exSel===p?' sel':''}" data-dbl="1" data-a="ex-file" data-p="${esc(p)}"><td>🟠 ${esc(f.replace(/\.ciff$/i,''))}</td><td>${S().pen[p]._saved || '31/07/2023 10:09'}</td><td>CIFF File</td><td>${20+(f.length%12)} KB</td></tr>`; });
+    return `<div class="ex"><div class="ex-bar"><button data-a="ex-up">↑</button><div class="ex-path">USB Drive (F:) › ${esc(exPath.split('/').join(' › '))}</div><button data-a="ex-eject" title="Eject">⏏ Eject</button></div>
+      <div class="ex-nav"><div>🏠 Home</div><div>🖥 Desktop</div><div>⬇ Downloads</div><div>📄 Documents</div><div class="${exPath===''?'on':''}" data-a="ex-root">💾 USB Drive (F:)</div><div class="${exPath==='JOBS'?'on':''}" data-a="ex-jobs">📁 JOBS</div></div>
+      <div class="ex-list"><table><tr><th>Name</th><th>Date modified</th><th>Type</th><th>Size</th></tr>${rows}</table>
+      <div class="it-small" style="padding:8px;color:#9aa">Double-click a .CIFF file to open it in CLARiSOFT. Root folder names are partly guessed (the root photo is blurred).</div></div></div>`;
+  },
+  click(a, t){
+    if (a === 'ex-dir'){ exPath = t.dataset.p; exSel = null; }
+    else if (a === 'ex-up'){ exPath = exPath.split('/').slice(0,-1).join('/'); }
+    else if (a === 'ex-root'){ exPath = ''; }
+    else if (a === 'ex-jobs'){ exPath = 'JOBS'; }
+    else if (a === 'ex-file'){ exSel = t.dataset.p; }
+    else if (a === 'ex-eject'){ S().usb.pen = 'out'; HX.log('PC','USB Drive (F:) ejected'); HX.emit('usb'); return; }
+    HX.desk.rerenderBody('ex'); HX.desk.render();
+  },
+  dbl(t){
+    if (t.dataset.a === 'ex-file'){ HX.cs.openFile(t.dataset.p); }
+  }
+};
+
+/* ---------- Office PC app ---------- */
+HX.note('pc', {title:'Office PC (Dell OptiPlex 3000)', tag:'photo', lines:[
+  'Two keys sit in the front USB ports: the black <b>SafeNet Sentinel licence dongle</b> (lit green) and a <b>Cruzer micro 2.0GB pen drive</b> (lit red) shown as <b>USB Drive (F:)</b>.',
+  'The pen drive holds the <b>JOBS</b> folder of .CIFF label jobs (108 items in the photo).',
+  'CommsBridge Desktop and CLARiSOFT are both on the Start menu.',
+  HX.tag('inf')+'CLARiSOFT needs the dongle to run (the caption says the software "needs the pen drive in to run"). The trainer ties the licence to the dongle and the job files to the pen drive.'
+]});
+HX.tasks.pc = [
+  {id:'cb-open-3024', text:'CommsBridge: open product 3024 in the Product editor'},
+  {id:'cb-pages', text:'CommsBridge: look at all 6 pages of the product'},
+  {id:'cb-save', text:'CommsBridge: change a value and save it'},
+  {id:'cb-send-l4', text:'CommsBridge: send changed products to Line 4'},
+  {id:'cb-sim-fail', text:'CommsBridge: try to send to the Simulator (watch it fail)'},
+  {id:'cs-launch', text:'CLARiSOFT: start it with the dongle in'},
+  {id:'cs-open', text:'CLARiSOFT: open ASDALARGE.ciff from the pen drive'},
+  {id:'cs-props', text:'CLARiSOFT: open the properties of a field (double-click)'},
+  {id:'cs-adb', text:'CLARiSOFT: open the Advanced Date Builder'},
+  {id:'cs-save', text:'CLARiSOFT: save a change back to the pen drive'},
+  {id:'usb-hawk', text:'Move the pen drive to the ICE printer'}
+];
+function strip(){
+  const u = S().usb;
+  return `<div class="it-strip"><b>Front USB ports:</b>
+    <button class="it-chip ${u.dongle==='pc'?'on':'off'}" data-u="dongle">Licence dongle: ${u.dongle==='pc'?'in PC':'removed'}</button>
+    <span>Pen drive (F:):</span>
+    <button class="it-chip ${u.pen==='pc'?'on':''}" data-u="pen-pc">in PC</button>
+    <button class="it-chip ${u.pen==='hawk'?'on':''}" data-u="pen-hawk">in ICE printer USB</button>
+    <button class="it-chip ${u.pen==='out'?'on':''}" data-u="pen-out">in my pocket</button></div>`;
+}
+HX.usbClick = function(t){
+  const u = S().usb, k = t.dataset.u;
+  if (k === 'dongle'){ u.dongle = u.dongle === 'pc' ? 'out' : 'pc'; HX.log('PC', 'Licence dongle ' + (u.dongle==='pc'?'inserted':'removed')); if (u.dongle !== 'pc' && S().cs.running) HX.cs.lostLicence(); }
+  else { const to = k.slice(4); if (u.pen !== to){ u.pen = to; HX.log('USB', 'Pen drive moved to ' + ({pc:'office PC', hawk:'ICE Zodiac Hawk USB port', out:'pocket'})[to]); if (to === 'hawk') HX.done('usb-hawk'); } }
+  HX.emit('usb');
+};
+HX.apps.push({
+  id:'pc', label:'Office PC',
+  mount(col){
+    col.innerHTML = `<div class="it-stagewrap"><div class="it-fit" id="pcFit"><div class="it-scaled" id="pcRoot"></div></div><div id="pcStrip"></div></div>`;
+    wrap = col.querySelector('#pcFit'); root = col.querySelector('#pcRoot');
+    root.addEventListener('click', onClick);
+    root.addEventListener('change', onChange);
+    root.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    col.querySelector('#pcStrip').addEventListener('click', e => { const t = e.target.closest('[data-u]'); if (t) HX.usbClick(t); });
+    render();
+  },
+  fit(){ HX.fit(wrap, 1280, 800); },
+  render(){ render(); document.getElementById('pcStrip').innerHTML = strip(); },
+  noteKey(){ const f = D.focus && D.open[D.focus] && !D.min[D.focus] ? D.focus : null; return f && W[f].noteKey ? W[f].noteKey() : 'pc'; },
+  dot(){ return HX.docDirty() ? 'amber' : 'ok'; }
+});
+})();
+
+
+/* ---- p4-commsbridge.js ---- */
+/* ===== p4-commsbridge.js — Ishida CommsBridge Desktop (W59070U-R8) + (W59098C-R6) ===== */
+(function(){
+'use strict';
+const S = () => HX.s, esc = HX.esc;
+const ui = { tab:'Products', sel:3024, ed:null, page:1, draft:null, dlg:null, dirty:false };
+
+const PRINT_OPTS = ['No print','Print','Add days'];
+const OPTS = {
+  packDate:PRINT_OPTS, packTime:['No print','Print'], sellByDate:PRINT_OPTS, sellByTime:['No print','Print'], useByDate:PRINT_OPTS,
+  conveyor:['1','2','3','4','5','6 (auto)','7','8','9'], countMode:['Good packs only','All packs'], extPrinter:['In use','Not in use'],
+  printerSwitching:['Do not switch','Switch when empty'], rank:['Yes','No'], prodMode:['Catch-weight','Fixed weight','Average weight'],
+  unitPer:['1kg','100g','1lb'], mdFlag:['No markdown','Markdown amount','Markdown %'],
+  up1p:['No print','Print'], up2p:['No print','Print'], un1p:['No print','Print'], un2p:['No print','Print'], colour:['Not in use','In use'],
+  bcType:['Variable GS1-13','Variable GS1-8','Fixed GS1-13','Fixed GS1-8','Variable GS1-13 + EAN5'],
+  bcStruct:['1: FFCCCCCxPPPPx','2: FFCCCCCxWWWWx'], ean5Type:['Date/Time','None'],
+  origin:['','UK','EU'], grade:['','Class A','Class B'], imgSel:['Not in use','In use']
+};
+/* Each row: [left, right]. Field: [label, key, flags]  flags: r=read-only, s=select, red, w=wide text, d=disabled-fn */
+const P = (l,k,f) => ({l,k,f:f||''});
+const GAP = null;
+function free(n){ return P('Free text #'+n, 'free.'+n, 'w'); }
+const PAGES = {
+  1:[[P('PLU number','plu','r'),P('Commodity name','name','w')],[P('Order number','orderNo'),P('Customer number','customer','w')],
+     [P('Order quantity','orderQty'),GAP],[P('Tray number','tray'),GAP],[GAP,GAP],[P('Tare weight','tare'),GAP],
+     [GAP,P('Conveyor speed','conveyor','s')],[P('MD preset number','md'),P('Count mode','countMode','s')],
+     [P('Pack date','packDate','s'),P('External printer','extPrinter','s')],[P('Pack time','packTime','s'),P('Time to print','timeToPrint','dPack')],
+     [P('Sell-by date','sellByDate','s'),P('Sell-by days','sellByDays','dSell')],[P('Sell-by time','sellByTime','s'),P('Time to print','timeToPrint2','dSellT')],
+     [P('Use-by date','useByDate','s'),P('Use-by days','useByDays','dUse')]],
+  2:[[P('PLU number','plu','r'),P('Commodity name','name','w')],[P('Fixed cook time (minutes)','cookFixed'),free(10)],[P('Cook time per kg','cookPerKg'),free(11)],
+     [P('Drained weight (%)','drained'),free(12)],[GAP,free(13)],[GAP,free(14)],[GAP,free(15)],[P('Item code','itemCode'),free(16)],
+     [P('External printer job name','extJob','w'),free(17)],[free(6),free(18)],[free(7),free(19)],[free(8),free(20)],[free(9),free(21)]],
+  3:[[P('PLU number','plu','r'),P('Commodity name','name','w')],[free(22),free(34)],[free(23),free(35)],[free(24),free(36)],[free(25),free(37)],
+     [free(26),free(38)],[free(27),free(39)],[free(28),free(40)],[free(29),P('Printer switching','printerSwitching','s')],
+     [free(30),P('Upper 1 cassette','up1cas')],[free(31),P('Upper 2 cassette','up2cas')],[free(32),P('Under 1 cassette','un1cas')],[free(33),P('Under 2 cassette','un2cas')]],
+  4:[[P('PLU number','plu','r'),P('Commodity name','name','w')],[P('Rank enabled','rank','s red'),P('Production mode','prodMode','s red')],
+     [GAP,P('Lower limit','lower','red dCW')],[P('Unit price','unitPrice','red'),P('Upper limit','upper','red dCW')],
+     [P('Unit price per','unitPer','s red'),P('Nominal weight','nominal','dFW')],[GAP,P('Upper tolerance','upperTol','dFW')],
+     [P('Fixed price','fixedPrice','dFW'),P('T1','t1','dFW')],[P('Fixed weight','fixedWeight','dFW'),P('T2','t2','dFW')],[GAP,GAP],
+     [P('Markdown flag','mdFlag','s red'),P('Printed quantity','printedQty','red')],[P('Markdown amount','mdAmount','dMD'),GAP]],
+  5:[[P('PLU number','plu','r'),P('Commodity name','name','w')],[P('Lot number','lot','red w'),P('Image 1','img1','red w')],
+     [P('Country of origin','origin','s red'),P('Image 2','img2','red w')],[P('Grade','grade','s red'),P('Image 3','img3','red w')],[GAP,P('Image 4','img4','red w')],
+     [P('Free text #41','free.41','red w'),P('Image 5','img5','red w')],[P('Free text #42','free.42','red w'),GAP],[P('Free text #43','free.43','red w'),GAP],
+     [P('Free text #44','free.44','red w'),P('Image barcode number','imgBc','red w')],[P('Free text #45','free.45','red w'),P('Image selection','imgSel','s red')]],
+  6:[[P('PLU number','plu','r'),P('Commodity name','name','w')],[GAP,P('Upper 1 printer','up1p','s red')],[GAP,P('Upper 1 format','up1f','red')],
+     [GAP,P('Upper 2 printer','up2p','s red')],[GAP,P('Upper 2 format','up2f','red')],[GAP,P('Under 1 printer','un1p','s red')],[GAP,P('Under 1 format','un1f','red')],
+     [P('Barcode type','bcType','s red'),P('Under 2 printer','un2p','s red')],[P('Barcode structure','bcStruct','s dAlways'),P('Under 2 format','un2f','red')],
+     [P('Barcode prefix','bcPrefix','red w'),P('Colour sensor','colour','s red')],[P('Barcode data','bcData','red w'),GAP],
+     [P('EAN5 type','ean5Type','s dAlways'),P('Tray barcode (for camera)','trayBc','red')],[P('EAN5 data','ean5Data','dAlways w'),GAP]]
+};
+function getV(p, k){ if (k.startsWith('free.')) return (p.free||{})[k.slice(5)] || ''; return p[k]; }
+function setV(p, k, v){ if (k.startsWith('free.')){ p.free = p.free || {}; p.free[k.slice(5)] = v; } else p[k] = v; }
+function disabled(p, f){
+  if (/dAlways/.test(f)) return true;
+  if (/dPack/.test(f)) return p.packTime === 'No print';
+  if (/dSellT/.test(f)) return p.sellByTime === 'No print';
+  if (/dSell/.test(f)) return p.sellByDate !== 'Add days';
+  if (/dUse/.test(f)) return p.useByDate !== 'Add days';
+  if (/dCW/.test(f)) return p.prodMode !== 'Catch-weight';
+  if (/dFW/.test(f)) return p.prodMode === 'Catch-weight';
+  if (/dMD/.test(f)) return p.mdFlag === 'No markdown';
+  return false;
+}
+function field(p, F){
+  if (!F) return `<div class="cb-gap"></div>`;
+  const v = getV(p, F.k), dis = disabled(p, F.f), ro = /(^| )r( |$)/.test(F.f);
+  const cls = 'cb-f' + (/red/.test(F.f)?' red':'') + (dis?' dis':'') + (/w/.test(F.f)?' wide':'');
+  let ctl;
+  if (/s/.test(F.f.replace(/dAlways|dSellT|dSell|dUse|dPack/g,'')) && OPTS[F.k]){
+    ctl = `<select data-f="${F.k}"${dis?' disabled':''}>${OPTS[F.k].map(o=>`<option${o==v?' selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  } else ctl = `<input data-f="${F.k}" value="${esc(v)}"${ro||dis?' readonly':''}${F.k==='name'?' style="width:60%"':''}>`;
+  return `<div class="${cls}"><label>${esc(F.l)}</label>${ctl}</div>`;
+}
+function editorHtml(){
+  const p = ui.draft;
+  let g = '';
+  PAGES[ui.page].forEach(([l,r]) => g += field(p,l) + field(p,r));
+  const pg = [1,2,3,4,5,6].map(n => `<button data-a="cb-page" data-n="${n}" class="${n>=4?'red':''}${ui.page===n?' on':''}">Page ${n}</button>`).join('');
+  return `<div class="cb-ed"><div class="hd">Product editor${ui.dirty?' — changed, not saved':''}</div><div class="grid">${g}</div>
+    <div class="cb-side"><button data-a="cb-ed-close" title="Close without saving (icon meaning inferred)">💾✖</button><button data-a="cb-ed-save" title="Save">💾</button>
+    ${ui.page>=4?`<div class="rank">Rank</div><button data-a="cb-rank" title="Rank up">⬆</button><div class="rn">1</div><button data-a="cb-rank" title="Rank down">⬇</button>`:''}</div>
+    <div class="cb-pages">${pg}</div></div>`;
+}
+function listHtml(){
+  if (ui.tab !== 'Products') return `<div class="cb-ph"><b>${esc(ui.tab)}</b><p>This tab has not been photographed yet, so it is not simulated.</p><p class="it-small">${HX.tag('ass')} Likely purpose: ${esc(({Labels:'label formats for the Ishida printers (made in Ishida LabelDesigner)',Images:'images used on Ishida labels',Barcodes:'barcode definitions',Orders:'production orders sent to each line',Batches:'batch / lot records',Updates:'what has been sent to each machine',['Order setup']:'how orders are built'})[ui.tab]||'unknown')}.</p><p class="it-small">Please photograph this tab next visit.</p></div>`;
+  const ps = Object.values(S().products).sort((a,b)=>a.plu-b.plu);
+  return `<div class="cb-list"><table>${ps.map(p=>`<tr data-a="cb-sel" data-dbl="1" data-plu="${p.plu}" class="${ui.sel==p.plu?'sel':''}"><td>${p.plu}</td><td>${esc(p.name)}</td></tr>`).join('')}</table></div>`;
+}
+function lineHtml(id){
+  const L = S().lines[id], c = L.conn, n = HX.linePendingCount(id);
+  const i = ok => `<i class="${ok?'g':'r'}"></i>`;
+  return `<div class="cb-line"><div class="pic">WPL picture</div><div class="st"><b>${esc(L.name)}</b><br>${i(c.pack)}Pack data connection<br>${i(c.ctrl)}Control connection<br>${i(c.cas)}Case label system
+    ${c.pack ? (n ? `<div class="pend">⚠ ${n} product(s) changed, not sent</div>` : `<div class="it-small">Products up to date</div>`) : ''}</div></div>`;
+}
+function dlgHtml(){
+  const d = ui.dlg; if (!d) return '';
+  if (d.kind === 'send'){
+    const lines = ['L4','L2','SIM'].map(id => `<label style="display:block"><input type="checkbox" data-d="ln-${id}" ${d.lines[id]?'checked':''}> ${esc(S().lines[id].name)} ${HX.linePendingCount(id)?`<span style="color:#a35a00">(${HX.linePendingCount(id)} changed)</span>`:''}</label>`).join('');
+    return `<div class="cb-dlg"><div class="hd">Send to machines ${HX.tag('ass').replace('it-tag','it-tag" style="font-size:9px')}</div><div class="bd">
+      <p>Choose the lines to send to:</p>${lines}
+      <p style="margin-top:8px">What to send:</p>
+      <label style="display:block"><input type="radio" name="cbw" data-d="w-changed" ${d.what==='changed'?'checked':''}> Changed products only</label>
+      <label style="display:block"><input type="radio" name="cbw" data-d="w-sel" ${d.what==='sel'?'checked':''}> Selected product only (PLU ${ui.sel})</label>
+      <label style="display:block"><input type="radio" name="cbw" data-d="w-all" ${d.what==='all'?'checked':''}> All products</label>
+      ${d.result?`<div style="margin-top:8px;padding:6px;background:#fff;border:1px solid #ccc">${d.result}</div>`:''}
+      </div><div class="ft">${d.result?'':'<button data-a="cb-send-go">Send</button>'}<button data-a="cb-dlg-x">${d.result?'Close':'Cancel'}</button></div></div>`;
+  }
+  if (d.kind === 'ask'){
+    return `<div class="cb-dlg"><div class="hd">CommsBridge Desktop</div><div class="bd">${d.msg}</div><div class="ft">${d.btns.map(b=>`<button data-a="cb-ask" data-v="${b}">${b}</button>`).join('')}</div></div>`;
+  }
+  if (d.kind === 'level'){
+    return `<div class="cb-dlg"><div class="hd">Access level ${HX.tag('ass').replace('it-tag','it-tag" style="font-size:9px')}</div><div class="bd">
+      <p>Current level: ${'★'.repeat(S().cbLevel)}${'☆'.repeat(4-S().cbLevel)}</p>
+      <p>Choose a level. Level ★★★★ needs the practice code. This is a trainer code, not a real one.</p>
+      <select data-d="lvl">${[1,2,3,4].map(n=>`<option value="${n}" ${n===d.lvl?'selected':''}>${'★'.repeat(n)}</option>`).join('')}</select>
+      <input data-d="code" placeholder="Practice code" style="margin-left:6px;width:120px" value="${esc(d.code||'')}">
+      <button data-a="cb-lvl-help" style="margin-left:6px">Help me enter it</button>
+      ${d.err?`<p style="color:#c00">${esc(d.err)}</p>`:''}</div>
+      <div class="ft"><button data-a="cb-lvl-ok">OK</button><button data-a="cb-dlg-x">Cancel</button></div></div>`;
+  }
+  if (d.kind === 'new'){
+    return `<div class="cb-dlg"><div class="hd">New product ${HX.tag('ass').replace('it-tag','it-tag" style="font-size:9px')}</div><div class="bd">PLU number: <input data-d="nplu" value="${esc(d.plu||'')}" style="width:100px">${d.err?`<p style="color:#c00">${esc(d.err)}</p>`:''}</div>
+      <div class="ft"><button data-a="cb-new-ok">Create</button><button data-a="cb-dlg-x">Cancel</button></div></div>`;
+  }
+  return '';
+}
+function html(){
+  const tabs = ['Products','Labels','Images','Barcodes','Orders','Batches','Updates','Order setup'];
+  return `<div class="cb">
+    <div class="cb-tool"><button data-a="cb-level" title="Access level (meaning inferred)" style="width:62px;font-size:11px;color:#c90">${'★'.repeat(S().cbLevel)}${'☆'.repeat(4-S().cbLevel)}</button>
+      <button data-a="cb-new" title="New product" style="color:#1a9a2a">✚</button>
+      <button data-a="cb-send" title="Send to machines (meaning inferred)" style="color:#1a7a2a">⬇</button>
+      <button data-a="cb-unknown" title="Unknown — photo needed">🖨</button>
+      <button data-a="cb-del" title="Delete product">🗑</button>
+      <button data-a="cb-lang" title="Language">🌐</button><button class="lang" data-a="cb-lang">ENGLISH</button></div>
+    <div class="cb-tabs">${tabs.map(t=>`<button data-a="cb-tab" data-t="${t}" class="${ui.tab===t?'on':''}">${t}</button>`).join('')}</div>
+    ${listHtml()}
+    <div class="cb-lines">${['L4','L2','SIM'].map(lineHtml).join('')}</div>
+    ${ui.ed ? editorHtml() : ''}
+    ${dlgHtml()}
+  </div>`;
+}
+function openEditor(plu){
+  ui.ed = plu; ui.page = 1; ui.dirty = false; ui.draft = HX.clone(S().products[plu]);
+  if (+plu === 3024) HX.done('cb-open-3024');
+  ui.seen = {1:true};
+}
+function saveDraft(){
+  if (S().cbLevel < 3){ ui.dlg = {kind:'ask', msg:'Access level too low to save changes. Raise the level with the ★ button (practice code).', btns:['OK']}; return false; }
+  const p = ui.draft;
+  ['plu','orderNo','orderQty','tray','tare','md','timeToPrint','sellByDays','timeToPrint2','useByDays','cookFixed','cookPerKg','drained','itemCode','up1cas','up2cas','un1cas','un2cas','unitPrice','fixedPrice','fixedWeight','mdAmount','lower','upper','nominal','upperTol','t1','t2','printedQty','up1f','up2f','un1f','un2f','trayBc']
+    .forEach(k => { if (p[k] !== undefined && p[k] !== '' && !isNaN(+p[k])) p[k] = +p[k]; });
+  const before = JSON.stringify(S().products[p.plu]);
+  S().products[p.plu] = HX.clone(p);
+  ui.dirty = false;
+  if (before !== JSON.stringify(p)){ HX.log('CommsBridge', `Product ${p.plu} saved`); HX.done('cb-save'); }
+  return true;
+}
+function doSend(){
+  const d = ui.dlg, out = [];
+  ['L4','L2','SIM'].forEach(id => {
+    if (!d.lines[id]) return;
+    const L = S().lines[id];
+    if (!L.conn.pack){ out.push(`❌ <b>${esc(L.name)}</b>: no pack data connection — nothing sent.`); HX.log('CommsBridge', `Send to ${L.name} failed: no pack data connection`); if (id==='SIM') HX.done('cb-sim-fail'); return; }
+    let plus = Object.keys(S().products);
+    if (d.what === 'changed') plus = plus.filter(p => HX.productPending(id, p));
+    if (d.what === 'sel') plus = [String(ui.sel)];
+    plus.forEach(p => L.products[p] = HX.clone(S().products[p]));
+    Object.keys(L.products).forEach(p => { if (!S().products[p]) delete L.products[p]; });
+    out.push(`✅ <b>${esc(L.name)}</b>: ${plus.length} product(s) sent.` + (L.current && plus.includes(String(L.current)) ? ' The running product changed — reselect it on the line to use the new data.' : ''));
+    HX.log('CommsBridge', `Sent ${plus.length} product(s) to ${L.name}`);
+    if (id === 'L4' && plus.length) HX.done('cb-send-l4');
+    HX.emit('line-copy', id);
+  });
+  if (!out.length) out.push('No line was ticked.');
+  d.result = out.join('<br>');
+}
+HX.winApps.cb = {
+  title: () => 'Ishida CommsBridge Desktop (W59070U-R8) + (W59098C-R6)',
+  short:'CommsBridge', x:185, y:30, w:1000, h:660,
+  iconHtml:'<b style="color:#c8102e">⏃</b>',
+  html,
+  noteKey(){ return ui.ed ? 'cb-p'+ui.page : (ui.tab==='Products' ? 'cb-list' : 'cb-tab'); },
+  click(a, t){
+    const pr = S().products;
+    switch(a){
+      case 'cb-tab': ui.tab = t.dataset.t; break;
+      case 'cb-sel': ui.sel = +t.dataset.plu; break;
+      case 'cb-page':
+        ui.page = +t.dataset.n; ui.seen = ui.seen || {}; ui.seen[ui.page] = true;
+        if (Object.keys(ui.seen).length === 6) HX.done('cb-pages');
+        break;
+      case 'cb-ed-save': if (saveDraft()) { HX.emit('product'); return; } break;
+      case 'cb-ed-close':
+        if (ui.dirty){ ui.dlg = {kind:'ask', msg:'Save changes to this product?', btns:['Yes','No','Cancel'], then:'close'}; }
+        else ui.ed = null;
+        break;
+      case 'cb-ask': {
+        const v = t.dataset.v, d = ui.dlg; ui.dlg = null;
+        if (d && d.then === 'close'){ if (v === 'Yes'){ if (saveDraft()) ui.ed = null; } else if (v === 'No'){ ui.ed = null; ui.dirty = false; } }
+        if (d && d.then === 'del' && v === 'Yes'){ delete pr[ui.sel]; HX.log('CommsBridge', `Product ${ui.sel} deleted`); ui.sel = null; HX.emit('product'); return; }
+        HX.emit('product'); return;
+      }
+      case 'cb-rank': HX.toast('Only one rank is set up for this product (rank 1).'); break;
+      case 'cb-send': ui.dlg = {kind:'send', lines:{L4:true, L2:false, SIM:false}, what:'changed'}; break;
+      case 'cb-send-go': doSend(); HX.emit('send'); return;
+      case 'cb-dlg-x': ui.dlg = null; break;
+      case 'cb-level': ui.dlg = {kind:'level', lvl:S().cbLevel}; break;
+      case 'cb-lvl-help': ui.dlg.code = '4444'; ui.dlg.err = 'Practice code filled in: 4444'; break;
+      case 'cb-lvl-ok': {
+        const d = ui.dlg; if (d.lvl === 4 && d.code !== '4444' && S().cbLevel !== 4){ d.err = 'Wrong code. Use "Help me enter it".'; break; }
+        S().cbLevel = d.lvl; ui.dlg = null; HX.emit('level'); return;
+      }
+      case 'cb-new': ui.dlg = {kind:'new'}; break;
+      case 'cb-new-ok': {
+        const n = parseInt(ui.dlg.plu, 10);
+        if (!n || pr[n]){ ui.dlg.err = !n ? 'Enter a number.' : 'That PLU already exists.'; break; }
+        pr[n] = HX.makeProduct(n, 'New product'); pr[n].extPrinter = 'Not in use'; ui.sel = n; ui.dlg = null; openEditor(n); HX.emit('product'); return;
+      }
+      case 'cb-del': if (ui.sel) ui.dlg = {kind:'ask', msg:`Delete product ${ui.sel}?`, btns:['Yes','No'], then:'del'}; break;
+      case 'cb-unknown': HX.toast('This toolbar button has not been identified yet — photo or hover tooltip needed.'); return;
+      case 'cb-lang': HX.toast('Language: ENGLISH (only language simulated).'); return;
+    }
+    HX.desk.rerenderBody('cb'); HX.app && HX.app.side();
+  },
+  dbl(t){ if (t.dataset.a === 'cb-sel'){ openEditor(+t.dataset.plu); HX.desk.rerenderBody('cb'); HX.app && HX.app.side(); } },
+  change(t){
+    if (t.dataset.f && ui.draft){
+      setV(ui.draft, t.dataset.f, t.value); ui.dirty = true;
+      setTimeout(()=>{ HX.desk.rerenderBody('cb'); }, 0);
+      return;
+    }
+    const d = ui.dlg; if (!d || !t.dataset.d) return;
+    const k = t.dataset.d;
+    if (k.startsWith('ln-')) d.lines[k.slice(3)] = t.checked;
+    else if (k.startsWith('w-')) d.what = k.slice(2);
+    else if (k === 'lvl') d.lvl = +t.value;
+    else if (k === 'code') d.code = t.value;
+    else if (k === 'nplu') d.plu = t.value;
+  }
+};
+HX.cb = { ui, openEditor };
+
+/* ---------- notes ---------- */
+HX.note('cb-list', {title:'CommsBridge Desktop — product list', tag:'photo', lines:[
+  'Title bar: <b>Ishida CommsBridge Desktop (W59070U-R8) + (W59098C-R6)</b>. Tabs: Products, Labels, Images, Barcodes, Orders, Batches, Updates, Order setup.',
+  'Right side: <b>Line 4</b>, <b>Line 2</b> and <b>Simulator</b>, each with Pack data connection, Control connection and Case label system lights. In the photo Lines 4 and 2 have green pack data and control lights. Case label is red on all three, and the Simulator is all red.',
+  'Ishida says CommsBridge "creates products and production orders, sends them to the machine, monitors production". It comes free with the WPL-AI weigh price labeller, along with LabelDesigner.',
+  HX.tag('inf')+'The green ⬇ button sends products to the lines and the ★★★★ button is the access level. Both meanings are inferred from the icons.',
+  HX.tag('ass')+'The send dialog and the "N products changed, not sent" message are trainer designs.',
+  'Double-click a product to open the Product editor.'
+]});
+HX.note('cb-tab', {title:'CommsBridge — other tabs', tag:'ass', lines:['Only the Products tab was photographed. The other tabs are placeholders until there are photos.']});
+HX.note('cb-p1', {title:'Product editor — Page 1', tag:'photo', lines:[
+  'PLU 3024 <b>ALDI Extra Large W/Bird</b>: Order number 1, Order quantity 1000, Tray number 1, Tare weight 8, MD preset number 1.',
+  'Pack date / Pack time / Sell-by date / Sell-by time are all <b>No print</b>. Use-by date is <b>Add days</b> and Use-by days is <b>10</b>.',
+  'Conveyor speed <b>6 (auto)</b>, Count mode <b>Good packs only</b>, External printer <b>In use</b>.',
+  HX.tag('inf')+'<b>External printer = In use</b> is what makes the line hand each pack to the ICE Zodiac Hawk. Ishida\'s own printers are set to "No print" on Page 6.',
+  HX.tag('inf')+'Use-by = pack date + Use-by days, sent to the ICE printer as the USEBY merge field.',
+  HX.tag('ass')+'Fields grey out when their setting is "No print". The extra dropdown choices are assumed.'
+]});
+HX.note('cb-p2', {title:'Product editor — Page 2', tag:'photo', lines:[
+  'Fixed cook time (minutes) <b>20</b>, Cook time per kg <b>45</b>, Drained weight (%) 0, Item code 0.',
+  '<b>External printer job name: ALDI WB HWC - PZ NEW</b>. This is the name of the CLARiSOFT job the ICE printer must have in its database.',
+  'Free text #6 – #21 are empty.',
+  HX.tag('inf')+'Cook time on the label = fixed + per-kg × weight. The CLARiSOFT preview "1hr 46mins" at 2.148 kg fits 20 + 40 × 2.148 for the ASDA job, so the ASDA products use 40 per kg here.'
+]});
+HX.note('cb-p3', {title:'Product editor — Page 3', tag:'photo', lines:['Free text #22 – #40 are empty. Printer switching <b>Do not switch</b>. Upper 1/2 cassette and Under 1/2 cassette are all 0.']});
+HX.note('cb-p4', {title:'Product editor — Page 4', tag:'photo', lines:[
+  'Rank enabled <b>Yes</b>, Production mode <b>Catch-weight</b>, Lower limit <b>2000</b>, Upper limit <b>2300</b> (grams).',
+  'Unit price 0 per <b>1kg</b>, Markdown flag <b>No markdown</b>, Printed quantity 0. Rank 1 with up/down arrows.',
+  HX.tag('inf')+'In catch-weight mode each pack keeps its real weight. Packs outside the lower/upper limits are rejected and get no label.'
+]});
+HX.note('cb-p5', {title:'Product editor — Page 5', tag:'ass', lines:[
+  'The photo of this page is <b>blurred</b>. Only "Image 1 – 5" and an "… image selection: Not in use" row can be made out.',
+  'The left-hand field names here are <b>assumed</b>. Please re-photograph Page 5.'
+]});
+HX.note('cb-p6', {title:'Product editor — Page 6', tag:'photo', lines:[
+  'Upper 1 / Upper 2 / Under 1 / Under 2 printer are all <b>No print</b> (format 1). Colour sensor <b>Not in use</b>.',
+  'Barcode type <b>Fixed GS1-13</b>. The dropdown offers Variable GS1-13, Variable GS1-8, Fixed GS1-13, Fixed GS1-8 and Variable GS1-13 + EAN5.',
+  'Barcode structure 1: FFCCCCCxPPPPx, prefix 40, data 8860016888. EAN5 type Date/Time. Tray barcode (for camera) 0.',
+  HX.tag('inf')+'Because all four Ishida printers are "No print", these barcode settings are not used for this product. The ICE label carries its own EAN-13 set in CLARiSOFT.'
+]});
+})();
+
+
+/* ---- p5-clarisoft.js ---- */
+/* ===== p5-clarisoft.js — CLARiSOFT Generic Image Design Software (ICE / Videojet) ===== */
+(function(){
+'use strict';
+const S = () => HX.s, esc = HX.esc;
+const ui = { splash:false, sel:null, menu:null, dlg:null, msg:null, zoom:450, adb:null, dragging:null, pending:null };
+const CS = () => S().cs;
+const ppm = () => ui.zoom/100*2.67;
+const winPath = p => 'F:\\' + p.replace(/\//g,'\\');
+
+function launch(then){
+  if (S().usb.dongle !== 'pc'){
+    ui.msg = {title:'CLARiSOFT', icon:'⛔', text:'No valid CLARiSOFT licence was found. Insert the licence key (dongle) and start CLARiSOFT again.', btns:['OK'], then:'quit'};
+    HX.desk.open('cs'); HX.log('CLARiSOFT', 'Start failed: no licence dongle'); return;
+  }
+  CS().running = true; ui.splash = true; HX.desk.open('cs'); HX.done('cs-launch');
+  setTimeout(() => { ui.splash = false; if (then) then(); HX.emit('cs'); }, 1200);
+}
+function openFile(path){
+  if (!CS().running){ launch(() => openFile(path)); return; }
+  if (CS().dirty){ ui.msg = {title:'CLARiSOFT', icon:'❓', text:'Save changes to the current job first?', btns:['Yes','No','Cancel'], then:'open', path}; HX.emit('cs'); return; }
+  const j = S().pen[path]; if (!j){ HX.toast('File not found.'); return; }
+  CS().doc = HX.clone(j); delete CS().doc._saved; CS().path = path; CS().dirty = false; ui.sel = null;
+  if (/ASDALARGE/.test(path)) HX.done('cs-open');
+  HX.log('CLARiSOFT', 'Opened ' + winPath(path));
+  HX.desk.open('cs'); HX.emit('cs');
+}
+function save(asName){
+  const c = CS();
+  if (!c.doc) return;
+  if (c.noLic){ ui.msg = {title:'CLARiSOFT', icon:'⛔', text:'The licence key has been removed. Saving is disabled until the dongle is put back.', btns:['OK']}; return; }
+  let path = c.path;
+  if (asName){ path = (c.path ? c.path.split('/').slice(0,-1).join('/') : 'JOBS') + '/' + asName + '.ciff'; c.doc.name = asName; }
+  if (!path){ ui.dlg = {kind:'saveas', name:c.doc.name}; return; }
+  if (S().usb.pen !== 'pc'){ ui.msg = {title:'CLARiSOFT', icon:'⚠', text:`Cannot save ${winPath(path)}.\nThe drive F: is not available. Plug the pen drive back into the PC.`, btns:['OK']}; HX.log('CLARiSOFT','Save failed: F: not available'); return; }
+  const d = HX.clone(c.doc); d.rev = (d.rev||1) + 1; c.doc.rev = d.rev;
+  const now = new Date(); d._saved = now.toLocaleDateString('en-GB') + ' ' + now.toTimeString().slice(0,5);
+  S().pen[path] = d; c.path = path; c.dirty = false;
+  HX.log('CLARiSOFT', 'Saved ' + winPath(path) + ' (job name "' + d.name + '")');
+  HX.done('cs-save');
+}
+HX.cs = {
+  openFile, launch,
+  lostLicence(){ CS().noLic = true; ui.msg = {title:'CLARiSOFT', icon:'⚠', text:'The licence key (dongle) was removed. You can look at the job but not save it until the dongle is back.', btns:['OK']}; }
+};
+HX.on(t => { if (t === 'usb' && S().usb.dongle === 'pc') CS().noLic = false; });
+
+/* ---------- canvas ---------- */
+function canvasHtml(){
+  const d = CS().doc, k = ppm();
+  if (!d) return `<div class="cs-empty">Use File › Open to open a .CIFF job from the pen drive (F:\\JOBS).</div>`;
+  const W = d.w*k, H = d.h*k, ox = 18, oy = 6;
+  let ticks = '';
+  for (let mm=0; mm<=Math.ceil(1200/k); mm+=5){ const x = ox + mm*k; ticks += `<div style="position:absolute;left:${x}px;bottom:0;height:${mm%10?5:9}px;border-left:1px solid #555"></div>` + (mm%10===0 && mm ? `<div style="position:absolute;left:${x+2}px;top:0;font-size:9px">${mm}|</div>` : ''); }
+  let vt = ''; for (let mm=10; mm<=d.h; mm+=10) vt += `<div style="position:absolute;top:${oy+mm*k}px;left:2px;font-size:9px;transform:rotate(-90deg)">${mm}</div>`;
+  const ctx = {mode:'design', date:new Date()};
+  let grid = ''; for (let gx=0; gx<=d.w; gx+=5) grid += `<line x1="${gx}" y1="0" x2="${gx}" y2="${d.h}" stroke="#bbb" stroke-width="0.06" stroke-dasharray="0.4 0.4"/>`;
+  for (let gy=0; gy<=d.h; gy+=5) grid += `<line x1="0" y1="${gy}" x2="${d.w}" y2="${gy}" stroke="#bbb" stroke-width="0.06" stroke-dasharray="0.4 0.4"/>`;
+  return `<div class="cs-ruler">${ticks}</div><div class="cs-vruler" style="height:${H+40}px">${vt}</div>
+    <svg id="csSvg" style="position:absolute;left:${ox}px;top:${18+oy}px;background:#fff" width="${W}" height="${H}" viewBox="0 0 ${d.w} ${d.h}" xmlns="http://www.w3.org/2000/svg">${grid}${HX.renderJobSVG(d, ctx, {sel:ui.sel, hit:true})}</svg>
+    <div style="position:absolute;left:${ox+W+40}px;top:${40}px;color:#fff;opacity:.55;font-size:13px;width:300px">Outside the 53 mm print area (Zodiac Hawk 53 mm printhead).<br><br>${HX.tag('inf')}The photo shows faded fields here (SC0242, £, 0,00 £/kg, 6,55£, 0219136006552). They look like another sub-image or non-printed fields. The status bar says "Sub-Image 1".</div>`;
+}
+
+/* ---------- property dialogs ---------- */
+const sel = (k, opts, v, extra) => `<select data-p="${k}" ${extra||''}>${opts.map(o=>`<option${String(o)===String(v)?' selected':''}>${esc(o)}</option>`).join('')}</select>`;
+const inp = (k, v, extra) => `<input type="text" data-p="${k}" value="${esc(v)}" ${extra||''}>`;
+const ck = (k, v, label, extra) => `<label class="ck"><input type="checkbox" data-p="${k}" ${v?'checked':''} ${extra||''}> ${esc(label)}</label>`;
+const rd = (k, val, cur, label) => `<label style="margin-right:14px"><input type="radio" name="${k}" data-p="${k}" value="${esc(val)}" ${cur===val?'checked':''}> ${esc(label)}</label>`;
+function previewOf(el){ return HX.elValue(el, {mode:'design', date:new Date()}); }
+function textTab(e){
+  const t = e.text;
+  const merge = t.type === 'Merge Field';
+  return `<label class="f">Preview</label><div class="prev">${esc(previewOf(e))}</div>
+  <div class="row"><div><label class="f">Type</label>${sel('text.type',['Fixed Text','Line Reference','Merge Field','User Entered','CLARiSOFT Database'],t.type)}</div>
+  <div><label class="f">Maximum Number of Characters</label><div class="row"><div>${inp('text.maxChars',t.maxChars,'style="width:60px"')}</div><div>${ck('text.fixedLen',t.fixedLen,'Fixed Length')}</div></div></div></div>
+  ${merge ? `<div class="row"><div><label class="f">Merge field ${HX.tag('ass')}</label>${sel('text.mergeKey',['WEIGHT','COOKTIME','USEBY','SELLBY','PRICE'],t.mergeKey)}</div><div><label class="f">Sample (design view only)</label>${inp('text.sample',t.sample)}</div></div>`
+          : `<label class="f">Default Text</label><div class="row"><div>${inp('text.value',t.value)}</div><div style="flex:0 0 130px"><button type="button" data-a="cs-intl" style="height:22px;width:100%">International Data</button></div></div>`}
+  <div class="row"><div><label class="f">Justification</label>${sel('text.justify',['Left Justified','Centred','Right Justified'],t.justify)}</div><div><label class="f">Pad Character</label>${inp('text.pad',t.pad||'')}</div></div>
+  <div class="grp">User Entered Data</div>
+  <label class="f">Characters Allowed</label>${sel('text.chars',['Any Characters','Numeric Only','Alpha Only'],t.chars||'Any Characters')}
+  <label class="f">Prompt Message</label>${inp('text.promptMsg',t.promptMsg||'')}
+  <label class="f">Prompt Value</label><div>${rd('text.promptVal','Default Value',t.promptVal,'Default Value')}${rd('text.promptVal','Blank',t.promptVal,'Blank')}${rd('text.promptVal','Last Value',t.promptVal,'Last Value')}</div>
+  ${ck('text.atCoder',t.atCoder,'Prompt at Coder')}
+  <div class="grp">Database</div><div class="row"><div><label class="f">Data Source</label>${sel('x',[''],'','disabled')}</div><div style="flex:0 0 90px"><label class="f">&nbsp;</label><button disabled style="width:100%">Select</button></div></div>
+  <label class="f">Checksum Calculation</label>${sel('x2',['NONE'],'NONE','disabled')}`;
+}
+function dateTab(e){
+  const d = e.date;
+  return `<label class="f">Preview</label><div class="prev">${esc(previewOf(e))}</div>
+  <div class="row"><div><label class="f">Date Format</label>${sel('date.fmt',['User Defined','DD MMM','dd/MM/yy','dd MMM yy'],d.fmt)}</div>
+  <div><label class="f">Separator</label>${sel('date.sep',['None','Space','Slash(/)','Dash(-)','Dot(.)'],d.sep)}</div><div style="flex:0 0 90px"><label class="f">&nbsp;</label><button type="button" data-a="cs-adb" style="width:100%;height:22px">Advanced</button></div></div>
+  <div class="grp">Date to Use</div><div>${rd('date.use','PC Date',d.use,'PC Date')}${rd('date.use','Coder Date',d.use,'Coder Date')}</div>
+  <div class="row"><div><label class="f">Date Type</label>${sel('date.dtype',['Current Date','Offset Date'],d.dtype)}</div><div><label class="f">Language</label>${sel('date.lang',['English'],d.lang)}</div></div>
+  ${d.dtype==='Offset Date'?`<label class="f">Offset (days) ${HX.tag('ass')}</label>${inp('date.offset',d.offset)}`:''}
+  <div class="row"><div><label class="f">Calculation to Use</label>${sel('x',[''],'','disabled')}</div><div style="flex:0 0 100px"><label class="f">&nbsp;</label><button disabled style="width:100%">Calc Manager</button></div></div>
+  <div class="grp">User Entered Date</div><label class="f">Minimum Offset Units</label>${sel('x3',['Disabled'],'Disabled','disabled')}
+  <div class="row"><div><label class="f">Minimum Offset</label>${inp('x4',0,'disabled')}</div><div><label class="f">Maximum Offset</label>${inp('x5',0,'disabled')}</div></div>`;
+}
+function timeTab(e){
+  const t = e.time;
+  return `<label class="f">Preview</label><div class="prev">${esc(previewOf(e))}</div>
+  <div class="row"><div><label class="f">Format</label>${sel('time.fmt',['HHmm','HHmmss','hhmm'],t.fmt)}</div><div><label class="f">Separator</label>${sel('time.sep',['Colon(:)','None','Dot(.)'],t.sep)}</div>
+  <div style="flex:0 0 90px"><label class="f">&nbsp;</label><button type="button" data-a="cs-tadv" style="width:100%;height:22px">Advanced</button></div></div>
+  <div class="grp">Time to Use</div><div>${rd('time.use','PC Time',t.use,'PC Time')}${rd('time.use','Coder Time',t.use,'Coder Time')}</div>
+  <div class="row"><div><label class="f">Time Type</label>${sel('time.ttype',['Current Time'],t.ttype)}</div><div><label class="f">Language</label>${sel('time.lang',['English'],t.lang)}</div></div>
+  <label class="f">Calculation to Use</label>${sel('x',[''],'','disabled')}`;
+}
+function fontTab(e){
+  return `<label class="f">Font ${HX.tag('ass')}</label>${sel('font',['Arial','Arial Narrow'],e.font||'Arial')}
+  <label class="f">Character height (mm)</label>${inp('size',e.size)}${ck('bold',e.bold,'Bold')}
+  <p class="it-small">The Font tab was not photographed; these controls are a simplified stand-in.</p>`;
+}
+function generalTab(e){
+  const bx = HX.elBox(e, {mode:'design', date:new Date()});
+  return `<label class="f">Field Name</label>${inp('name',e.name)}
+  <div class="grp">Position and Size</div>
+  <div class="row"><div><label class="f">X Position (mm)</label>${inp('x',(+e.x).toFixed(2))}</div><div><label class="f">Y Position (mm)</label>${inp('y',(+e.y).toFixed(2))}</div></div>
+  <div class="row"><div><label class="f">Width (mm)</label>${inp('w_',bx.w.toFixed(2),'disabled')}</div><div><label class="f">Height (mm)</label>${inp('h_',bx.h.toFixed(2),'disabled')}</div></div>
+  <label class="f">Orientation (Degrees)</label>${sel('orient',[0,90,180,270],e.orient||0,'style="width:90px"')}
+  <div class="grp">Features</div><div>${rd('printed','yes',e.printed===false?'no':'yes','Printed')}${rd('printed','no',e.printed===false?'no':'yes','Non-Printed')}</div>
+  ${ck('inverse',e.inverse,'Field Inverse')}${ck('mirror',e.mirror,'Field Mirror Image')}${ck('transmitted',e.transmitted,'Transmitted Field')}
+  <div class="row"><div><label class="f">Field Transparency</label>${sel('transp',['Default'],'Default')}</div></div>
+  <label class="f">CLARiNET Logged Field</label>${sel('logged',['Field Not Logged','Field Logged'],e.logged||'Field Not Logged')}
+  <label class="f">Encrypted Field</label>${sel('enc',['NONE'],'NONE')}`;
+}
+function barcodeTab(e){
+  const b = e.bc;
+  return `<label class="f">Barcode Data</label>${inp('bc.data',b.data)}
+  <div class="row"><div><label class="f">Type</label>${sel('bc.type',['Fixed Text','Merge Field','CLARiSOFT Database'],b.type)}</div><div style="flex:0 0 110px"><label class="f">&nbsp;</label><button type="button" data-a="cs-merge" style="width:100%;height:22px" ${b.type==='Merge Field'?'':'disabled'}>Merge...</button></div></div>
+  ${b.type==='Merge Field'?`<label class="f">Merge field ${HX.tag('ass')}</label>${sel('bc.mergeKey',['','EAN'],b.mergeKey)}`:''}
+  <div class="row"><div><label class="f">Magnification(%)</label>${sel('bc.mag',[50,62.5,75.7,80,90,100,120],b.mag)}</div><div><label class="f">Barcode Height</label>${inp('bc.height',b.height)}</div></div>
+  <div class="grp">Human Readable</div>${ck('bc.hr',b.hr,'Display Human Readable Text')}
+  <div class="grp">Barcode Features</div>${ck('bc.autoCheck',b.autoCheck,'Automatically calculate Check Digit')}${ck('bc.guard',b.guard,'Guard Bars')}${ck('bc.quiet',b.quiet,'Quiet Margins')}
+  <div class="grp">Database</div><label class="f">Data Source</label>${sel('x',[''],'','disabled')}<label class="f">Field to Use</label>${sel('x6',[''],'','disabled')}`;
+}
+const KIND_TITLE = {text:'Text Properties', date:'Date Properties', time:'Time Properties', barcode:'EAN13 Properties', logo:'Logo Properties', line:'Drawing Properties'};
+const KIND_TABS = {text:['Text','Font','General'], date:['Text','Font','General'], time:['Text','Font','General'], barcode:['Barcode','General'], logo:['General'], line:['General']};
+function propsHtml(){
+  const d = ui.dlg, e = d.draft;
+  let body = '';
+  if (d.tab === 'General') body = generalTab(e);
+  else if (d.tab === 'Font') body = fontTab(e);
+  else if (d.tab === 'Barcode') body = barcodeTab(e);
+  else body = e.kind === 'date' ? dateTab(e) : e.kind === 'time' ? timeTab(e) : textTab(e);
+  return `<div class="cs-dlg" style="left:60px;top:40px;width:400px"><div class="hd"><span>${KIND_TITLE[e.kind]}</span><button data-a="cs-dlg-x">✕</button></div>
+    <div class="tabs">${KIND_TABS[e.kind].map(t=>`<button data-a="cs-tab" data-t="${t}" class="${d.tab===t?'on':''}">${t}</button>`).join('')}</div>
+    <div class="bd">${body}</div>
+    <div class="ft"><button data-a="cs-ok">OK</button><button data-a="cs-dlg-x">Cancel</button><button data-a="cs-apply">Apply</button></div></div>`;
+}
+function adbHtml(){
+  const a = ui.adb, e = ui.dlg.draft;
+  const prev = HX.fmtDateParts(new Date(), a.parts, e.date.sep);
+  return `<div class="cs-dlg" style="left:150px;top:200px;width:460px;z-index:9"><div class="hd"><span>Advanced Date Builder</span><button data-a="adb-x">✕</button></div>
+   <div style="padding:8px;background:#fff;margin:6px 8px;border:1px solid #bbb">
+    <label class="f">Preview</label><div class="prev">${esc(prev)}</div>
+    <div class="row" style="margin-top:6px"><div><label class="f">Available Formats</label><div class="lst">${HX.DATE_FORMATS.map(([n])=>`<div data-a="adb-av" data-n="${esc(n)}" class="${a.av===n?'on':''}">${esc(n)}</div>`).join('')}</div></div>
+    <div style="flex:0 0 80px;padding-top:40px"><button data-a="adb-add" style="width:100%">Add -&gt;</button><br><br><button data-a="adb-rem" style="width:100%">&lt;- Remove</button></div>
+    <div><label class="f">Selected Formats</label><div class="lst">${a.parts.map((n,i)=>`<div data-a="adb-sp" data-i="${i}" class="${a.si===i?'on':''}">${esc(n)}</div>`).join('')}</div></div>
+    <div style="flex:0 0 80px;padding-top:40px"><button data-a="adb-up" style="width:100%">Move Up</button><br><br><button data-a="adb-dn" style="width:100%">Move Down</button></div></div>
+    <label class="f">Constant Text</label><div class="row"><div><input type="text" data-q="const" value="${esc(a.cst||'')}"></div><div style="flex:0 0 80px"><button data-a="adb-cst" style="width:100%">Add -&gt;</button></div></div>
+    <div class="row"><div>${'<select disabled><option>NONE</option></select>'}</div><div style="flex:0 0 80px"><button disabled style="width:100%">Add -&gt;</button></div></div>
+    <label class="ck"><input type="checkbox" disabled> Pad with leading zeros</label></div>
+   <div class="ft"><button data-a="adb-ok">OK</button><button data-a="adb-x">Cancel</button></div></div>`;
+}
+function menuHtml(){
+  if (!ui.menu) return '';
+  const c = CS(), has = !!c.doc;
+  const items = {
+    File:[['cs-new','New'],['cs-open','Open...'],['cs-save','Save',!has],['cs-saveas','Save As...',!has],['cs-close','Close',!has],['cs-exit','Exit']],
+    Edit:[['cs-props','Properties...',!ui.sel],['cs-del','Delete',!ui.sel]],
+    View:[['cs-z+','Zoom in'],['cs-z-','Zoom out']],
+    Tools:[['cs-na','Database Manager'],['cs-na','Calc Manager']],
+    Help:[['cs-about','About CLARiSOFT']]
+  }[ui.menu];
+  return `<div class="cs-dd" style="left:${({File:0,Edit:34,View:70,Tools:110,Help:156})[ui.menu]}px">${items.map(([a,l,dis])=>`<button data-a="${a}" ${dis?'disabled':''}>${l}</button>`).join('')}</div>`;
+}
+function dialogHtml(){
+  if (!ui.dlg) return '';
+  if (ui.dlg.kind === 'props') return propsHtml() + (ui.adb ? adbHtml() : '');
+  if (ui.dlg.kind === 'open'){
+    if (S().usb.pen !== 'pc') return `<div class="cs-dlg" style="left:300px;top:120px;width:520px"><div class="hd"><span>Open</span><button data-a="cs-dlg-x">✕</button></div><div class="bd" style="min-height:100px">Drive F: (pen drive) is not plugged into this PC. Use the Pen drive buttons under the desktop.</div><div class="ft"><button data-a="cs-dlg-x">Cancel</button></div></div>`;
+    const files = Object.keys(S().pen).sort((a,b)=> (b.includes('ASDAPRICE')-a.includes('ASDAPRICE')) || a.localeCompare(b));
+    return `<div class="cs-dlg" style="left:300px;top:60px;width:560px"><div class="hd"><span>Open — USB Drive (F:)</span><button data-a="cs-dlg-x">✕</button></div>
+      <div class="bd" style="min-height:0"><div class="lst" style="height:360px">${files.map(f=>`<div data-a="cs-of" data-p="${esc(f)}" class="${ui.dlg.pick===f?'on':''}">${esc(winPath(f))}</div>`).join('')}</div></div>
+      <div class="ft"><button data-a="cs-of-go" ${ui.dlg.pick?'':'disabled'}>Open</button><button data-a="cs-dlg-x">Cancel</button></div></div>`;
+  }
+  if (ui.dlg.kind === 'saveas') return `<div class="cs-dlg" style="left:380px;top:180px;width:420px"><div class="hd"><span>Save As</span><button data-a="cs-dlg-x">✕</button></div>
+      <div class="bd" style="min-height:0"><label class="f">Job name (this is the name the ICE printer and Ishida use)</label><input type="text" data-q="saveas" value="${esc(ui.dlg.name||'')}"></div>
+      <div class="ft"><button data-a="cs-saveas-go">Save</button><button data-a="cs-dlg-x">Cancel</button></div></div>`;
+  return '';
+}
+function html(){
+  const c = CS();
+  if (ui.msg && !c.running) return `<div class="cs" style="background:transparent">${msgHtml()}</div>`;
+  if (ui.splash) return `<div class="cs" style="background:#202124"><div class="cs-splash"><div class="l">✣ CLARiSOFT<small>Generic Image Design Software</small></div><div class="i">Initialising Components...</div><div class="m">✣ CLARiCOM<br>GENERIC IMAGE<br>DESIGN SOFTWARE</div></div></div>`;
+  return `<div class="cs">
+    <div class="cs-menu">${['File','Edit','View','Tools','Help'].map(m=>`<div><button data-a="cs-menu" data-m="${m}">${m}</button></div>`).join('')}${menuHtml()}</div>
+    <div class="cs-tb"><button data-a="cs-new" title="New">🗋</button><button data-a="cs-open" title="Open">📂</button><button data-a="cs-save" title="Save">💾</button><span class="sep"></span>
+      <button data-a="cs-del" title="Delete">✂</button><button data-a="cs-na" title="Copy">⧉</button><button data-a="cs-na" title="Undo">↶</button><span class="sep"></span>
+      <button data-a="cs-na">⇤</button><button data-a="cs-na">⇥</button><button data-a="cs-na">⤒</button><button data-a="cs-na">⤓</button><button data-a="cs-na">⇹</button><span class="sep"></span>
+      <button data-a="cs-props" title="Properties">⚙</button><button data-a="cs-about" title="Help">❓</button></div>
+    <div class="cs-tb"><button data-a="cs-z+" title="Zoom in">🔍</button><button data-a="cs-z-" title="Zoom out">🔎</button>
+      <select data-q="zoom">${[200,300,450,600].map(z=>`<option value="${z}" ${ui.zoom===z?'selected':''}>${z}%</option>`).join('')}</select>
+      <select data-q="printer"><option>Zodiac Hawk(53mm)</option></select><select><option>Default</option></select></div>
+    <div class="cs-box"><div class="t">CLARiSOFT Toolbox</div>
+      ${[['text','<sup>23</sup>AC','Text'],['time','🕒','Time'],['date','📅','Date'],['counter','¹²₃','Counter'],['price','£$','Price'],['bc2','▥','Secondary Barcode'],['bc1','▦','Primary Barcode'],['logo','🖼','Logo'],['draw','▣','Drawing'],['tblock','≣','Text Block'],['rtb','RT','Rich Text Block']]
+        .map(([k,i,l])=>`<button data-a="cs-add" data-k="${k}"><i>${i}</i>${l}</button>`).join('')}</div>
+    <div class="cs-work" id="csWork">${canvasHtml()}</div>
+    <div class="cs-status"><span>Ready</span><span>${c.doc?'Sub-Image 1':''}</span><span>mm</span>${c.noLic?'<span style="color:#c00">Licence key missing — save disabled</span>':''}</div>
+    ${dialogHtml()}${msgHtml()}
+  </div>`;
+}
+function msgHtml(){
+  if (!ui.msg) return '';
+  const m = ui.msg;
+  return `<div class="cs-msg"><div class="hd">${esc(m.title)}</div><div class="bd"><i>${m.icon}</i><div style="white-space:pre-line">${esc(m.text)}</div></div><div class="ft">${m.btns.map(b=>`<button data-a="cs-msg" data-v="${b}">${b}</button>`).join('')}</div></div>`;
+}
+function curEl(){ return CS().doc && CS().doc.els.find(e => e.id === ui.sel); }
+function openProps(id){
+  const el = CS().doc.els.find(e => e.id === id); if (!el) return;
+  ui.sel = id; ui.dlg = {kind:'props', id, tab:KIND_TABS[el.kind][0], draft:HX.clone(el)}; ui.adb = null;
+  HX.done('cs-props');
+}
+function setPath(o, k, v){ const ks = k.split('.'); let x = o; for (let i=0;i<ks.length-1;i++) x = x[ks[i]]; x[ks[ks.length-1]] = v; }
+function applyDraft(){
+  const d = ui.dlg, doc = CS().doc, i = doc.els.findIndex(e => e.id === d.id);
+  const e = HX.clone(d.draft);
+  ['x','y','size'].forEach(k => e[k] = +e[k] || 0);
+  if (e.text){ e.text.maxChars = +e.text.maxChars || 0; }
+  if (e.bc){ e.bc.mag = +e.bc.mag; e.bc.height = +e.bc.height; }
+  if (e.date) e.date.offset = +e.date.offset || 0;
+  if (JSON.stringify(doc.els[i]) !== JSON.stringify(e)){ doc.els[i] = e; CS().dirty = true; HX.log('CLARiSOFT', `Field ${e.name} changed`); }
+}
+function addField(k){
+  const doc = CS().doc; if (!doc){ HX.toast('Open or create a job first.'); return; }
+  const id = k + Date.now().toString(36);
+  let el = null;
+  if (k === 'text') el = {id, kind:'text', name:'Text'+doc.els.length, x:4, y:33, size:3, font:'Arial', text:{type:'Fixed Text', value:'TEXT', maxChars:20, fixedLen:false, justify:'Left Justified', atCoder:false, promptVal:'Default Value', promptMsg:''}};
+  if (k === 'date') el = {id, kind:'date', name:'Date'+doc.els.length, x:4, y:33, size:3, font:'Arial', date:{fmt:'DD MMM', parts:['dd','MMM'], sep:'Space', use:'Coder Date', dtype:'Current Date', offset:0, lang:'English'}};
+  if (k === 'time') el = {id, kind:'time', name:'Time'+doc.els.length, x:4, y:33, size:3, font:'Arial', time:{fmt:'HHmm', sep:'Colon(:)', use:'Coder Time', ttype:'Current Time', lang:'English'}};
+  if (k === 'bc1' || k === 'bc2') el = {id, kind:'barcode', name:'EAN13_'+doc.els.length, x:28, y:30, size:2, bc:{sym:'EAN13', data:'5000000000000', type:'Fixed Text', mergeKey:'', mag:62.5, height:6, hr:true, autoCheck:true, guard:true, quiet:false}};
+  if (!el){ HX.toast('That toolbox item is not simulated yet (not enough photos).'); return; }
+  doc.els.push(el); ui.sel = id; CS().dirty = true; openProps(id);
+}
+HX.winApps.cs = {
+  title(){ const c = CS(); return 'CLARiSOFT' + (c.path ? ' - ' + winPath(c.path) + (c.dirty?'*':'') : ''); },
+  short:'CLARiSOFT', x:0, y:0, w:1280, h:756, iconHtml:'<b style="color:#e8873e">✣</b>',
+  launch(){ if (CS().running) HX.desk.open('cs'); else launch(); },
+  onClose(){ CS().running = false; ui.menu = null; ui.dlg = null; },
+  html,
+  noteKey(){ if (ui.dlg && ui.dlg.kind === 'props') return ui.adb ? 'cs-adb' : 'cs-'+ui.dlg.draft.kind; return 'cs'; },
+  click(a, t){
+    const c = CS();
+    if (a !== 'cs-menu') ui.menu = null;
+    switch(a){
+      case 'cs-menu': ui.menu = ui.menu === t.dataset.m ? null : t.dataset.m; break;
+      case 'cs-msg': {
+        const m = ui.msg, v = t.dataset.v; ui.msg = null;
+        if (m.then === 'quit'){ HX.desk.close('cs'); return; }
+        if (m.then === 'open'){ if (v === 'Yes') save(); if (v !== 'Cancel'){ c.dirty = false; openFile(m.path); return; } }
+        if (m.then === 'exit'){ if (v === 'Yes') save(); if (v !== 'Cancel'){ c.dirty = false; c.doc = null; c.path = null; HX.desk.close('cs'); HX.emit('cs'); return; } }
+        break;
+      }
+      case 'cs-new': c.doc = HX.baseJob('NEWJOB', {price:''}); c.doc.els = []; c.path = null; c.dirty = true; ui.sel = null; break;
+      case 'cs-open': ui.dlg = {kind:'open'}; break;
+      case 'cs-of': ui.dlg.pick = t.dataset.p; { const now = Date.now(); if (ui.lastOf && ui.lastOf.p === ui.dlg.pick && now - ui.lastOf.t < 450){ ui.dlg = null; openFile(t.dataset.p); return; } ui.lastOf = {p:ui.dlg.pick, t:now}; } break;
+      case 'cs-of-go': { const p = ui.dlg.pick; ui.dlg = null; openFile(p); return; }
+      case 'cs-save': save(); HX.emit('cs'); return;
+      case 'cs-saveas': ui.dlg = {kind:'saveas', name:c.doc ? c.doc.name : ''}; break;
+      case 'cs-saveas-go': { const n = (ui.dlg.name||'').trim(); if (!n){ HX.toast('Type a job name.'); return; } ui.dlg = null; save(n); HX.emit('cs'); return; }
+      case 'cs-close': c.doc = null; c.path = null; c.dirty = false; ui.sel = null; break;
+      case 'cs-exit': if (c.dirty){ ui.msg = {title:'CLARiSOFT', icon:'❓', text:'Save changes before closing?', btns:['Yes','No','Cancel'], then:'exit'}; break; } HX.desk.close('cs'); HX.emit('cs'); return;
+      case 'cs-props': if (ui.sel) openProps(ui.sel); else HX.toast('Select a field first.'); break;
+      case 'cs-del': if (ui.sel && c.doc){ c.doc.els = c.doc.els.filter(e => e.id !== ui.sel); ui.sel = null; c.dirty = true; } break;
+      case 'cs-z+': ui.zoom = Math.min(600, ui.zoom === 200 ? 300 : ui.zoom === 300 ? 450 : 600); break;
+      case 'cs-z-': ui.zoom = Math.max(200, ui.zoom === 600 ? 450 : ui.zoom === 450 ? 300 : 200); break;
+      case 'cs-na': HX.toast('Not simulated.'); return;
+      case 'cs-about': ui.msg = {title:'About CLARiSOFT', icon:'ℹ', text:'CLARiSOFT — Generic Image Design Software. Jobs are saved in CIFF (coder-independent file format). Version number: not yet photographed.', btns:['OK']}; break;
+      case 'cs-add': addField(t.dataset.k); break;
+      case 'cs-tab': ui.dlg.tab = t.dataset.t; break;
+      case 'cs-dlg-x': ui.dlg = null; ui.adb = null; break;
+      case 'cs-apply': applyDraft(); HX.emit('cs'); return;
+      case 'cs-ok': applyDraft(); ui.dlg = null; ui.adb = null; HX.emit('cs'); return;
+      case 'cs-intl': HX.toast('International Data: not simulated.'); return;
+      case 'cs-tadv': HX.toast('Advanced time builder: not photographed.'); return;
+      case 'cs-merge': HX.toast('Merge... picks the merge source. Not photographed.'); return;
+      case 'cs-adb': ui.adb = {parts:[...ui.dlg.draft.date.parts], av:null, si:null}; HX.done('cs-adb'); break;
+      case 'adb-av': ui.adb.av = t.dataset.n; break;
+      case 'adb-sp': ui.adb.si = +t.dataset.i; break;
+      case 'adb-add': if (ui.adb.av) ui.adb.parts.push(ui.adb.av); break;
+      case 'adb-rem': if (ui.adb.si != null){ ui.adb.parts.splice(ui.adb.si,1); ui.adb.si = null; } break;
+      case 'adb-up': { const i = ui.adb.si; if (i > 0){ const p = ui.adb.parts; [p[i-1],p[i]] = [p[i],p[i-1]]; ui.adb.si = i-1; } break; }
+      case 'adb-dn': { const i = ui.adb.si, p = ui.adb.parts; if (i != null && i < p.length-1){ [p[i+1],p[i]] = [p[i],p[i+1]]; ui.adb.si = i+1; } break; }
+      case 'adb-cst': if (ui.adb.cst) ui.adb.parts.push('"'+ui.adb.cst+'"'); break;
+      case 'adb-ok': ui.dlg.draft.date.parts = ui.adb.parts; ui.dlg.draft.date.fmt = 'User Defined'; ui.adb = null; break;
+      case 'adb-x': ui.adb = null; break;
+    }
+    HX.desk.rerenderBody('cs'); HX.desk.render(); HX.app && HX.app.side();
+  },
+  change(t){
+    if (t.dataset.q === 'zoom'){ ui.zoom = +t.value; setTimeout(()=>HX.desk.rerenderBody('cs'),0); return; }
+    if (t.dataset.q === 'const'){ ui.adb.cst = t.value; return; }
+    if (t.dataset.q === 'saveas'){ ui.dlg.name = t.value; return; }
+    if (t.dataset.p && ui.dlg && ui.dlg.draft){
+      const k = t.dataset.p; if (/^x\d?$|_$/.test(k)) return;
+      let v = t.type === 'checkbox' ? t.checked : t.value;
+      if (k === 'printed') v = t.value === 'yes';
+      if (k === 'orient') v = +v;
+      setPath(ui.dlg.draft, k, v);
+      setTimeout(()=>{ HX.desk.rerenderBody('cs'); }, 0);
+    }
+  },
+  down(e){
+    const h = e.target.closest('.cs-el'); if (!h || !CS().doc || ui.dlg) return;
+    const id = h.dataset.el, el = CS().doc.els.find(x => x.id === id);
+    const now = Date.now();
+    if (ui.lastDown && ui.lastDown.id === id && now - ui.lastDown.t < 450){ ui.lastDown = null; openProps(id); HX.desk.rerenderBody('cs'); HX.app && HX.app.side(); e.preventDefault(); return; }
+    ui.lastDown = {id, t:now};
+    ui.sel = id;
+    const k = (document.getElementById('pcFit')._k || 1) * ppm();
+    ui.dragging = {id, sx:e.clientX, sy:e.clientY, ox:el.x, oy:el.y, k, moved:false};
+    e.preventDefault();
+    redrawCanvas();
+  },
+  move(e){
+    const d = ui.dragging; if (!d) return;
+    const el = CS().doc.els.find(x => x.id === d.id); if (!el) return;
+    const nx = Math.round((d.ox + (e.clientX-d.sx)/d.k)*100)/100, ny = Math.round((d.oy + (e.clientY-d.sy)/d.k)*100)/100;
+    if (Math.abs(nx-d.ox) + Math.abs(ny-d.oy) > 0.05){ d.moved = true; el.x = nx; el.y = ny; redrawCanvas(); }
+  },
+  up(){
+    const d = ui.dragging; ui.dragging = null; if (!d) return;
+    if (d.moved){ CS().dirty = true; HX.log('CLARiSOFT', 'Field moved'); HX.emit('cs'); }
+    else { HX.desk.rerenderBody('cs'); HX.app && HX.app.side(); }
+  }
+};
+function redrawCanvas(){ const w = document.getElementById('csWork'); if (w){ const st = w.scrollTop, sl = w.scrollLeft; w.innerHTML = canvasHtml(); w.scrollTop = st; w.scrollLeft = sl; } }
+
+/* ---------- notes ---------- */
+HX.note('cs', {title:'CLARiSOFT designer', tag:'photo', lines:[
+  'Title: <b>CLARiSOFT - F:\\JOBS\\ASDAPRICE UPDATE 2026\\ASDALARGE.ciff</b>. An asterisk (*) means there are unsaved changes, as in photo 14.',
+  'Toolbox: Text, Time, Date, Counter, Price, Secondary Barcode, Primary Barcode, Logo, Drawing, Text Block, Rich Text Block. Zoom <b>450%</b>, printer <b>Zodiac Hawk(53mm)</b>, "Default".',
+  'Job ASDALARGE: cook time <b>1hr 46mins</b>, <b>GB 2037</b> health mark, <b>L1 6311 13:55 HDV</b>, EAN-13 <b>5057172354801</b>, <b>23 SEP</b>, <b>2,148kg</b> and <b>5.22</b>.',
+  'Vendor: CLARiSOFT saves designs in <b>CIFF</b> (coder-independent file format). Designs reach the printer by print-to-file (USB), RS232/TCP-IP or CLARiNET.',
+  HX.tag('inf')+'"1hr 46mins", "23 SEP" and "2,148kg" are <b>merge fields</b> that Ishida fills for each pack. The preview date 23 SEP is not today\'s date, so it must be sample data.',
+  'Click a field to select it, drag to move it, and double-click to open its properties.'
+]});
+HX.note('cs-text', {title:'Text Properties', tag:'photo', lines:[
+  'Tabs: Text, Font, General. On the Text tab: Preview, Type, Maximum Number of Characters, Fixed Length, Default Text, International Data, Justification, Pad Character, User Entered Data (Characters Allowed, Prompt Message, Prompt Value: Default Value / Blank / Last Value, Prompt at Coder), Database, Checksum Calculation.',
+  '<b>5.22</b>: Fixed Text, 4 characters, Left Justified. <b>L1</b>: <b>Line Reference</b>, 2 characters, Prompt at Coder. <b>HDV</b>: Fixed Text, 3 characters, Prompt at Coder.',
+  HX.tag('inf')+'"Prompt at Coder" means the ICE printer asks the operator to confirm this value when the job is loaded. With "Default Value", L1 is offered every time. That is why Line 4 packs can come out as "L1" if nobody types L4 (photo 18 shows L4 printed).',
+  HX.tag('ass')+'The "Merge field" picker is a trainer stand-in. How CLARiSOFT names merge fields was not photographed.'
+]});
+HX.note('cs-date', {title:'Date Properties', tag:'photo', lines:[
+  'Preview <b>6311</b>. Date Format <b>User Defined</b>, Separator None, <b>Coder Date</b>, Date Type <b>Current Date</b>, Language English. Calculation to Use is empty.',
+  'General tab: Field Name <b>JulianDate</b>, X <b>6.83</b>, Y <b>16.67</b>, Width 4.58, Height 2.50 mm, Orientation 0, Printed, CLARiNET Logged Field = Field Not Logged, Encrypted Field = NONE.',
+  '<b>Coder Date</b> means the date comes from the ICE printer\'s own clock, not the PC. If the printer clock is wrong, the code is wrong.'
+]});
+HX.note('cs-adb', {title:'Advanced Date Builder', tag:'photo', lines:[
+  'Selected formats: <b>y (2010 = 0)</b> then <b>JulDayZ(060)</b>.',
+  '<b>y (2010 = 0)</b> is the last digit of the year, so 2026 → <b>6</b>. <b>JulDayZ(060)</b> is the day of the year as 3 digits, so 7 Nov 2026 → <b>311</b>. Together: <b>6311</b>. The printed pack shows 6310 (6 Nov).',
+  'The available list in the photo starts: d, Day of Month Code, Day of Week Code, DayOfWeek(1-7), DayOfWeek(A-G), dd, DDD, ddd …',
+  HX.tag('ass')+'The rest of the available list is assumed.'
+]});
+HX.note('cs-time', {title:'Time Properties', tag:'photo', lines:['Preview 13:56, Format HHmm, Separator <b>Colon(:)</b>, <b>Coder Time</b>, Time Type Current Time, Language English.']});
+HX.note('cs-barcode', {title:'EAN13 Properties', tag:'photo', lines:[
+  'Barcode Data <b>5057172354801</b>, Type <b>Fixed Text</b> (options: Fixed Text / Merge Field / CLARiSOFT Database), Magnification(%) <b>75.7</b>, Barcode Height <b>10.75</b>.',
+  'Display Human Readable Text ✔, Automatically calculate Check Digit ✘, Guard Bars ✔, Quiet Margins ✘.',
+  'The trainer draws a real EAN-13. 75.7% of the 0.33 mm module is about 0.25 mm per bar, so the code is about 24 mm wide.',
+  HX.tag('inf')+'With auto check digit off, a mistyped number prints a barcode with a wrong check digit. The trainer warns you about it in the designer.'
+]});
+HX.note('cs-logo', {title:'Health mark (logo)', tag:'ass', lines:['The GB 2037 oval is drawn as a simple logo. Its properties dialog was not photographed.']});
+HX.note('cs-line', {title:'Rule line', tag:'ass', lines:['The line above the barcode is drawn as a Drawing field. Its properties were not photographed.']});
+})();
+
+
+/* ---- p6-line.js ---- */
+/* ===== p6-line.js — Ishida WPL (weigh price labeller) on Line 4 — machine screen (assumed layout) ===== */
+(function(){
+'use strict';
+const S = () => HX.s, esc = HX.esc;
+const L4 = () => S().lines.L4;
+let wrap, root, tray, pick = null;
+
+function msg(t){ const L = L4(); L.msgs.unshift(new Date().toTimeString().slice(0,8)+'  '+t); L.msgs.length = Math.min(L.msgs.length, 40); }
+HX.line = {
+  select(plu){
+    const L = L4();
+    if (!L.products[plu]){ msg(`PLU ${plu} not found on this machine — send it from CommsBridge first.`); HX.log('Line 4', `PLU ${plu} not found`); return; }
+    L.current = +plu; L.snap = HX.clone(L.products[plu]); L.packs = 0; L.rejects = 0; L.last = null;
+    msg(`Product ${plu} selected: ${L.snap.name}`); HX.log('Line 4', `Product ${plu} selected`);
+    HX.done('ln-select');
+    if (L.snap.extPrinter === 'In use'){
+      const r = HX.hawk.selectJob(L.snap.extJob, 'Line 4');
+      msg(r.ok ? `External printer: job "${L.snap.extJob}" selected${r.prompt?' — waiting for operator to confirm prompts at the printer':''}.` : `External printer: ${r.why}`);
+    } else msg('External printer not in use for this product (Ishida printers would be used).');
+  },
+  feed(kind){
+    const L = L4();
+    if (!L.running){ msg('Machine is stopped. Press Start.'); return; }
+    if (!L.snap){ msg('No product selected.'); return; }
+    const p = L.snap;
+    let g;
+    const lo = p.lower || 1000, hi = p.upper || 2000;
+    if (kind === 'heavy') g = hi + 40 + Math.round(Math.random()*120);
+    else g = lo + Math.round(Math.random()*(hi-lo));
+    const okW = p.prodMode !== 'Catch-weight' || (g >= p.lower && g <= p.upper);
+    L.last = {g, ok:okW};
+    if (!okW){ L.rejects++; msg(`Pack ${(g/1000).toFixed(3)} kg outside ${p.lower}–${p.upper} g — REJECTED, no label.`); HX.done('ln-reject'); HX.emit('line'); return; }
+    L.packs++;
+    if (p.extPrinter === 'In use'){
+      const merge = HX.buildMerge(p, g, new Date());
+      const r = HX.hawk.print(merge, {line:'Line 4', plu:p.plu});
+      if (r.ok){ msg(`Pack ${(g/1000).toFixed(3)} kg OK → labelled by ICE printer (use-by ${merge.USEBY}, cook ${merge.COOKTIME}).`); HX.done('ln-label'); }
+      else msg(`Pack ${(g/1000).toFixed(3)} kg OK but NOT labelled: ${r.why}`);
+    } else msg(`Pack ${(g/1000).toFixed(3)} kg OK (external printer not in use).`);
+    HX.emit('line');
+  },
+  test(){
+    const L = L4(); if (!L.snap){ msg('No product selected.'); return; }
+    const merge = HX.buildMerge(L.snap, 0, new Date());
+    const r = HX.hawk.print(merge, {line:'Line 4', plu:L.snap.plu, test:true});
+    msg(r.ok ? 'Test label sent with no weight (0,000kg).' : 'Test label not printed: ' + r.why);
+    if (r.ok) HX.done('ln-test');
+    HX.emit('line');
+  }
+};
+function html(){
+  const L = L4(), p = L.snap, hk = S().hawk;
+  const prods = Object.values(L.products).sort((a,b)=>a.plu-b.plu);
+  const pend = L.current && HX.productPending('L4', L.current);
+  const changedSinceSelect = L.current && L.products[L.current] && JSON.stringify(L.products[L.current]) !== JSON.stringify(L.snap);
+  const w = L.last ? (L.last.g/1000).toFixed(3) : '0.000';
+  const hkState = !hk.running ? 'Stopped' : hk.faults.some(f=>f.sev==='f') ? 'Fault' : hk.pendingPrompt ? 'Waiting for prompts' : 'Running';
+  return `<div class="wl"><div class="wl-top">ISHIDA WPL — Line 4 <span style="font-weight:400">(machine screen, assumed layout)</span><span class="md">${L.running?'● RUNNING':'■ STOPPED'}</span></div>
+   <div class="wl-l">
+     <div class="wl-box"><div class="wl-wt">${w} kg</div>
+       <div class="wl-j ${!L.last?'idle':L.last.ok?'ok':'rej'}" style="margin-top:8px">${!L.last?'—':L.last.ok?'ACCEPT':'REJECT'}</div></div>
+     <div class="wl-box" style="margin-top:10px"><div class="wl-kv">
+       <div>PLU</div><div><b>${p?p.plu:'—'}</b> ${p?esc(p.name):''}</div>
+       <div>Production mode</div><div>${p?esc(p.prodMode):'—'} ${p&&p.prodMode==='Catch-weight'?`(${p.lower}–${p.upper} g)`:''}</div>
+       <div>External printer</div><div>${p?esc(p.extPrinter):'—'}</div>
+       <div>Job name</div><div>${p?esc(p.extJob||'—'):'—'}</div>
+       <div>Use-by</div><div>${p?(p.useByDate==='Add days'?`pack date + ${p.useByDays} days`:esc(p.useByDate)):'—'}</div>
+       <div>Cook time</div><div>${p?`${p.cookFixed} min + ${p.cookPerKg} min/kg`:'—'}</div>
+       <div>Packs / rejects</div><div>${L.packs} / ${L.rejects}</div></div>
+       ${changedSinceSelect?'<div style="color:#a35a00;margin-top:6px">⚠ New product data received — reselect the product to use it.</div>':''}
+       ${pend?'<div style="color:#a35a00;margin-top:6px">⚠ CommsBridge has unsent changes for this product.</div>':''}</div>
+     <div class="wl-btns" style="margin-top:10px">
+       <button class="go" data-a="ln-start">Start</button><button class="st" data-a="ln-stop">Stop</button>
+       <button data-a="ln-feed">Feed pack</button><button data-a="ln-heavy">Feed heavy pack</button><button data-a="ln-test" title="Assumed">Test label</button></div>
+   </div>
+   <div class="wl-r">
+     <div class="wl-box"><b>Product select</b> <span class="it-small">(products on this machine)</span>
+       <select class="wl-sel" data-a="ln-pick" style="margin-top:6px">${prods.map(x=>`<option value="${x.plu}" ${(pick??L.current)==x.plu?'selected':''}>${x.plu} — ${esc(x.name)}</option>`).join('')}</select>
+       <div class="wl-btns" style="margin-top:8px"><button data-a="ln-select">Select product</button></div></div>
+     <div class="wl-box"><b>External printer (ICE Zodiac Hawk)</b><div class="wl-kv" style="margin-top:4px">
+       <div>Status</div><div>${hkState}</div><div>Current job</div><div>${esc(hk.current||'—')}</div><div>Ribbon</div><div>${Math.max(0,Math.round(hk.ribbon))} m</div></div></div>
+     <div class="wl-box" style="flex:1;min-height:0;overflow:hidden"><b>Messages</b><div class="wl-msg">${L.msgs.map(m=>`<div>${esc(m)}</div>`).join('')||'<div class="it-small">No messages yet.</div>'}</div></div>
+   </div></div>`;
+}
+HX.labelsTray = function(n){
+  const ls = S().labels.slice(0, n||3);
+  if (!ls.length) return '<p class="it-small">No labels printed yet.</p>';
+  return `<div class="it-labels">${ls.map(r=>`<div class="lab">${HX.printedLabelSVG(r)}${r.test?'<div class="it-small">Test label</div>':''}</div>`).join('')}</div>`;
+};
+HX.note('line', {title:'Ishida WPL — Line 4 machine screen', tag:'ass', lines:[
+  'The line\'s own touchscreen was <b>not photographed</b>, so this layout is a trainer design. It shows how a product on the line drives the ICE printer.',
+  'Vendor: the Ishida WPL-AI weighs each pack and can run up to two upper and two under printers. CommsBridge sends products and orders to it.',
+  HX.tag('inf')+'When a product with <b>External printer = In use</b> is selected, the line tells the ICE printer which job to load (the "External printer job name"). For every good pack it then sends the weight, cook time and use-by date as merge data.',
+  HX.tag('inf')+'The real label in photo 18 shows <b>0,000kg</b> and <b>0hr 00mins</b> but a valid use-by (13 NOV). That fits a label printed with <b>no weight</b>. Use "Test label" to reproduce it.',
+  'Packs outside the catch-weight limits (2000–2300 g for PLU 3024) are rejected and get no label.'
+]});
+HX.tasks.line = [
+  {id:'ln-select', text:'Select a product on Line 4'},
+  {id:'ln-label', text:'Run a good pack and get an ICE label'},
+  {id:'ln-reject', text:'Feed a heavy pack and see it rejected'},
+  {id:'ln-test', text:'Print a test label (no weight) and compare it with photo 18'}
+];
+HX.apps.push({
+  id:'line', label:'Line 4 WPL',
+  mount(col){
+    col.innerHTML = `<div class="it-stagewrap"><div class="it-fit" id="lnFit"><div class="it-scaled" id="lnRoot"></div></div></div>
+      <div class="it-card" style="margin-top:12px"><h3>Printed labels (latest first)</h3><div id="lnTray"></div></div>`;
+    wrap = col.querySelector('#lnFit'); root = col.querySelector('#lnRoot'); tray = col.querySelector('#lnTray');
+    root.addEventListener('click', e => {
+      const t = e.target.closest('[data-a]'); if (!t) return;
+      const a = t.dataset.a, L = L4();
+      if (a === 'ln-start'){ L.running = true; msg('Started.'); HX.log('Line 4','Started'); HX.emit('line'); }
+      else if (a === 'ln-stop'){ L.running = false; msg('Stopped.'); HX.log('Line 4','Stopped'); HX.emit('line'); }
+      else if (a === 'ln-select'){ HX.line.select(pick ?? (root.querySelector('[data-a="ln-pick"]').value)); pick = null; HX.emit('line'); }
+      else if (a === 'ln-feed') HX.line.feed('normal');
+      else if (a === 'ln-heavy') HX.line.feed('heavy');
+      else if (a === 'ln-test') HX.line.test();
+    });
+    root.addEventListener('change', e => { if (e.target.dataset.a === 'ln-pick') pick = +e.target.value; });
+  },
+  fit(){ HX.fit(wrap, 1024, 600); },
+  render(){ root.innerHTML = html(); tray.innerHTML = HX.labelsTray(3); },
+  noteKey(){ return 'line'; },
+  dot(){ const L = L4(); return L.current && HX.productPending('L4', L.current) ? 'amber' : 'ok'; }
+});
+})();
+
+
+/* ---- p7-hawk.js ---- */
+/* ===== p7-hawk.js — ICE Zodiac Hawk 53 mm thermal transfer overprinter, CLARiTY touchscreen (assumed layout from the manual) ===== */
+(function(){
+'use strict';
+const S = () => HX.s, esc = HX.esc;
+const H = () => S().hawk;
+const ui = { view:'home', pickJob:null, draft:null, faultSel:null, dbSel:null };
+let wrap, root, tray;
+
+function hasPrompts(job){ return job.els.some(e => e.kind === 'text' && e.text.atCoder && e.text.type !== 'Merge Field'); }
+function fault(code, text, sev){ const h = H(); if (!h.faults.some(f => f.code === code)) h.faults.push({code, text, sev}); HX.log('ICE Hawk', (sev==='f'?'FAULT: ':'Warning: ') + text); if (sev === 'f') h.running = false; }
+function promptDefaults(job){
+  const h = H(), last = h.prompts[job.name] || {}, o = {};
+  job.els.forEach(e => { if (e.kind === 'text' && e.text.atCoder && e.text.type !== 'Merge Field'){
+    o[e.id] = e.text.promptVal === 'Blank' ? '' : e.text.promptVal === 'Last Value' && last[e.id] != null ? last[e.id] : e.text.value; } });
+  return o;
+}
+HX.hawk = {
+  selectJob(name, by){
+    const h = H();
+    if (!name){ return {ok:false, why:'no job name set in the product (External printer job name is empty).'}; }
+    if (!h.db[name]){ fault('JOBNF', `Job not found: "${name}"`, 'w'); HX.emit('hawk'); return {ok:false, why:`job "${name}" is not in the printer's database (Job not found).`}; }
+    h.current = name; h.faults = h.faults.filter(f => f.code !== 'JOBNF');
+    const job = h.db[name];
+    h.pendingPrompt = hasPrompts(job);
+    if (h.pendingPrompt){ ui.view = 'prompt'; ui.draft = promptDefaults(job); }
+    else h.prompts[name] = {};
+    HX.log('ICE Hawk', `Job "${name}" selected by ${by}`);
+    if (by === 'operator') HX.done('hk-job');
+    HX.emit('hawk');
+    return {ok:true, prompt:h.pendingPrompt};
+  },
+  print(merge, meta){
+    const h = H();
+    if (!h.current) return {ok:false, why:'the ICE printer has no job loaded.'};
+    if (h.faults.some(f => f.sev === 'f')) return {ok:false, why:'the ICE printer has a fault ('+h.faults.find(f=>f.sev==='f').text+').'};
+    if (!meta.manual && !h.running) return {ok:false, why:'the ICE printer is stopped (press Start on the printer).'};
+    if (h.pendingPrompt) return {ok:false, why:'the ICE printer is waiting for the operator to confirm the prompted fields.'};
+    const job = h.db[h.current];
+    if (!job) return {ok:false, why:'job missing from the database.'};
+    const rec = {t:HX.hawkNow().getTime(), job:HX.clone(job), merge:HX.clone(merge), prompts:HX.clone(h.prompts[h.current]||{}), line:meta.line, plu:meta.plu, test:!!meta.test};
+    S().labels.unshift(rec); S().labels.length = Math.min(S().labels.length, 30);
+    h.printed++; h.lastLabel = rec;
+    h.ribbon -= 0.08;
+    if (h.ribbon <= 0){ h.ribbon = 0; fault('RIB', 'Ribbon Break', 'f'); }
+    HX.emit('print', rec);
+    return {ok:true};
+  },
+  importUSB(){
+    const h = H();
+    if (S().usb.pen !== 'hawk') return {ok:false, why:'No USB memory device in the printer.'};
+    let n = 0, changed = [];
+    Object.values(S().pen).forEach(j => { const c = HX.clone(j); delete c._saved; const before = h.db[j.name] ? JSON.stringify(h.db[j.name]) : ''; h.db[j.name] = c; if (before !== JSON.stringify(c)){ n++; changed.push(j.name); } });
+    HX.log('ICE Hawk', `Job database loaded from USB: ${n} job(s) new or changed` + (changed.length ? ' (' + changed.slice(0,4).join(', ') + (changed.length>4?'…':'') + ')' : ''));
+    HX.done('hk-import');
+    return {ok:true, n, changed};
+  }
+};
+/* keep the printer's database matching what printing uses */
+HX.on(t => { if (t === 'reset'){ ui.view = 'home'; ui.draft = null; } });
+
+function previewSVG(job, merge){
+  const ctx = {mode:'print', merge:merge || {COOKTIME:'0hr 00mins', WEIGHT:'0,000kg', USEBY:'', SELLBY:'', PRICE:''}, prompts:H().prompts[job.name] || {}, date:HX.hawkNow()};
+  return `<svg viewBox="0 0 ${job.w} ${job.h}" width="${job.w*7}" height="${job.h*7}" xmlns="http://www.w3.org/2000/svg" style="background:#fff">${HX.renderJobSVG(job, ctx, {warnCheck:false})}</svg>`;
+}
+function main(){
+  const h = H();
+  const job = h.current && h.db[h.current];
+  switch(ui.view){
+    case 'home': return `<div class="hk-h">Current job</div>${job ? `<div class="hk-prev">${previewSVG(job, h.lastLabel && h.lastLabel.job.name===job.name ? h.lastLabel.merge : null)}</div>
+        <p style="font-size:14px">Job <b>${esc(job.name)}</b> · printed ${h.printed} · mode ${esc(h.mode)}${h.pendingPrompt?' · <b style="color:#c43a3a">prompts not confirmed</b>':''}</p>` : '<p style="font-size:16px">No job selected. Touch <b>Job</b>, or select a product on the Ishida line.</p>'}`;
+    case 'job': {
+      const names = Object.keys(h.db).sort();
+      return `<div class="hk-h">Select job</div><div class="hk-list">${names.map(n=>`<div data-a="hk-pick" data-n="${esc(n)}" class="${ui.pickJob===n?'on':''}">${esc(n)}</div>`).join('')}</div>
+        <div class="hk-row"><button class="hk-btn ok" data-a="hk-job-ok" ${ui.pickJob?'':'disabled'}>ok</button><button class="hk-btn alt" data-a="hk-home">Cancel</button></div>`;
+    }
+    case 'prompt': {
+      if (!job) { ui.view = 'home'; return main(); }
+      const flds = job.els.filter(e => e.kind === 'text' && e.text.atCoder && e.text.type !== 'Merge Field');
+      return `<div class="hk-h">Job "${esc(job.name)}" — enter variable fields</div>
+        ${flds.map(e=>`<div class="hk-row"><div style="width:220px;font-size:15px">${esc(e.text.promptMsg || e.name)} <span class="it-small">(${esc(e.text.type)}, max ${e.text.maxChars})</span></div>
+          <input class="hk-in" data-pf="${e.id}" maxlength="${e.text.maxChars||20}" value="${esc(ui.draft[e.id] ?? '')}"></div>`).join('')}
+        <div class="hk-row"><button class="hk-btn ok" data-a="hk-prompt-ok">Confirm and make current</button></div>
+        <p class="it-small">Prompt Value in CLARiSOFT decides what is offered: Default Value (the designed text), Blank, or Last Value.</p>`;
+    }
+    case 'status': return `<div class="hk-h">Machine Status</div><div class="hk-kv">
+        <div>State</div><div>${h.running?'Running':'Stopped'}</div><div>Current job</div><div>${esc(h.current||'—')}</div><div>Prints this session</div><div>${h.printed}</div>
+        <div>Ribbon remaining</div><div>${Math.round(h.ribbon)} m of 1200 m</div><div>Printer clock</div><div>${HX.hawkNow().toLocaleString('en-GB')}</div>
+        <div>Host (Ishida Line 4)</div><div>Connected ${HX.tag('inf')}</div><div>USB memory device</div><div>${S().usb.pen==='hawk'?'Present (pen drive)':'None'}</div>
+        <div>Jobs in database</div><div>${Object.keys(h.db).length}${HX.hawkPendingCount()?` · <b style="color:#c98a10">${HX.hawkPendingCount()} newer on the pen drive</b>`:''}</div></div>`;
+    case 'details': return job ? `<div class="hk-h">Current Job Details — ${esc(job.name)}</div><div class="hk-kv">${job.els.filter(e=>e.kind!=='line'&&e.kind!=='logo').map(e=>`<div>${esc(e.name)}</div><div>${esc(e.kind==='text'?e.text.type:e.kind==='date'?'Date ('+e.date.use+')':e.kind==='time'?'Time ('+e.time.use+')':'EAN13')} → <b>${esc(HX.elValue(e,{mode:'print',merge:h.lastLabel?h.lastLabel.merge:{},prompts:h.prompts[job.name]||{},date:HX.hawkNow()}))}</b></div>`).join('')}</div>` : '<p>No job.</p>';
+    case 'tools': return `<div class="hk-h">Tools</div>
+        <button class="hk-tile" data-a="hk-v" data-v="setup-control">Setup<br><small>Control</small></button><button class="hk-tile" data-a="hk-v" data-v="setup-head">Setup<br><small>Printhead</small></button>
+        <button class="hk-tile" data-a="hk-v" data-v="setup-cons">Setup<br><small>Consumables</small></button><button class="hk-tile" data-a="hk-v" data-v="db">Database</button>
+        <button class="hk-tile" data-a="hk-v" data-v="diag">Diagnostics</button>`;
+    case 'setup-control': { const d = HX.hawkNow(); return `<div class="hk-h">Tools › Setup › Control › Date and Time</div>
+        <p style="font-size:15px">Printer clock: <b>${d.toLocaleString('en-GB')}</b>${h.clockOffsetMin?` <span style="color:#c43a3a">(${h.clockOffsetMin>0?'+':''}${Math.round(h.clockOffsetMin/60*10)/10} h from real time)</span>`:''}</p>
+        <div class="hk-row"><button class="hk-btn" data-a="hk-clk" data-d="-1440">−1 day</button><button class="hk-btn" data-a="hk-clk" data-d="-60">−1 hour</button><button class="hk-btn" data-a="hk-clk" data-d="60">+1 hour</button><button class="hk-btn" data-a="hk-clk" data-d="1440">+1 day</button><button class="hk-btn ok" data-a="hk-clk0">Set to real time</button></div>
+        <p class="it-small">"Coder Date" and "Coder Time" fields on the label come from this clock.</p>`; }
+    case 'setup-head': return `<div class="hk-h">Tools › Setup › Printhead</div><div class="hk-kv">
+        <div>Print darkness</div><div><select data-hs="darkness">${['Light','Normal','Dark'].map(o=>`<option ${h.darkness===o?'selected':''}>${o}</option>`).join('')}</select></div>
+        <div>Print speed (mm/s)</div><div><select data-hs="printSpeed">${[100,200,300,500,800].map(o=>`<option ${h.printSpeed==o?'selected':''}>${o}</option>`).join('')}</select></div>
+        <div>Print delay (ms)</div><div><select data-hs="printDelay">${[0,10,20,50].map(o=>`<option ${h.printDelay==o?'selected':''}>${o}</option>`).join('')}</select></div>
+        <div>Mode</div><div><select data-hs="mode">${['Intermittent','Continuous'].map(o=>`<option ${h.mode===o?'selected':''}>${o}</option>`).join('')}</select></div></div>
+        <p class="it-small">Names from the Zodiac manual; values are illustrative.</p>`;
+    case 'setup-cons': return `<div class="hk-h">Tools › Setup › Consumables</div><div class="hk-kv">
+        <div>Ribbon Width (mm)</div><div><select data-hs="ribbonWidth">${[20,25,30,33,40,45,50,55].map(o=>`<option ${h.ribbonWidth==o?'selected':''}>${o}</option>`).join('')}</select></div>
+        <div>Ribbon remaining</div><div>${Math.round(h.ribbon)} m</div></div>
+        <p class="it-small">The manual warns that a wrong Ribbon Width can cause a false "Ribbon Break". Ribbon width range for the 53 mm head: 20–55 mm.</p>`;
+    case 'db': {
+      const names = Object.keys(h.db).sort();
+      return `<div class="hk-h">Tools › Database</div>
+        <div class="hk-row"><button class="hk-btn ok" data-a="hk-import">Load jobs from USB</button><span style="font-size:14px">${S().usb.pen==='hawk'?'USB memory device present':'No USB device — bring the pen drive'}</span>
+        ${HX.hawkPendingCount()&&S().usb.pen==='hawk'?`<b style="color:#c98a10">${HX.hawkPendingCount()} job(s) on USB are newer</b>`:''}</div>
+        <div style="display:flex;gap:12px"><div class="hk-list" style="width:330px;max-height:230px">${names.map(n=>`<div data-a="hk-dbsel" data-n="${esc(n)}" class="${ui.dbSel===n?'on':''}">${esc(n)}${HX.jobPending(n)?' •':''}</div>`).join('')}</div>
+        <div>${ui.dbSel && h.db[ui.dbSel] ? `<div class="hk-prev">${previewSVG(h.db[ui.dbSel])}</div><div class="hk-row"><button class="hk-btn alt" data-a="hk-dbdel">Delete</button></div>` : '<p class="it-small">Select a job to preview.</p>'}</div></div>`;
+    }
+    case 'diag': return `<div class="hk-h">Tools › Diagnostics</div><div class="hk-kv"><div>Printer</div><div>ICE Zodiac Hawk 53 mm</div><div>Printhead</div><div>53 mm, 300 dpi (12 dots/mm)</div><div>Serial number</div><div>•••••• (masked)</div><div>Software version</div><div>not photographed</div><div>Comms</div><div>1 × RS232, 2 × Ethernet, 2 × USB</div></div>`;
+    case 'fault': {
+      const f = h.faults[0];
+      if (!f){ ui.view = 'home'; return main(); }
+      const fix = f.code === 'RIB' ? `<p style="font-size:15px">Fit a new ribbon. The cassette holds up to 1,200 m. Thread it onto the correct spool, then touch Clear.</p><button class="hk-btn" data-a="hk-ribbon">Fit new ribbon (simulated)</button>` :
+                  f.code === 'JOBNF' ? `<p style="font-size:15px">The host asked for a job that is not in this printer's database. Check the spelling of the "External printer job name" in CommsBridge, or load the job from USB.</p>` :
+                  f.code === 'CAS' ? `<p style="font-size:15px">Close and lock the ribbon cassette.</p><button class="hk-btn" data-a="hk-cas">Lock cassette</button>` : '';
+      return `<div class="hk-h" style="color:${f.sev==='f'?'#c43a3a':'#8a6400'}">${f.sev==='f'?'Fault':'Warning'}: ${esc(f.text)}</div>${fix}
+        <div class="hk-row"><button class="hk-btn ok" data-a="hk-clear" ${f.code==='RIB'&&h.ribbon<=0?'disabled':''}${f.code==='CAS'&&!f.fixed?' disabled':''}>Clear</button></div>`;
+    }
+  }
+  return '';
+}
+function html(){
+  const h = H(), f = h.faults[0];
+  const st = h.running ? (h.pendingPrompt ? ['idle','WAITING'] : ['run','RUNNING']) : ['stop','STOPPED'];
+  const rib = Math.max(0, h.ribbon/1200*100), rc = h.ribbon < 20 ? '#d93a3a' : h.ribbon < 50 ? '#f2c94c' : '#3b7dd8';
+  return `<div class="hk"><div class="hk-top"><span class="nm">CLARiTY · Zodiac Hawk 53</span><span class="st ${st[0]}">${st[1]}</span><span style="font-size:14px">Job: <b>${esc(h.current||'—')}</b></span>
+     <span class="clk">${HX.hawkNow().toLocaleTimeString('en-GB').slice(0,5)}<br><small>${HX.hawkNow().toLocaleDateString('en-GB')}</small></span></div>
+    <div class="hk-fault ${f?f.sev:'none'}" data-a="${f?'hk-fault':''}">${f?(f.sev==='f'?'⛔ ':'⚠ ')+esc(f.text)+' — touch for details':'✔ No faults or warnings'}</div>
+    <div class="hk-body"><div class="hk-main">${main()}</div>
+      <div class="hk-nav">${[['home','Home'],['job','Job'],['status','Machine Status'],['tools','Tools'],['details','Current Job Details']].map(([v,l])=>`<button data-a="hk-v" data-v="${v}" class="${ui.view===v||(v==='tools'&&/^(setup|db|diag)/.test(ui.view))?'on':''}">${l}</button>`).join('')}</div></div>
+    <div class="hk-ctrl"><button class="start" data-a="hk-start">Start</button><button class="stop" data-a="hk-stop">Stop</button><button data-a="hk-test">Test Print</button><button data-a="hk-reg">Print Registration</button>
+      <div class="hk-ribbon">Ribbon ${Math.round(h.ribbon)} m<div class="bar"><i style="width:${rib}%;background:${rc}"></i></div></div></div></div>`;
+}
+function click(e){
+  const t = e.target.closest('[data-a]'); if (!t || !t.dataset.a) return;
+  const a = t.dataset.a, h = H();
+  switch(a){
+    case 'hk-v': ui.view = t.dataset.v; if (ui.view === 'job') ui.pickJob = h.current; if (ui.view === 'setup-control') HX.done('hk-clock'); break;
+    case 'hk-home': ui.view = 'home'; break;
+    case 'hk-pick': ui.pickJob = t.dataset.n; break;
+    case 'hk-job-ok': HX.hawk.selectJob(ui.pickJob, 'operator'); if (!h.pendingPrompt) ui.view = 'home'; break;
+    case 'hk-prompt-ok': {
+      const job = h.db[h.current]; root.querySelectorAll('[data-pf]').forEach(i => ui.draft[i.dataset.pf] = i.value);
+      h.prompts[h.current] = HX.clone(ui.draft); h.pendingPrompt = false; ui.view = 'home';
+      HX.log('ICE Hawk', 'Prompts confirmed: ' + Object.values(ui.draft).join(' / '));
+      HX.done('hk-prompt');
+      const lr = job.els.find(e => e.text && e.text.type === 'Line Reference');
+      if (lr && ui.draft[lr.id] === 'L4') HX.done('hk-l4');
+      break;
+    }
+    case 'hk-start':
+      if (h.faults.some(f => f.sev === 'f')){ HX.toast('Clear the fault first.'); return; }
+      h.running = true; HX.log('ICE Hawk','Start'); HX.done('hk-start'); break;
+    case 'hk-stop': h.running = false; HX.log('ICE Hawk','Stop'); break;
+    case 'hk-test': {
+      const r = HX.hawk.print({COOKTIME:'', WEIGHT:'', USEBY:'', SELLBY:'', PRICE:''}, {line:'ICE Test Print', plu:'—', test:true, manual:true});
+      HX.toast(r.ok ? 'Test Print sent (merge fields empty).' : 'Test Print failed: ' + r.why); break;
+    }
+    case 'hk-reg': HX.toast('Print Registration: lines up the print position on the label (not simulated).'); return;
+    case 'hk-fault': ui.view = 'fault'; break;
+    case 'hk-ribbon': h.ribbon = 1200; HX.log('ICE Hawk','New ribbon fitted (1200 m)'); break;
+    case 'hk-cas': { const f = h.faults.find(x => x.code === 'CAS'); if (f) f.fixed = true; break; }
+    case 'hk-clear': { const f = h.faults.shift(); if (f) HX.log('ICE Hawk', 'Cleared: ' + f.text); HX.done('hk-clear'); ui.view = 'home'; break; }
+    case 'hk-clk': h.clockOffsetMin += +t.dataset.d; HX.log('ICE Hawk', 'Printer clock changed'); break;
+    case 'hk-clk0': h.clockOffsetMin = 0; HX.log('ICE Hawk', 'Printer clock set to real time'); HX.done('hk-clock'); break;
+    case 'hk-import': { const r = HX.hawk.importUSB(); HX.toast(r.ok ? `Loaded from USB: ${r.n} job(s) new or changed.` : r.why); break; }
+    case 'hk-dbsel': ui.dbSel = t.dataset.n; break;
+    case 'hk-dbdel': if (ui.dbSel){ delete h.db[ui.dbSel]; if (h.current === ui.dbSel) h.current = null; HX.log('ICE Hawk', `Job "${ui.dbSel}" deleted from printer database`); ui.dbSel = null; } break;
+  }
+  HX.emit('hawk');
+}
+HX.note('hawk', {title:'ICE Zodiac Hawk — CLARiTY screen', tag:'ass', lines:[
+  'The printer\'s screen was <b>not photographed</b>. This layout is built from the Zodiac / CLARiTY manual\'s menu names: Job, Machine Status, Tools, Current Job Details, and the Start / Stop / Test Print / Print Registration control frame. Tools has Setup (Control, Printhead, Consumables), Database and Diagnostics.',
+  'Vendor: the Zodiac Hawk is a <b>53 mm, 300 dpi</b> thermal transfer overprinter. It has a 1,200 m ribbon, RS232, 2 × Ethernet and 2 × USB. It can load jobs from a USB memory device and supports "Host PC Mode".',
+  'Vendor: when a job has prompted fields, the printer asks for them, and every one must be confirmed before the job becomes current.',
+  HX.tag('inf')+'On this line the ICE unit is a large-roll labeller with the Hawk printing the variable coder block onto pre-printed labels. Ishida picks the job by name and sends the weight, cook time and use-by date for each pack.',
+  HX.tag('ass')+'"Load jobs from USB" stands for the manual\'s "download a Job database directly from a USB device". Whether this site uses USB or a network cable is still to be confirmed.'
+]});
+HX.tasks.hawk = [
+  {id:'hk-import', text:'Load jobs from USB (pen drive in the printer)'},
+  {id:'hk-job', text:'Select a job from the printer\'s Job screen'},
+  {id:'hk-prompt', text:'Confirm the prompted fields'},
+  {id:'hk-l4', text:'Set the Line Reference to L4 at the prompt'},
+  {id:'hk-start', text:'Start the printer'},
+  {id:'hk-clock', text:'Check the printer clock (Tools › Setup › Control)'},
+  {id:'hk-clear', text:'Clear a fault or warning'}
+];
+HX.apps.push({
+  id:'hawk', label:'ICE Hawk printer',
+  mount(col){
+    col.innerHTML = `<div class="it-stagewrap"><div class="it-fit" id="hkFit"><div class="it-scaled" id="hkRoot"></div></div><div id="hkStrip"></div></div>
+      <div class="it-card" style="margin-top:12px"><h3>Labels out of the ICE labeller (latest first)</h3><div id="hkTray"></div></div>`;
+    wrap = col.querySelector('#hkFit'); root = col.querySelector('#hkRoot'); tray = col.querySelector('#hkTray');
+    root.addEventListener('click', click);
+    root.addEventListener('change', e => { const k = e.target.dataset.hs; if (k){ H()[k] = isNaN(+e.target.value) ? e.target.value : +e.target.value; HX.emit('hawk'); } });
+    col.querySelector('#hkStrip').addEventListener('click', e => { const t = e.target.closest('[data-u]'); if (t) HX.usbClick(t); const c = e.target.closest('[data-cas]'); if (c){ HX.hawkFault('CAS','Cassette Open','f'); HX.emit('hawk'); } });
+  },
+  fit(){ HX.fit(wrap, 1024, 600); },
+  render(){
+    root.innerHTML = html(); tray.innerHTML = HX.labelsTray(3);
+    const u = S().usb;
+    document.getElementById('hkStrip').innerHTML = `<div class="it-strip"><b>Printer USB port:</b>
+      <button class="it-chip ${u.pen==='hawk'?'on':''}" data-u="pen-hawk">Pen drive in printer</button>
+      <button class="it-chip ${u.pen==='pc'?'on':''}" data-u="pen-pc">Pen drive back to office PC</button>
+      <button class="it-chip" data-cas="1">Open the ribbon cassette</button></div>`;
+  },
+  noteKey(){ return 'hawk'; },
+  dot(){ const h = H(); return h.faults.some(f=>f.sev==='f') ? 'red' : (HX.hawkPendingCount() || h.faults.length || h.pendingPrompt) ? 'amber' : 'ok'; }
+});
+HX.hawkFault = fault;
+HX.hawkUi = ui;
+})();
+
+
+/* ---- p8-connect.js ---- */
+/* ===== p8-connect.js — "How it connects" tab, drills, sources, and the app switcher ===== */
+(function(){
+'use strict';
+const S = () => HX.s, esc = HX.esc;
+const CORRECT_ALDI = 'ALDI WB HWC - PZ NEW';
+
+HX._logHook = m => { const d = S().drill; if (d){ d.seen = d.seen || []; d.seen.push(m); } };
+const seen = re => (S().drill && S().drill.seen || []).some(m => re.test(m));
+const newLabel = () => S().hawk.printed > (S().drill ? S().drill.printed0 : 0) ? S().labels[0] : null;
+const val = (job, id) => { const e = job && job.els.find(x => x.id === id); return e ? (e.text ? e.text.value : '') : null; };
+const penAsda = () => S().pen['JOBS/ASDAPRICE UPDATE 2026/ASDALARGE.ciff'];
+
+const DRILLS = [
+  {id:'price', title:'ASDA price change, end to end', kind:'Change',
+   why:'A price-per-kg change made in CLARiSOFT reaches packs only after the job is saved, carried to the printer and loaded there.',
+   steps:[
+    {t:'Office PC: open ASDALARGE.ciff in CLARiSOFT', ok:()=> /ASDALARGE/.test(S().cs.path||'')},
+    {t:'Change the 5.22 field to 5.45 and Save (File › Save)', ok:()=> val(penAsda(),'price') === '5.45'},
+    {t:'Move the pen drive to the ICE printer', ok:()=> S().usb.pen === 'hawk'},
+    {t:'ICE printer: Tools › Database › Load jobs from USB', ok:()=> val(S().hawk.db.ASDALARGE,'price') === '5.45'},
+    {t:'Line 4: select PLU 6171, Start the line; on the printer confirm the prompts and press Start', ok:()=> S().lines.L4.current === 6171 && S().hawk.current === 'ASDALARGE' && !S().hawk.pendingPrompt && S().hawk.running && S().lines.L4.running},
+    {t:'Feed a good pack — the label shows 5.45', ok:()=> { const l = newLabel(); return l && !l.test && l.job.name === 'ASDALARGE' && val(l.job,'price') === '5.45'; }}
+   ]},
+  {id:'useby', title:'Use-by days 10 → 8 for PLU 3024', kind:'Change',
+   why:'Product data lives in CommsBridge. The line only uses it after a send, and the running product only after it is reselected.',
+   steps:[
+    {t:'CommsBridge: PLU 3024 › Page 1 › Use-by days = 8, then Save', ok:()=> +S().products[3024].useByDays === 8},
+    {t:'Send changed products to Line 4 (green ⬇ button)', ok:()=> S().lines.L4.products[3024] && +S().lines.L4.products[3024].useByDays === 8},
+    {t:'Line 4: select PLU 3024 (reselect if it was running)', ok:()=> S().lines.L4.current === 3024 && +S().lines.L4.snap.useByDays === 8},
+    {t:'Get a good pack labelled — the use-by is today + 8', ok:()=> { const l = newLabel(); return l && !l.test && l.plu === 3024 && l.merge.USEBY === HX.ddmmm(HX.addDays(new Date(), 8)); }}
+   ]},
+  {id:'jobnf', title:'Failure: "Job not found"', kind:'Failure',
+   why:'Ishida finds the ICE job by its exact name. One missing space and the printer cannot find it.',
+   setup(){ const p = S().products[3024]; p.extJob = 'ALDI WB HWC-PZ NEW'; S().lines.L4.products[3024] = HX.clone(p); S().lines.L4.current = null; S().lines.L4.snap = null; },
+   steps:[
+    {t:'Line 4: select PLU 3024 and read the message', ok:()=> seen(/Job not found/)},
+    {t:'CommsBridge: fix Page 2 › External printer job name to "ALDI WB HWC - PZ NEW" and Save', ok:()=> S().products[3024].extJob === CORRECT_ALDI},
+    {t:'Send to Line 4', ok:()=> S().lines.L4.products[3024].extJob === CORRECT_ALDI},
+    {t:'Reselect PLU 3024, clear the printer warning, confirm prompts, Start both, label a pack', ok:()=> { const l = newLabel(); return l && !l.test && l.job.name === CORRECT_ALDI; }}
+   ]},
+  {id:'l1', title:'Failure: Line 4 packs say "L1"', kind:'Failure',
+   why:'L1 is a Line Reference with "Prompt at Coder" and Prompt Value = Default Value. Unless someone types L4 at the printer, L1 is printed.',
+   setup(){ S().hawk.prompts = {}; S().lines.L4.current = null; S().lines.L4.snap = null; },
+   steps:[
+    {t:'Line 4: select PLU 3024 (job ALDI WB HWC - PZ NEW)', ok:()=> S().lines.L4.current === 3024 && S().hawk.current === CORRECT_ALDI},
+    {t:'ICE printer: at the prompt screen type L4 for the line number and confirm', ok:()=> (S().hawk.prompts[CORRECT_ALDI]||{}).lineref === 'L4' && !S().hawk.pendingPrompt},
+    {t:'Label a good pack — the code line starts "L4"', ok:()=> { const l = newLabel(); return l && !l.test && (l.prompts||{}).lineref === 'L4'; }},
+    {t:'Optional fix for next time: CLARiSOFT › LineRef › Prompt Value = Last Value, save, load into printer', ok:()=> { const j = S().hawk.db[CORRECT_ALDI]; const e = j && j.els.find(x=>x.id==='lineref'); return e && e.text.promptVal === 'Last Value'; }, optional:true}
+   ]},
+  {id:'dongle', title:'Failure: CLARiSOFT will not start', kind:'Failure',
+   why:'CLARiSOFT is licensed by the SafeNet Sentinel dongle. Without it, nobody can edit or save jobs.',
+   setup(){ S().usb.dongle = 'out'; S().cs.running = false; },
+   steps:[
+    {t:'Office PC: try to open CLARiSOFT from the desktop', ok:()=> seen(/no licence dongle/)},
+    {t:'Put the licence dongle back into the PC', ok:()=> S().usb.dongle === 'pc'},
+    {t:'Start CLARiSOFT again', ok:()=> S().cs.running}
+   ]},
+  {id:'ribbon', title:'Failure: Ribbon Break mid-run', kind:'Failure',
+   why:'When the ribbon runs out the Hawk raises a fault and stops. Packs keep coming but get no label until the ribbon is replaced and the fault cleared.',
+   setup(){ S().hawk.ribbon = 0.15; },
+   steps:[
+    {t:'Line 4: run good packs until the printer shows "Ribbon Break"', ok:()=> S().hawk.faults.some(f=>f.code==='RIB')},
+    {t:'ICE printer: touch the fault, fit a new ribbon', ok:()=> S().hawk.ribbon > 1000},
+    {t:'Clear the fault and press Start', ok:()=> !S().hawk.faults.some(f=>f.code==='RIB') && S().hawk.running},
+    {t:'Label a good pack again', ok:()=> { const l = newLabel(); return l && !l.test && S().hawk.ribbon > 1000; }}
+   ]},
+  {id:'clock', title:'Failure: wrong Julian code', kind:'Failure',
+   why:'JulianDate uses "Coder Date", which is the ICE printer\'s clock. A wrong printer clock gives a wrong 6311-style code, even when the PC is right.',
+   setup(){ S().hawk.clockOffsetMin = -1440; },
+   steps:[
+    {t:'Label a pack on Line 4 and compare the code with today\'s Julian day', ok:()=> { const l = newLabel(); return l && Math.abs(l.t - Date.now()) > 3600e3; }},
+    {t:'ICE printer: Tools › Setup › Control › Set to real time', ok:()=> S().hawk.clockOffsetMin === 0},
+    {t:'Label another pack — the code now matches today', ok:()=> { const l = newLabel(); return l && Math.abs(l.t - Date.now()) < 3600e3; }}
+   ]},
+  {id:'sim', title:'Failure: send to the Simulator', kind:'Failure',
+   why:'All three lights for the Simulator are red in the photo. With no pack data connection, CommsBridge cannot send anything to it.',
+   steps:[
+    {t:'CommsBridge: ⬇ Send, tick Simulator, Send', ok:()=> seen(/Send to Simulator failed/)},
+    {t:'Send to Line 4 instead (green lights)', ok:()=> seen(/Sent \d+ product\(s\) to Line 4/)}
+   ]}
+];
+
+function startDrill(id){
+  const d = DRILLS.find(x => x.id === id);
+  S().drill = {id, step:0, seen:[], printed0:S().hawk.printed, t0:Date.now()};
+  if (d.setup) d.setup();
+  HX.log('Trainer', 'Drill started: ' + d.title);
+  HX.emit('drill');
+}
+function advance(){
+  const dr = S().drill; if (!dr) return;
+  const d = DRILLS.find(x => x.id === dr.id); if (!d) return;
+  let moved = false;
+  while (dr.step < d.steps.length && d.steps[dr.step].ok()){
+    dr.step++; moved = true;
+    dr.printed0 = S().hawk.printed;   // the next "label a pack" step needs a label printed after this point
+  }
+  if (moved && dr.step >= d.steps.filter(s=>!s.optional).length && !dr.done){ dr.done = Date.now(); HX.done('drill-'+d.id); HX.toast('Drill complete: ' + d.title); }
+}
+/* each "label a pack" step must be satisfied by a label printed after the previous step */
+HX.on(() => { if (S().drill) advance(); });
+
+function chain(){
+  const s = S(), L = s.lines.L4;
+  const plu = L.current || 3024;
+  const pPend = HX.productPending('L4', plu);
+  const snapOld = L.current && L.products[plu] && JSON.stringify(L.products[plu]) !== JSON.stringify(L.snap);
+  const jobName = (L.snap && L.snap.extJob) || (s.products[plu] && s.products[plu].extJob) || 'ASDALARGE';
+  const penE = HX.penJobByName(jobName);
+  const docOpen = s.cs.doc && s.cs.doc.name === jobName;
+  const jPend = HX.jobPending(jobName);
+  const h = s.hawk, fault = h.faults.find(f=>f.sev==='f');
+  const last = s.labels[0];
+  const n = (cls, b, sp) => `<div class="cx-node ${cls}"><b>${b}</b><span>${sp}</span></div>`;
+  return `<div class="cx-chain">
+    ${n('ok','1 · CommsBridge product', `PLU ${plu} · job "${esc(jobName)}"`)}<div class="cx-arrow">→</div>
+    ${n(pPend?'amber':'ok','2 · Line 4 copy', pPend?'Changes waiting — use ⬇ Send':'Same as CommsBridge')}<div class="cx-arrow">→</div>
+    ${n(!L.current?'amber':snapOld?'amber':'ok','3 · Line 4 running product', !L.current?'No product selected':snapOld?'New data received — reselect':'PLU '+L.current+' selected')}<div class="cx-arrow">⇢</div>
+    ${n(docOpen&&s.cs.dirty?'amber':'ok','4 · CLARiSOFT', docOpen ? (s.cs.dirty?'Unsaved changes (*)':'Open, saved') : 'Job not open (that is fine)')}<div class="cx-arrow">→</div>
+    ${n(!penE?'red':'ok','5 · Pen drive F:\\JOBS', penE ? esc(penE[0].split('/').pop()) + ' · pen drive ' + ({pc:'in PC',hawk:'in printer',out:'in pocket'})[s.usb.pen] : 'No job with that name!')}<div class="cx-arrow">→</div>
+    ${n(!h.db[jobName]?'red':jPend?'amber':'ok','6 · ICE printer database', !h.db[jobName]?'Job not found':jPend?'Older than the pen drive — load from USB':'Same as pen drive')}<div class="cx-arrow">→</div>
+    ${n(fault?'red':(h.current!==jobName||h.pendingPrompt||!h.running)?'amber':'ok','7 · ICE printer', fault?esc(fault.text):h.current!==jobName?'Current job: '+esc(h.current||'none'):h.pendingPrompt?'Waiting for prompts':!h.running?'Stopped':'Running')}<div class="cx-arrow">→</div>
+    ${n(last?'ok':'amber','8 · Label', last ? `${esc(last.job.name)} · ${esc((last.merge&&last.merge.WEIGHT)||'')}` : 'Nothing printed yet')}
+  </div>`;
+}
+function drillsHtml(){
+  const dr = S().drill;
+  return DRILLS.map(d => {
+    const act = dr && dr.id === d.id;
+    return `<div class="cx-drill ${act?'active':''}"><b>${d.kind === 'Failure' ? '🛠' : '🔁'} ${esc(d.title)}</b> ${HX.isDone('drill-'+d.id)?'<span style="color:var(--ok)">✔ done</span>':''}
+      <div class="it-small">${esc(d.why)}</div>
+      ${act ? `<ol>${d.steps.map((s,i)=>`<li class="${i<dr.step?'done':''}">${i===dr.step?'<b>':''}${esc(s.t)}${s.optional?' <i>(optional)</i>':''}${i===dr.step?'</b>':''}</li>`).join('')}</ol>
+        <div class="it-strip"><button class="it-btn ghost" data-dr-stop="1">Stop drill</button></div>`
+           : `<div class="it-strip"><button class="it-btn" data-dr="${d.id}">Start drill</button></div>`}</div>`;
+  }).join('');
+}
+HX.note('cx', {title:'How the two systems link', tag:'inf', lines:[
+  '<b>Ishida side:</b> CommsBridge Desktop (master product data) → ⬇ send → WPL on Line 4 (machine copy) → product selected on the line.',
+  '<b>ICE side:</b> CLARiSOFT (job design, needs the dongle) → save .CIFF to the pen drive → load into the Zodiac Hawk database.',
+  '<b>The link:</b> the Ishida product\'s <b>External printer = In use</b> plus <b>External printer job name</b> picks the Hawk job. Each good pack sends WEIGHT, COOKTIME and USEBY into the job\'s merge fields.',
+  '<b>Printer-side values:</b> the Julian code and time use the <b>Coder Date/Time</b> (the printer clock). L1/HDV are prompted at the printer. 5.22 and the EAN-13 are fixed in the job.',
+  'A change only shows downstream after its transfer step: Save → USB load for jobs, Save → Send → reselect for products.',
+  HX.tag('ass')+'Whether the Hawk gets jobs by USB or over the network, and the exact host messages, still need confirming on site.'
+]});
+HX.note('about', {title:'About this trainer', tag:'photo', lines:['Built from 27 photos taken 07/11/2026, plus vendor documents (see Sources). Each screen\'s notes card marks what is <b>From photo</b>, <b>Inferred</b> or <b>Assumed</b>.']});
+
+/* ---------- connect + about apps ---------- */
+let cxRoot, abRoot;
+HX.apps.push({
+  id:'cx', label:'How it connects',
+  mount(col){ cxRoot = col; col.addEventListener('click', e => {
+    const b = e.target.closest('[data-dr]'); if (b){ startDrill(b.dataset.dr); return; }
+    if (e.target.closest('[data-dr-stop]')){ S().drill = null; HX.emit('drill'); }
+  }); },
+  render(){
+    cxRoot.innerHTML = `<div class="it-card"><h3>Live chain (product on Line 4 → ICE label)</h3>${chain()}</div>
+      <div class="it-card" style="margin-top:12px"><h3>Drills</h3><p class="it-small">Start a drill, then use the Office PC, Line 4 and ICE printer tabs. Steps tick automatically.</p><div class="cx-grid">${drillsHtml()}</div></div>
+      <div class="it-card" style="margin-top:12px"><h3>Latest labels</h3>${HX.labelsTray(4)}</div>
+      <div class="it-card" style="margin-top:12px"><h3>Transfer log</h3><div class="it-log">${S().log.map(l=>`<div>${esc(l)}</div>`).join('')||'Nothing yet.'}</div></div>`;
+  },
+  noteKey(){ return 'cx'; },
+  dot(){ return S().drill && !S().drill.done ? 'amber' : 'ok'; }
+});
+HX.apps.push({
+  id:'about', label:'Sources & photos',
+  mount(col){ abRoot = col; },
+  render(){
+    abRoot.innerHTML = `<div class="it-card"><h3>What this trainer covers</h3><ul>
+      <li><b>Ishida CommsBridge Desktop</b> (W59070U-R8) + (W59098C-R6): product list, 6-page Product editor, Line 4 / Line 2 / Simulator connections, send to lines.</li>
+      <li><b>Ishida WPL on Line 4</b>: weighs each pack (catch-weight), rejects packs out of limits, and drives the external printer. Its screen is assumed.</li>
+      <li><b>CLARiSOFT</b> (Generic Image Design Software): opens .CIFF jobs from the pen drive (F:), with Text, Date, Time and EAN13 properties and the Advanced Date Builder. It needs the SafeNet Sentinel dongle.</li>
+      <li><b>ICE Zodiac Hawk 53 mm</b> thermal transfer overprinter on the large-roll ICE labeller, with the CLARiTY screen. Built from the manual, not photographed.</li></ul></div>
+    <div class="it-card" style="margin-top:12px"><h3>Sources</h3><ul>
+      <li><a href="https://www.ishidaeurope.com/media/vmypm515/wpl-brochure_en_v1-0525.pdf" target="_blank" rel="noopener">Ishida WPL-AI brochure</a>: CommsBridge, LabelDesigner, up to two top and two under printers, rank / catch-weight.</li>
+      <li><a href="https://global.videojet.com/wp-content/uploads/dam/pdf/NA%20-%20English/Brochure/br-clarisoft-us.pdf" target="_blank" rel="noopener">Videojet CLARiSOFT brochure</a>: CIFF format; fixed / prompted / database fields; transfer by USB, RS232/TCP-IP or CLARiNET.</li>
+      <li><a href="https://global.videojet.com/wp-content/uploads/dam/pdf/NA%20-%20English/Specification-Sheet/ss-clarisuite-options-us.pdf" target="_blank" rel="noopener">CLARiSUITE options</a>: the Alliance edition uses a dongle; job selection is via CLARiTY.</li>
+      <li><a href="https://manualmachine.com/ice/zodiacplus/21266608-operators-manual" target="_blank" rel="noopener">ICE Zodiac Plus operator's manual</a>: CLARiTY menus, USB job load, prompted fields, Ribbon Break / Cassette Open.</li>
+      <li><a href="https://www.altech-uk.com/brochures/ICE%20Hawk%2053mm.pdf" target="_blank" rel="noopener">ICE Zodiac Hawk 53 mm data sheet</a>: 300 dpi, 1,200 m ribbon, RS232 + 2 × Ethernet + 2 × USB, Host PC Mode.</li>
+      <li><a href="https://www.clearmark.uk/products/thermal-transfer-overprinters-uk/zodiac-hawk-53mm" target="_blank" rel="noopener">Clearmark — Zodiac Hawk</a> and <a href="https://www.emautomationltd.com/printers-labelling/" target="_blank" rel="noopener">EM Automation</a>: Hawk used on labellers; ICE Vulcan print-and-apply.</li></ul>
+      <p class="it-small">Vendor documents are thin on CommsBridge itself. There is no public manual, so all CommsBridge behaviour comes from the photos.</p></div>
+    <div class="it-card" style="margin-top:12px"><h3>Photos still wanted</h3><ul>
+      <li>CommsBridge: Page 5 (sharp), the other tabs (Labels, Orders, Updates…), the hover text of each toolbar icon, and the send / download dialog.</li>
+      <li>CLARiSOFT: Help › About (version), File menu, Font tab, the merge field setup (how "2,148kg" is linked), and how the job gets to the printer (print-to-file / network).</li>
+      <li>ICE labeller + Hawk: the CLARiTY home screen, the Job list, the prompt screen (L1/HDV), Tools › Database, Machine Status, and the cable between Ishida and the Hawk.</li>
+      <li>Ishida WPL Line 4 touchscreen: product select, run screen, alarms.</li>
+      <li>A label printed with a real weight (to compare with photo 18's 0,000kg).</li></ul></div>
+    <div class="it-card" style="margin-top:12px"><h3>Privacy</h3><p class="it-small">No passwords are used. The ★★★★ practice code 4444 is made up. Serial numbers are masked. Customer names and product codes are internal 2SFG data, so keep the repo private.</p></div>`;
+  },
+  noteKey(){ return 'about'; },
+  dot(){ return 'ok'; }
+});
+
+/* ---------- shell: tabs, panels, side cards, fit ---------- */
+const tabsEl = document.getElementById('itTabs'), mainEl = document.getElementById('itMain');
+let active = 'pc';
+try { active = localStorage.getItem('ishidaTrainer.tab') || 'pc'; } catch(e){}
+if (!HX.apps.some(a => a.id === active)) active = 'pc';
+const panels = {};
+HX.apps.forEach(a => {
+  const sec = document.createElement('section');
+  sec.className = 'it-panel'; sec.hidden = true;
+  sec.innerHTML = `<div class="it-stagecol"></div><aside class="it-side"><div class="it-card it-notes"></div><div class="it-card it-taskcard"></div></aside>`;
+  mainEl.appendChild(sec);
+  panels[a.id] = sec;
+  a.mount(sec.querySelector('.it-stagecol'));
+});
+function tabs(){
+  tabsEl.innerHTML = HX.apps.map(a => `<button class="it-tab" role="tab" data-tab="${a.id}" aria-selected="${a.id===active}">${esc(a.label)}<span class="dot ${a.dot()==='ok'?'':a.dot()}"></span></button>`).join('');
+}
+function side(){
+  const a = HX.apps.find(x => x.id === active), sec = panels[active];
+  const n = HX.notes[a.noteKey()] || HX.notes[a.id] || {title:'', lines:[]};
+  sec.querySelector('.it-notes').innerHTML = `<h3>${HX.tag(n.tag||'photo')} ${esc(n.title)}</h3><ul>${n.lines.map(l=>`<li>${l}</li>`).join('')}</ul>`;
+  const groups = active === 'cx' ? DRILLS.map(d => ({id:'drill-'+d.id, text:'Drill: '+d.title})) : (HX.tasks[active] || []);
+  sec.querySelector('.it-taskcard').innerHTML = `<h3>Tasks</h3><ul class="it-tasks">${groups.map(t=>`<li class="${HX.isDone(t.id)?'done':''}">${esc(t.text)}</li>`).join('')}</ul>
+    <p class="it-small">${groups.filter(t=>HX.isDone(t.id)).length} of ${groups.length} done</p>`;
+}
+function show(id){
+  active = id; try { localStorage.setItem('ishidaTrainer.tab', id); } catch(e){}
+  Object.entries(panels).forEach(([k,p]) => p.hidden = k !== id);
+  const a = HX.apps.find(x => x.id === id);
+  a.render(); if (a.fit) a.fit(); tabs(); side();
+}
+HX.app = { side, show };
+tabsEl.addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) show(b.dataset.tab); });
+const resetBtn = document.getElementById('itReset');
+resetBtn.addEventListener('click', () => {
+  if (resetBtn.classList.contains('arm')){ resetBtn.classList.remove('arm'); resetBtn.textContent = 'Reset trainer'; HX.reset(); HX.toast('Trainer reset to the photographed starting state.'); return; }
+  resetBtn.classList.add('arm'); resetBtn.textContent = 'Click again to reset everything';
+  setTimeout(() => { resetBtn.classList.remove('arm'); resetBtn.textContent = 'Reset trainer'; }, 4000);
+});
+let raf = null;
+HX.on(() => { if (raf) return; raf = requestAnimationFrame(() => { raf = null; const a = HX.apps.find(x => x.id === active); a.render(); if (a.fit) a.fit(); tabs(); side(); }); });
+window.addEventListener('resize', () => { const a = HX.apps.find(x => x.id === active); if (a.fit) a.fit(); });
+setInterval(() => { if (active === 'hawk' || active === 'pc'){ const a = HX.apps.find(x => x.id === active); if (active === 'hawk') a.render(); } }, 30000);
+show(active);
+})();
+
+</script>
+</body>
+</html>

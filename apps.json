@@ -1,0 +1,20 @@
+[
+  {
+    "id": "bizerba",
+    "name": "Bizerba",
+    "source": null,
+    "note": "Built from apps/bizerba/source (python3 build.py). After a rebuild: python3 tools/sync.py --local <build folder> bizerba"
+  },
+  {
+    "id": "hellenic",
+    "name": "Hellenic",
+    "source": null,
+    "note": "Built from apps/hellenic/source (node tools/build.js). After a rebuild: python3 tools/sync.py --local <build folder> hellenic"
+  },
+  {
+    "id": "ishida",
+    "name": "Ishida",
+    "source": "apps/ishida/source/index.html",
+    "note": "Hand-built single file; apps/ishida/source/index.html is the source."
+  }
+]

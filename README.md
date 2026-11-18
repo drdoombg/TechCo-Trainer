@@ -1,141 +1,60 @@
-<p align="center">
-  <img src="assets/icon-192.png" width="96" height="96" alt="">
-</p>
+# TechCo Trainer
 
-<h1 align="center">Labeller Line Trainer</h1>
+One home screen for the factory software trainers used at 2 Sisters Food Group, Scunthorpe. Open the page, pick a machine, train. Everything runs in the browser with no install and no connection to any real factory system.
 
-<p align="center">
-  A browser replica of the <b>Bizerba GLM-I</b> weigh-price labeller terminal.<br>
-  One file, no server, no internet — learn the machine software without touching a live line.
-</p>
+| Plate | Machine | Programs inside |
+|---|---|---|
+| **Bizerba** | GLM-I 40 / 70, C-Wrap applicator (FP2 Lines 3–6, FP1 Line 3) | GLM-I scale terminal · Bizerba Brain 2 · Data Management |
+| **Hellenic** | Hellenic Systems OCM, Requiem v9 | Scale terminal · FOPS 8 · FOPSX Web Editors · Comms (VNC) · Label Designer |
+| **Ishida** | WPL weigh-price labeller, ICE Zodiac Hawk printer (Line 4) | Office PC (CommsBridge, CLARiSOFT) · Line 4 WPL · ICE Hawk printer |
 
-<p align="center">
-  <a href="#quick-start"><img alt="runs offline" src="https://img.shields.io/badge/runs-offline-1f5c94"></a>
-  <img alt="one file" src="https://img.shields.io/badge/build-single%20HTML%20file-555">
-  <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/licence-MIT-1d7a3b"></a>
-  <a href="NOTICE.md"><img alt="unofficial" src="https://img.shields.io/badge/status-unofficial-a35f00"></a>
-</p>
+Each trainer is the same app it has always been. The combined site only adds the home screen and a small home button in the corner of each trainer (also **Alt+H**).
 
----
+This repository is now the only home for all three: the built trainers, the sources they are built from, and the handoff notes.
 
-A weigh-price labeller is unforgiving to learn on. It is in the middle of a
-running line, the menu is five levels deep, and the wrong setting means
-mislabelled product. This is that terminal in a browser tab: the same menu
-tree, the same authorization levels, the same messages — plus a simulated line
-you can break on purpose and put back together.
+## Layout
 
-Written by an end user as a training aid. **Not a Bizerba product** and not a
-substitute for the manual or for training on the real line — see
-[NOTICE.md](NOTICE.md).
+```
+index.html                   home screen (built from src/home.inner.html)
+src/home.inner.html          the home screen itself: title, styles, plates, script
+tools/build_home.py          src/home.inner.html -> index.html
+tools/sync.py                copy a trainer in and inject the home button
+apps.json                    where each trainer comes from
+dist/artifact-home.html      the home screen without the document shell
 
-## What's in it
+apps/bizerba/index.html      the trainer that runs
+apps/bizerba/source/         what builds it, plus HANDOFF_V6.md
+apps/hellenic/index.html
+apps/hellenic/source/        build sources, terminal photos, HANDOFF.md
+apps/ishida/index.html
+apps/ishida/source/          the file as delivered
+```
 
-* **The terminal** — 1280×768 screen, a menu tree of 500+ softkeys built from
-  726 sections of the GLM-I instruction manual, authorization levels 0–9 with
-  the password dialog, and the customer level 9 layout photographed from a real
-  line.
-* **A running line** — packages are weighed with realistic spread, sorted into
-  weight classes, routed to print channels, labelled, totalled and ejected.
-  Totals, the weighing list, motor currents and throughput all move.
-* **Hardware** — schematic of the line, label roll change step by step with the
-  manual's own figures, height adjustment, air, E-stop, light barriers.
-* **31 drills** across terminal basics, cooking time by weight class, hardware
-  and settings faults. Fault drills load a problem as if the last shift left
-  it; fix it and run eight good packs. Progress is kept per line.
-* **Explain mode** — press `E` and every softkey shows its manual section
-  instead of running.
-* **Macros** — record, save to a key, replay, and copy to a level 9 softkey,
-  the way the customer macros on the real terminal work.
-* **Four lines** — two GLM-I 40s, a GLM-I 70 with master and slave heads that
-  is offline from BRAIN2, and one with a C-Wrap applicator.
+Saved data (settings, passwords, drill progress) lives in the browser, one set of keys per trainer, so the three never overwrite each other. Anything already saved carries over as long as the site keeps the same `github.io` host.
 
-## Quick start
+## Running it
 
-**Online** — open the GitHub Pages site for this repository.
+- **Hosted:** GitHub Pages serves the repository root. The home screen is the site root; each trainer is a folder under `apps/`.
+- **Offline:** copy the whole folder to the laptop and open `index.html`. Every link is relative, so it works straight from the file system.
 
-**From disk** — download `index.html` and double-click it. That's the whole
-application: 1.5 MB, no server, no network access, nothing to install. Put it on
-a USB stick and it works on a line-side PC with no internet.
+## Rebuilding a trainer
+
+Each trainer builds the same way it always did — see `SOURCE-NOTES.md` in its `source/` folder. Afterwards, copy the built file in and put the home button back:
 
 ```bash
-git clone https://github.com/drdoombg/Bizerba-Trainer.git
-# then open index.html
+python3 tools/sync.py --local <folder holding the built index.html> bizerba
+python3 tools/sync.py ishida      # Ishida builds from apps/ishida/source/index.html
 ```
 
-Everything you change — screen mode, site passwords, your price list, drill
-progress — is stored in that browser's `localStorage` and nowhere else.
+`sync.py` writes `apps/<id>/index.html` and injects the home button between the `TECHCO:HOME` markers at the end of `<body>`. Running it again replaces that block instead of adding another, so the file stays exactly as its build produced it.
 
-## Your own articles
+## Adding a machine
 
-The trainer ships with **18 fictional demo articles**. No real price list,
-customer, product or pricing data is in this repository or in `index.html`.
+1. Put the trainer's `index.html` in `apps/<id>/`, its build sources in `apps/<id>/source/`, and any assets it loads beside it.
+2. Add an entry to `apps.json` so `sync.py` can re-inject the home button later.
+3. Copy a plate in `src/home.inner.html`, change the name, model line, program list, bottom strip and `data-n` / `data-id`, then run `python3 tools/build_home.py`.
+4. Update the machine and program counts in the header.
 
-To practise on your own range, open the **Price list** tab and load a CSV or
-JSON file. It is read in the browser, stored on that device only, and never
-becomes part of the page. From a real Retail Product Information Sheet:
+## Editing the home screen
 
-```bash
-python -m pip install openpyxl
-python tools/pricelist_to_plu.py "Price list wc 16 10 2026 V1.xlsm" my-plu.json
-```
-
-Full column list, the aliases accepted, and how the weighing mode is read from
-the product name: **[docs/plu-format.md](docs/plu-format.md)**.
-
-Site name, the level 9 customer macro label and its filter are set in
-**Settings** — also browser-local. Site passwords go there too; none are in the
-code.
-
-## Repo layout
-
-```
-index.html                 the application — built, committed, open it directly
-src/template.html          page shell and all CSS
-src/app.js                 all behaviour, one IIFE
-src/build.py               inlines the JSON + app.js into index.html
-data/manual.json           726 sections from the GLM-I manual (paths, levels, options, text)
-data/figs.json             43 manual figures as WebP data URIs
-data/plu-demo.json/.csv    the fictional demo articles, and the import format by example
-tools/pricelist_to_plu.py  price list .xlsm -> PLU json/csv for loading in the browser
-tools/make_icons.py        regenerates assets/ from one shape definition
-docs/plu-format.md         price list import format
-```
-
-### Building
-
-```bash
-python src/build.py     # rewrites index.html from src/ and data/
-node --check src/app.js # optional syntax check
-```
-
-Edit `src/`, never `index.html` — the Pages workflow rebuilds and fails the
-deploy if the committed `index.html` is out of step.
-
-## What's real and what's assumed
-
-The Reference tab inside the app tags every item. In short:
-
-| | |
-|---|---|
-| **From the manual** | menu paths, mode levels, option lists, messages and remedies, print channel options, weight class table fields, the macro menu, the preselection matrix, roll-change steps |
-| **From photographs** of a real terminal | level names, the level 9 softkey layout on both pages, screen layout, status box, totals, motor currents, weighing list |
-| **Inferred** — my reading, not confirmed | manual mode level → site level mapping, weighing mode and weight limits read from product names, 8-day shelf life, position trigger 2 as ejector timing, label layouts, the key under the flag |
-
-The label layouts are generic. Real customer designs are not modelled.
-
-## Not modelled yet
-
-GT-SoftControl layouts, the contents of the real customer macros, real label
-layouts, and BRAIN2 (data maintenance, download/upload, Label_Designer) beyond
-the download that overwrites local changes.
-
-## Contributing
-
-Photographs of the main menu at each level, a weight class data table, a lock
-message or a slave head screen are worth more than code here — the fidelity is
-limited by what has been seen. Open an issue.
-
-## Licence
-
-[MIT](LICENSE) for the code. The quoted manual text and figures, and the
-Bizerba name, are not covered by it — see [NOTICE.md](NOTICE.md).
+Edit `src/home.inner.html` and run `python3 tools/build_home.py`. Do not edit `index.html` by hand — it is generated.

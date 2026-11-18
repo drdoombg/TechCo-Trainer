@@ -27,28 +27,33 @@ const LVN={0:"Standby",1:"Check settings",2:"Article change",3:"Create and maint
 const MAP_LV={"1":1,"2":2,"3":3,"4":3,"5":4,"T":9};
 const siteLv=l=>l==null?2:(MAP_LV[String(l)]??2);
 const LINES={
- "FP2-L03":{tab:"FP2 · Line 3",model:"GLM-I 40",dev:[{bus:2,name:"FP2-L03-Master"}],heads:[{id:"LC 1",name:"Labeller 1 (top)",ch:"internal",conv:"LC 1"},{id:"LC 2",name:"Labeller 2 (top)",ch:"A",conv:"LC 2"}],
-  chan:{internal:"always active",A:"always active"},sendE:"Labeller 2 data (assumed)",note:"Screens photographed on this line.",photo:true},
- "FP2-L04":{tab:"FP2 · Line 4",model:"GLM-I 40",dev:[{bus:2,name:"FP2-L04-Master"}],heads:[{id:"LC 1",name:"Labeller 1 (top)",ch:"internal",conv:"LC 1"},{id:"LC 2",name:"Labeller 2 (top)",ch:"A",conv:"LC 2"}],
-  chan:{internal:"always active",A:"always active"},sendE:"Labeller 2 data (assumed)",note:"Same machine type and software as Line 3. Device name assumed."},
- "FP1-L03":{tab:"FP1 · Line 3",model:"GLM-I 70",dev:[{bus:1,name:"FP1-L03-Master"},{bus:2,name:"FP1-L03-Slave"}],heads:[{id:"M",name:"Master head",ch:"internal",conv:"LC 1"},{id:"S",name:"Slave head",ch:"A",conv:"LC 1"}],
-  online:false,chan:{internal:"Pair1 (start) change on paper end",A:"Pair1 (Standby) Change on paper end"},sendE:"Slave head (assumed)",note:"Master and slave heads. Pairing on paper end is the manual's example (p. 285); confirm your line's setting."},
- "FP1-CW":{tab:"FP1 · C-Wrap",model:"GLM-I with C-Wrap applicator",dev:[{bus:1,name:"FP1-CWrap-Master"}],heads:[{id:"T",name:"Top labeller",ch:"internal",conv:"LC 1"},{id:"CW",name:"C-Wrap applicator",ch:"A",conv:"LC 2",wrap:true}],
+ "FP2-L03":{grp:"FP2",sub:"Line 3",tab:"FP2 · Lines 3–6",model:"GLM-I 40",dev:[{bus:2,name:"FP2-L03-Master"},{bus:3,name:"FP2-L03-Slave"}],b2:["FP2-L03-Glmi-M","FP2-L03-Glmi-S"],heads:[{id:"LC 1",name:"Labeller 1 (master)",ch:"internal",conv:"LC 1",dev:0},{id:"LC 2",name:"Labeller 2 (slave)",ch:"A",conv:"LC 2",dev:1}],
+  chan:{internal:"always active",A:"always active"},sendE:"Labeller 2 data (assumed)",note:"Lines 3 and 4 run the same machine and software. Screens photographed on both.",photo:true},
+ "FP2-L04":{grp:"FP2",sub:"Line 4",tab:"FP2 · Lines 3–6",model:"GLM-I 40",dev:[{bus:2,name:"FP2-L04-Master"},{bus:3,name:"FP2-L04-Slave"}],b2:["FP2-L04-Glmi-M","FP2-L04-Glmi-S"],heads:[{id:"LC 1",name:"Labeller 1 (master)",ch:"internal",conv:"LC 1",dev:0},{id:"LC 2",name:"Labeller 2 (slave)",ch:"A",conv:"LC 2",dev:1}],
+  chan:{internal:"always active",A:"always active"},sendE:"Labeller 2 data (assumed)",note:"Lines 3 and 4 run the same machine and software. Screens photographed on both.",photo:true},
+ "FP2-L05":{grp:"FP2",sub:"Line 5",tab:"FP2 · Lines 3–6",model:"GLM-I 40",dev:[{bus:2,name:"FP2-L05-Master"}],b2:["FP2-L05-Glmi-M"],heads:[{id:"LC 1",name:"Labeller 1 (master)",ch:"internal",conv:"LC 1",dev:0}],
+  chan:{internal:"always active"},sendE:"External data (assumed)",note:"Line 5 has one GLM-I device (master only) in the Data Maintenance device list. Same software as lines 3 and 4 (assumed).",photo:true},
+ "FP2-L06":{grp:"FP2",sub:"Line 6",tab:"FP2 · Lines 3–6",model:"GLM-I 40",dev:[{bus:2,name:"FP2-L06-Master"},{bus:3,name:"FP2-L06-Slave"}],b2:["FP2-L06-Glmi-M","FP2-L06-Glmi-S"],heads:[{id:"LC 1",name:"Labeller 1 (master)",ch:"internal",conv:"LC 1",dev:0},{id:"LC 2",name:"Labeller 2 (slave)",ch:"A",conv:"LC 2",dev:1}],
+  chan:{internal:"always active",A:"always active"},sendE:"Labeller 2 data (assumed)",note:"Line 6 has a master and a slave GLM-I in the Data Maintenance device list. Same software as lines 3 and 4 (assumed).",photo:true},
+ "FP1-L03":{tab:"FP1 · Line 3",model:"GLM-I 70",dev:[{bus:1,name:"FP1-L03-Master"},{bus:2,name:"FP1-L03-Slave"}],b2:["FP1-L03-Glmi-M","FP1-L03-Glmi-S"],heads:[{id:"M",name:"Master head",ch:"internal",conv:"LC 1",dev:0},{id:"S",name:"Slave head",ch:"A",conv:"LC 1",dev:1}],
+  online:false,chan:{internal:"Pair1 (start) change on paper end",A:"Pair1 (Standby) Change on paper end"},sendE:"Slave head (assumed)",note:"Master and slave heads. Old line: BRAIN2 can read it and send label layouts, but not PLU, text or weight class data."},
+ "FP1-CW":{tab:"FP1 · C-Wrap",model:"GLM-I with C-Wrap applicator",dev:[{bus:1,name:"FP1-CWrap-Master"}],b2:["FP1-CW-Glmi-M"],heads:[{id:"T",name:"Top labeller",ch:"internal",conv:"LC 1",dev:0},{id:"CW",name:"C-Wrap applicator",ch:"A",conv:"LC 2",wrap:true,dev:0}],
   chan:{internal:"always active",A:"always active"},sendE:"External data (assumed)",note:"Station layout taken from Bizerba's product picture. Line number not given."}
 };
+const grpOf=k=>LINES[k].grp||k;
 const CHAN_OPTS=["always active","not active","active when special price","not active when special price","Pair1 (start) change on paper end","Pair1 (Standby) Change on paper end","Pair1 (start) alternated after each package","Pair1 (Standby) alternat. after each package","Pair2 (start) change on paper end","Pair2 (Standby) Change on paper end"];
 const CHANS=["internal","A","B","C","D","E","F","G"];
 
 /* ============================================================ price list (PLU data)
-   No real price list ships in this file. DEMO_PRODUCTS is a small fictional sample.
+   This private build carries the Scunthorpe price list (w/c 16/10/2026) as SITE_PRODUCTS; a newer list can be loaded in the Price list tab.
    Your own price list is loaded from the Price list tab and kept in this browser's
    localStorage only, so it is never part of the page or of anything you share. */
 const PLU_KEY="glmi-plu-v1",SITE_KEY="glmi-site-v1";
-const DEF_SITE={name:"",macroLabel:"CUST PLU ONLY",macroFilter:""};
+const DEF_SITE={name:"Scunthorpe",macroLabel:"m&s plu only",macroFilter:"M&S"};
 let SITE=Object.assign({},DEF_SITE,store.get(SITE_KEY,{})||{});
 let PLU_SRC=store.get(PLU_KEY,null);
 if(!(PLU_SRC&&Array.isArray(PLU_SRC.rows)&&PLU_SRC.rows.length))PLU_SRC=null;
-let PRODUCTS=PLU_SRC?PLU_SRC.rows:DEMO_PRODUCTS;
+let PRODUCTS=PLU_SRC?PLU_SRC.rows:SITE_PRODUCTS;
 const usingDemo=()=>!PLU_SRC;
 const BIRD=/\b(WB|WHOLE|Whole|wholebird|Wholebird|Spatchcock|Spatchcook|CIB|Rotisserie|Bird|BIRD|Joint)\b/;
 /* the level 9 "<customer> PLU ONLY" macro: label and filter are set in Settings */
@@ -58,6 +63,7 @@ function custMatch(p){const f=(SITE.macroFilter||"").trim().toLowerCase();if(!f)
 /* which PLU a line boots on: a whole-bird article on FP1, otherwise the first in the list */
 function defaultPlu(key){if(!PRODUCTS.length)return 0;
  const bird=PRODUCTS.find(r=>BIRD.test(r.name));
+ if(key.startsWith("FP2")&&PRODUCTS.some(x=>x.plu===6419))return 6419;
  return ((key.startsWith("FP1")&&bird)||PRODUCTS[0]).plu}
 function parseProduct(r){
  const name=r.name;const tare=parseFloat(String(r.tare).replace(/[^\d.]/g,""))||0;
@@ -79,8 +85,11 @@ function parseProduct(r){
  else if(/^2\d{6}0{5}\d$/.test(bc))code={type:"Price embedded",v:bc.slice(0,7)};
  else if(/^[A-Z] ?\d{4,} ?[A-Z]$/i.test(bc))code={type:"Customer code",v:bc};
  const num=v=>{const n=parseInt(String(v||"").replace(/[^\d]/g,""),10);return isNaN(n)?0:n};
- return{plu:r.plu,text:name,cust:r.cust||"",sect:r.sect||"",mode,unit,fixp,fixw,tare,minw,maxw,life1:8,life2:8,d1:"Packed on",d2:"Use by",d3:"Without",
-  lab:bird?3:4,aut:bird?1:2,wc:r.plu,txt1:bird?22:31,code,pre1:num(r.case),eob:num(r.eob),pz:r.pz||0,fops:num(r.fops),basket:r.basket||"",outer:r.outer||"",nav:r.nav||"",pcode:r.pcode||"",
+ const ms=/M&S/i.test((r.cust||"")+" "+name);const cdig=(bc.match(/\d{6,}/)||[""])[0];
+ return{plu:r.plu,country:"England",upi:"per unit",sprice:0,recalc:"Without recalculation",ingsel:"Ingredients in %",ingp:0,dt1:0,dt2:0,dt3:0,logo1:ms?6:0,logo2:0,logo3:0,lseq:0,
+  tf2:(ms?"*06,":"")+name,tf3:"",tf4:"",tf5:"Scunthorpe, North Lincolnshire",tf6:"6",tf7:bird?"L1 Please Enter Kill Line Number (1 = L1 - 2 = L2 - 4 = No Kill Line)":"",tf8:"",tf9:"",tf10:ms&&bird?'=$N$ IF [[GL0A < 7 OR GL0A > 10]] THEN [[ABORT ["Invalid Use By Date"]]]':"",
+  cf1:code?6:0,cf2:0,cf3:0,cs1:cdig.slice(-8)||"0",cs2:"0",cs3:"0",cs4:"0",cs5:"0",selcrit:"Unknown",slave:bird?{lb1:40,dist:0,pkh:132,conv:60,speed:43}:{},text:name,cust:r.cust||"",sect:r.sect||"",mode,unit,fixp,fixw,tare,minw,maxw,life1:8,life2:8,d1:"Packed on",d2:"Use by",d3:"Without",
+  lab:ms?205:bird?3:({"Asda":174,"Co-op Portions":173,"Co-op WB":173,"Iceland portions":176,"Iceland WB":176}[r.cust]||4),aut:bird?1:2,wc:r.plu,txt1:bird?22:31,code,pre1:num(r.case),eob:num(r.eob),pz:r.pz||0,fops:num(r.fops),basket:r.basket||"",outer:r.outer||"",nav:r.nav||"",pcode:r.pcode||"",
   barcode:bc,tray:r.tray||"",info:r.info||"",flash:r.flash||"",acode:r.acode||"",mean:mean||1000,sd:sd||40,pack:bird?"bird":"tray",grp:0,pcs:1,chan:{}}}
 function mkCol(up,ltype){return{up,ltype,weight:0,txt1:-1,life1:0,totaliz:"with",noprint:false,pre:{type:"Weight",val:0},glob:true}}
 function mkWC(name,lt,lo,hi){return{name,stype:lt==="Fixed weight"?"FPV Europe":"Weight determination",factor:3,lower:lo,upper:hi,stops:0,cols:[mkCol(lo,"No labeling"),mkCol(hi,lt),mkCol(null,"No labeling")]}}
@@ -93,8 +102,41 @@ function freshDB(){
   auto:{1:{name:"Whole bird bags",ref:"Pckg. edge front side",dist:160,speed:35,conv:40,sepf:1.2,lb1:360,lb23:0,pkh:110,pkw:260,len:380},
         2:{name:"Retail trays",ref:"Pckg. edge front side",dist:120,speed:40,conv:45,sepf:1.2,lb1:150,lb23:0,pkh:55,pkw:190,len:240}},
   wc:{},
+  logo:{1:"UK2037EC.bmp",6:"GB-2037.png",7:"GB-1606.png",9:"GBNEW2026.bmp",12:"TRACTOR.bmp"},
+  /* 1, 3, 5 and 9 rebuilt from the 27/10/2026 test labels (Code 1 price code, Code 3 price code, EAN, Code 9 weight code); 2, 4 and 6 assumed */
+  code:{1:{name:"Price code",type:"EAN13",segs:[["Code substring 1","",6],["Constant","2",1],["Price","",5],["Check digit","",1]]},
+   2:{name:"EAN13 price embedded",type:"EAN13",segs:[["Constant","2",1],["PLU number","",6],["Price check digit","",1],["Price","",4],["Check digit","",1]]},
+   3:{name:"Price code 4 digit",type:"EAN13",segs:[["Code substring 1","",6],["Constant","78",2],["Price","",4],["Check digit","",1]]},
+   4:{name:"GS1 DataBar Expanded",type:"GS1 DataBar Expanded",segs:[["AI (01) GTIN","",14],["AI (3103) net weight","",6],["AI (17) use by","",6],["AI (10) batch","",8]]},
+   5:{name:"EAN code",type:"EAN13",segs:[["Code substring 1","",6],["Code substring 2","",6],["Check digit","",1]]},
+   6:{name:"Customer item code",type:"EAN13",segs:[["Constant","0",1],["Code substring 1","",8],["Price","",3],["Check digit","",1]]},
+   9:{name:"Weight code",type:"EAN13",segs:[["Code substring 1","",6],["Constant","2",1],["Net weight","",5],["Check digit","",1]]}},
+  stattxt:{1:"Keep refrigerated",2:""},
+  dtext:{1:"Packed on",2:"Use by",3:"Best before",4:"Display until"},
   text:{1:"Keep refrigerated below 5°C.",2:"Produced in the UK.",21:"Cook from chilled: 190°C, Fan 170°C, Gas 5 for 1 hr 15 mins.",22:"Cook from chilled: 190°C, Fan 170°C, Gas 5 for 1 hr 25 mins.",23:"Cook from chilled: 190°C, Fan 170°C, Gas 5 for 1 hr 35 mins.",24:"Cook from chilled: 190°C, Fan 170°C, Gas 5 for 1 hr 45 mins.",31:"Cook from chilled: 200°C, Fan 180°C, Gas 6 for 20-25 mins."}};
+ /* General texts as listed in Data Maintenance (photo 27/10/2026). Text 1000 held a person's name: placeholder used. */
+ Object.assign(db.text,{1:"L1",2:"L2",3:"",4:"",5:"",6:"",7:"1.708",8:"15.00",9:"10.00",554:"4",555:"5",556:"6",557:"7",558:"8",559:"9",1000:"(grower name), North Lincolnshire",1001:"1.708",1002:"1.615",1665:"1.250",1666:"1.600",1667:"2055",1668:"1.615",1669:"1.612",
+  1985:"Keep in fridge 2 to 5°C",2605:"CO-OP PSO CIB Whole Bird 1.400-1.600Kg",2606:"Coop CIB Extra Tasty 1.400 - 1.699 Kg",5595:"2hrs 2mins",6685:"1.708",21105:"ALDI PSO WB CIB 1.6kg",24073:"Tesco Sea Salt, Lemon Pepper Crown",
+  666666666:"6",777777777:"L1  Please Enter Kill Line Number (1 = L1 - 2 = L2 - 4 = No Kill Line)",100000000:'=$%$ IF [ GL0A < 6 OR GL0A > 10 ] THEN [ ABORT [ "Invalid Use By Date" ] ]'});
+ for(let m=0;m<=59;m++)db.text[11100+m]="1hr"+(m?" "+m+(m===1?"min":"mins"):"");
+ for(let m=0;m<=59;m++)db.text[12100+m]="2hrs"+(m?" "+m+(m===1?"min":"mins"):"");
  PRODUCTS.forEach(r=>{if(db.plu[r.plu])return;const p=parseProduct(r);db.plu[r.plu]=p;db.wc[r.plu]=mkWC("WC "+r.plu,p.mode==="Fixed weight"?"Fixed weight":"Weight",p.minw,p.maxw)});
+ db.layouts=defaultLayouts();db.label[3].layout="3";db.label[4].layout="4";
+ db.label[205]={name:"205 M&S NFO 2",size:"70 x 50",type:"Standard",layout:"205",speed:150,vpos:432,hpos:50,feed:20,rev:"W/o",sales:"without",lbf:2,lbb:2};
+ [173,174,175,176,177,178].forEach(n=>{db.label[n]=Object.assign(clone(db.label[4]),{name:db.layouts[n].name,layout:String(n)})});
+ /* PLU 6419 as photographed on FP2-L04 (Edit current article data) */
+ const ph=db.plu[6419];if(ph){Object.assign(ph,{tare:62,minw:2458,maxw:2874,life1:9,life2:0,wc:7292,lab:205,aut:1,txt1:0,cs1:"00015035"});db.wc[7292]=mkWC("WC 7292",ph.mode,2458,2874);delete db.wc[6419]}
+ /* PLU 7777 TEST TEST: the test article of 27/10/2026, as it stood on the terminal when the test labels were printed.
+    Code 1, substrings and Logo 1 were already on the device (Data Maintenance shows 0 = keep previously loaded data). */
+ db.plu[7777]=Object.assign(parseProduct({plu:7777,name:"TEST TEST",cust:"",sect:"Test",price:"15.99",ppkg:"",barcode:"",tare:"28g"}),{text:"TEST TEST",mode:"Fixed value",fixp:15.99,unit:0,tare:28,minw:100,maxw:5000,fixw:0,mean:1421,sd:1.2,life1:10,life2:10,d1:"Packed on",
+  wc:-1,lab:77,aut:2,txt1:7,tf2:"Tesco Sea Salt, Lemon Pepper Crown",tf3:"15.00",tf4:"5",tf5:"1hr 3mins",tf6:"6",tf7:"L1  Please Enter Kill Line Number (1 = L1 - 2 = L2 - 4 = No Kill Line)",tf8:"1hr 29mins",tf9:"ALDI PSO WB CIB 1.6kg",tf10:'=$%$ IF [ GL0A < 6 OR GL0A > 10 ] THEN [ ABORT [ "Invalid Use By Date" ] ]',
+  cf1:1,cf2:0,cf3:0,cs1:"123456",cs2:"789123",logo1:6,pack:"tray",code:null,test:true});
+ db.label[77]={name:"77 77-test",size:"65 x 265",type:"Standard",layout:"77",speed:150,vpos:300,hpos:40,feed:16,rev:"W/o",sales:"with",lbf:2,lbb:2};
+ [[82,"82 booths ac"],[83,"83 customer label"],[85,"85 OCADO new"],[87,"87- M&S BDF PZ C WR"],[91,"91 M&S EVENT"],[92,"92 M&S Truffle"]].forEach(([n,nm])=>{db.label[n]=Object.assign(clone(db.label[4]),{name:nm,layout:String(n)})});
+ /* label parameter set numbers in the Data Maintenance photo (1, 15, 16, 17, 30, 31, 32, 33); set 1 = Customer Label 83 as photographed, the others' layouts assumed */
+ [[1,83],[15,4],[16,173],[17,174],[30,3],[31,205],[32,85],[33,87]].forEach(([n,ly])=>{db.label[n]=Object.assign(clone(db.label[ly===3?3:ly===205?205:4]),{name:"Customer Label "+ly,layout:String(ly)})});
+ /* weight class 7929: cooking time per weight band (texts 11xxx / 12xxx), bands assumed */
+ if(db.plu[6706]){const W=mkWC("WC 7929","Weight",1850,2400);W.cols=[mkCol(1850,"No labeling"),mkCol(2000,"Weight"),mkCol(2150,"Weight"),mkCol(2300,"Weight"),mkCol(2400,"Weight"),mkCol(null,"No labeling")];[11125,11130,11135,11140].forEach((t,i)=>W.cols[i+1].txt1=t);db.wc[7929]=W;db.plu[6706].wc=7929;db.plu[6706].txt1=0;db.plu[6706].lab=205}
  return db}
 
 /* ============================================================ menu tree from the manual */
@@ -143,7 +185,8 @@ function freshState(key){const L=LINES[key];const photo=!!L.photo;
 let DB=freshDB();const REF=clone(DB);const DBS={};
 const ST={};let S;
 function useLine(k){if(S&&S.running)stop("Line switched");if(!DBS[k])DBS[k]=Object.keys(DBS).length?freshDB():DB;DB=DBS[k];if(!ST[k]){ST[k]=freshState(k);S=ST[k];loadJob(true)}S=ST[k];store.set("line",k);renderLines();render();renderHW();renderDrills()}
-const P=()=>DB.plu[S.plu];
+/* "Edit current article data" changes only the running job: they live in S.jobOv until the next PLU call */
+const P=()=>S&&S.jobOv&&S.jobOv.plu===S.plu?S.jobOv.data:DB.plu[S.plu];
 const LT=()=>DB.label[P()?.lab]||null;
 const AT=()=>DB.auto[P()?.aut]||null;
 const WC=()=>{const p=P();if(S&&S.wcJob)return S.wcJob;return p&&p.wc!==-1?DB.wc[p.wc]:null};
@@ -152,6 +195,7 @@ function textFor(w){const p=P(),wc=wcCol(w);if(wc&&wc.c.txt1>0&&DB.text[wc.c.txt
  if(S.jobText&&S.jobText[1]!=null)return{t:S.jobText[1],src:"job"};if(p&&p.txt1>0&&DB.text[p.txt1]!=null)return{t:DB.text[p.txt1],src:"plu",n:p.txt1};return{t:"",src:"none"}}
 const shortT=t=>{const m=String(t||"").match(/(\d+\s*hrs?\s*\d*\s*(mins)?|\d+-?\d*\s*mins)/i);return m?m[0]:String(t||"–").slice(0,18)};
 const LINE=()=>LINES[S.key];
+const DK=D=>grpOf(S.key)+":"+D.id;
 function log(t){S.log.unshift(new Date().toTimeString().slice(0,8)+"  "+t);if(S.log.length>200)S.log.length=200}
 const d1=()=>S.d[1]||new Date();
 const life=n=>S.life[n]!=null?S.life[n]:(P()?P()["life"+n]:0);
@@ -167,11 +211,18 @@ function loadJob(init){const L=LT(),A=AT(),p=P();if(!p)return;
 function geo(){const p=P();const A=REF.auto[p.aut]||REF.auto[1],L=REF.label[p.lab]||REF.label[3];return{dist:A.dist,vpos:L.vpos,hpos:L.hpos,feed:L.feed,len:A.len,pkh:A.pkh,pitch:A.len/1000+.22}}
 
 /* ============================================================ passwords (stored only in this browser) */
-function pwFor(level){const sp=store.get("sitepw",null);
- if(sp&&sp.lower&&Number(sp.lowerLv)===level)return sp.lower;
- if(sp&&sp.higher&&(sp.higherLv||"3,4").split(",").map(Number).includes(level))return sp.higher;
- return({2:"2222",3:"3333",4:"4444"})[level]||null}
-function macroPw(){const sp=store.get("sitepw",null);return sp&&sp.lower?sp.lower:"2222"}
+/* One site password (the label checker's) opens levels 2, 3, 4 and 5 and the protected (#) macros.
+   Levels 0, 1 and 9 are open. The password lives in this browser only. */
+/* Two site passwords, both kept in this browser only:
+   label checker  -> the protected (#) macros on level 9: plu change, m&s plu only
+   higher         -> authorization levels 2, 3, 4 and 5 (settings and modes)
+   Levels 0, 1 and 9 are open. Training defaults until saved: 1111 and 2222. */
+const PW_LEVELS=[2,3,4,5];
+function pwStore(){const sp=store.get("sitepw",null)||{};return{lower:sp.lower||sp.site||"",higher:sp.higher||""}}
+function labelPw(){return pwStore().lower||"1111"}
+function higherPw(){return pwStore().higher||"2222"}
+function pwFor(level){return PW_LEVELS.includes(level)?higherPw():null}
+function macroPw(){return labelPw()}
 
 /* ============================================================ messages (manual ch. 25) */
 const MSG={
@@ -188,6 +239,10 @@ const MSG={
  underload:{t:"Process blocked: Scale underload",lock:true,cause:"Weight stayed below minimum for more than 5 s.",fix:"No action needed. The lock releases once the scale shows zero for 1 s.",ok:()=>Math.abs(S.drift)<.03},
  pluload:{t:"Process blocked: Error during loading of PLU data record",lock:true,cause:"The article data is incomplete.",fix:"Check the article data, add what's missing, then change the article. Only a successful article change clears this.",ok:()=>S.pluOK!==false},
  estop:{t:"Emergency stop pressed",lock:true,cause:"An emergency stop button is pressed in.",fix:"Find and release the E-stop (Hardware tab), check the line is safe, then acknowledge.",ok:()=>!S.estop,sim:true},
+ layout:{t:"Layout missing",gx:107,lock:true,cause:"The label parameter table points to a layout that isn't on this device (GX status 107, PSL_RECEIVE_GXSTATUS).",fix:"Export the layout to this line from BRAIN2 Label Designer (File › Export to…), or point the label table at a layout the device has.",ok:()=>layoutOK()},
+ cab:{t:"Code build rule missing",gx:120,lock:true,cause:"Code field 1 of the article points to a code build rule (GGL_CABNR1 → GGT_CAB) that doesn't exist on the device (GX status 120).",fix:"Send the code structure from BRAIN2 (Product data › Code Structure, then download), or set Code field 1 to an existing rule in Edit current article data › Barcode.",ok:()=>cabOK()},
+ cts:{t:"Data error: code substring missing",gx:129,lock:true,cause:"The code build rule uses a code substring the article doesn't fill (GX status 129).",fix:"Fill Code sub-string 1–5 in Edit current article data › Barcode (max. 30 characters each), then Enable.",ok:()=>ctsOK()},
+ abort:{t:"Invalid Use By Date",lock:true,cause:"Text field 10 of this article holds a check formula: IF GL0A < 7 OR GL0A > 10 THEN ABORT \"Invalid Use By Date\". GL0A is the GxNet code of GGL_HALTBAR1, shelf-life 1 in days (the photo is blurred and reads like GLDA; GLDA would be clock 3, which can't be 7–10). The current shelf-life is outside that window, so no label is printed.",fix:"Set Shelf-life 1 back inside the window (Article data › Edit current article data › General › Shelf-life 1, or call the PLU up again), then Enable.",ok:()=>gldaOK()},
  stops:{t:"Automat stopped: packages with incorrect weight",lock:true,cause:"Successive wrong-weight packages reached the error count (Device menu / Error handling).",fix:"Check the article (right PLU?), the scale zero and the product. Then Enable and restart.",ok:()=>true,sim:true}
 };
 const openMsgs=()=>S.msgs.filter(m=>!m.c);
@@ -202,7 +257,14 @@ function start(){if(S.running||!canRun())return;S.running=true;log("Start · aut
 function schedule(){clearTimeout(timer);if(!S.running)return;const dt=geo().pitch/(S.set.speed/60)*1000;timer=setTimeout(()=>{tick();schedule()},Math.max(320,dt))}
 function stop(why){if(!S.running)return;S.running=false;clearTimeout(timer);log(why||"Stop");render()}
 function activeHeads(){return LINE().heads.filter(h=>{const st=S.heads[h.id];return st.chan!=="not active"})}
+function layoutOK(){const L=LT();return!L||!L.layout||!!(DB.layouts&&DB.layouts[L.layout])}
+function cabOK(){const p=P();return!(p&&p.cf1>0)||!!(DB.code&&DB.code[p.cf1])}
+function ctsOK(){const p=P();if(!p||!(p.cf1>0)||!DB.code||!DB.code[p.cf1])return true;return DB.code[p.cf1].segs.every(s=>{const m=String(s[0]).match(/^Code substring (\d)/);return!m||String(p["cs"+m[1]]??"").trim()!==""})}
+function gldaWin(){const p=P();const m=String(p&&p.tf10||"").match(/GL(?:0A|DA)\s*<\s*(\d+)\s*OR\s*GL(?:0A|DA)\s*>\s*(\d+)/i);return m?[Number(m[1]),Number(m[2])]:null}
+function gldaOK(){const w=gldaWin();if(!w)return true;const l=Number(life(1));return l>=w[0]&&l<=w[1]}
 function tick(){const p=P();if(!p){stop();return}
+ if(!gldaOK()){push("abort",`Shelf-life 1 = ${life(1)} days; allowed ${gldaWin().join("–")}`);return}
+ if(S.set.opmode!=="Transport"){if(!layoutOK()){push("layout",`Label table ${P().lab} → layout ${LT().layout}`);return}if(!cabOK()){push("cab",`Code field 1 = ${P().cf1}`);return}if(!ctsOK()){push("cts");return}}
  if(S.estop){push("estop");return}
  if(!S.air||S.airBar<4){push("air");return}
  if(Object.values(S.heads).some(h=>!h.vac)){push("vac");return}
@@ -275,7 +337,13 @@ function pack(p){
  if(W&&W.stops>0&&S.rejRun>=W.stops){S.rejRun=0;push("stops",`${W.stops} successive packages outside ${W.lower}–${W.upper} g`)}
  const price=p.mode==="Weight"?Math.round(w*p.unit*100)/100:p.mode==="Fixed weight"?Math.round(p.fixw/1000*p.unit*100)/100:p.fixp;
  const T1=textFor(w);if(printed.length&&ok){if(T1.src==="job"&&p.mode==="Fixed weight")S.ev.ctJob=(S.ev.ctJob||0)+1;if(T1.src==="plu"&&DB.text[p.txt1]!==REF.text[p.txt1])S.ev.ctDb=(S.ev.ctDb||0)+1;if(T1.src==="wc"){S.ev.ctWc=S.ev.ctWc||{};S.ev.ctWc[T1.n]=true}}
- const rec={t1:T1.t,t1src:T1.src,t1cls:T1.cls,c:S.cons,w,cls,l1,l1off,printed,ej,ok,note:note.join("; ")||"OK",plu:S.plu,d1:d1(),d2:WCC&&WCC.c.life1>0?addDays(d1(),WCC.c.life1):d2(),d3:d3(),wcIx:WCC?WCC.i:null,vpos:S.set.vpos,hpos:S.set.hpos,feed:S.set.feed,price,batch:S.set.batch||S.key.replace("-","")+"-"+fmtD(new Date()).replace(/\//g,""),op:S.set.operator};
+ if(printed.length&&DB.layoutsFromB2)S.ev.layoutPrinted=(S.ev.layoutPrinted||0)+1;
+ /* PSL_PCK_ERR_FLAGS (PL13): the per-package error bits a GLM sends with every package record */
+ let flags=0;if(!rej&&!transport&&(printed.length<need||l1==="Blank"||l1==="Jammed"||l1==="Shifted"))flags|=1<<1;if(rej)flags|=1<<3;
+ if(printed.length&&LINE().heads.length>1&&LINE().heads[1].dev===1&&!printed.includes(LINE().heads[1].id)&&S.heads[LINE().heads[1].id].chan==="always active")flags|=1<<5;
+ if(transport)flags|=1<<9;if(S.dbl>0)flags|=1<<12;
+ if(typeof b2Result==="function")b2Result({line:S.key,plu:S.plu,w,cls,ok,ej,printed:printed.length,t:Date.now(),nom:p.mode==="Fixed weight"?p.fixw:p.minw,mode:p.mode,flags});
+ const rec={flags,life:life(1),t1:T1.t,t1src:T1.src,t1cls:T1.cls,c:S.cons,w,cls,l1,l1off,printed,ej,ok,note:note.join("; ")||"OK",plu:S.plu,d1:d1(),d2:WCC&&WCC.c.life1>0?addDays(d1(),WCC.c.life1):d2(),d3:d3(),wcIx:WCC?WCC.i:null,vpos:S.set.vpos,hpos:S.set.hpos,feed:S.set.feed,price,batch:S.set.batch||S.key.replace("-","")+"-"+fmtD(new Date()).replace(/\//g,""),op:S.set.operator};
  S.lastPacks.unshift(rec);if(S.lastPacks.length>8)S.lastPacks.length=8;
  if(printed.length)S.last=rec;
  if(ok)S.good++;else S.good=0;
@@ -306,32 +374,31 @@ function num(title,unit,cur,ok,extra){S.dlg={k:"num",title,unit:unit||"",val:Str
 function sel(title,opts,cur,ok){S.dlg={k:"sel",title,opts,ix:Math.max(0,opts.indexOf(cur)),ok};render()}
 function conf(title,text,yes,no){S.dlg={k:"conf",title,text,yes,no};render()}
 function info(title,html){S.dlg={k:"info",title,html};render()}
-function textIn(title,cur,ok){S.dlg={k:"pw",title,val:String(cur??""),mask:false,ok,shift:true};render()}
+function textIn(title,cur,ok,max){S.dlg={k:"pw",title:title+(max?` (max. ${max})`:""),val:String(cur??""),mask:false,ok,shift:true,max};render()}
 function pw(ok,title){S.dlg={k:"pw",title:title||"Enter password",val:"",mask:true,ok,shift:false};render()}
-function protect(fn){if(S.unlocked.macro){fn();return}pw(v=>{if(v===macroPw()){S.unlocked.macro=true;fn()}else toast("Wrong password")})}
+function protect(fn){if(S.unlocked.macro){fn();return}pw(v=>{if(v===macroPw()){S.unlocked.macro=true;fn()}else toast("Wrong password")},"Label checker password")}
 function authDlg(){const opts=[0,1,2,3,4,5,9];S.dlg={k:"auth",ix:Math.max(0,opts.indexOf(S.level)),opts};render()}
 function setLevel(l){
  const go=()=>{S.level=l;S.path=[];S.page=0;S.editor=null;S.quick=false;S.unlocked={};log(`Authorization level ${l}: ${LVN[l]}`);toast(`Authorization level ${l}`);S.ev["lv"+l]=true;if(l===9&&S.ev.lv3)S.ev.back9=true;render();checkDrills()};
- if(l===5){pw(()=>info("Authorization level 5","Level 5 BIZERBA is reserved for Bizerba service engineers. Site staff don't get this password."));return}
  if(S.level===0&&l!==0&&!pwFor(l)){num("From standby: enter 183","","",v=>{if(v==="183")go();else toast("Wrong entry")});return}
- const need=pwFor(l);if(need&&l!==S.level&&!(l<S.level&&S.level!==9)){pw(v=>{if(v===need)go();else toast("Wrong password")});return}
+ const need=pwFor(l);if(need&&l!==S.level&&!(l<S.level&&S.level!==9)){pw(v=>{if(v===need)go();else toast("Wrong password")},"Password level "+l);return}
  go()}
 
 /* ============================================================ functions behind softkeys */
 function setN(k,v,lo,hi,name){const n=Number(v);if(v===""||isNaN(n)){toast("Enter a number");return false}if(n<lo||n>hi){toast(`Allowed range ${lo} … ${hi}`);return false}S.set[k]=n;log(`${name} = ${n}`);return true}
-function askPLU(){if(S.running){toast("Stop the automat before a PLU change");return}num("PLU","",pad6(S.plu),v=>callPLU(Number(v)),[{label:"Article text",fn:()=>pluList(()=>true)}])}
-function pluList(filter){if(S.running){toast("Stop the automat before a PLU change");return}const ks=Object.keys(DB.plu).filter(k=>filter(DB.plu[k])).sort((a,b)=>DB.plu[a].text.localeCompare(DB.plu[b].text));if(!ks.length){toast("No matching articles");return}
- sel("Select article",ks.map(k=>pad6(k)+"  "+DB.plu[k].text),"",v=>callPLU(Number(v.slice(0,6))))}
-function validatePLU(p){const e=[];if(!p.text)e.push("Article text is empty");if(!DB.label[p.lab])e.push(`Label param. No. ${p.lab} not found`);if(p.aut!==-1&&!DB.auto[p.aut])e.push(`Auto. labeler param. No. ${p.aut} not found`);if(p.wc!==-1&&!DB.wc[p.wc])e.push(`Weight class No. ${p.wc} not found`);return e}
+function askPLU(){if(S.running){toast("Stop the automat before a PLU change");return}loadDlg("PLU",S.plu,v=>callPLU(Number(v)),[{label:"PLU",ico:"⌕",fn:()=>pluList(()=>true)},{label:"Article text",ico:"⌕",fn:()=>pluList(()=>true)}])}
+function pluList(filter,ok){if(S.running&&!ok){toast("Stop the automat before a PLU change");return}const ks=Object.keys(DB.plu).filter(k=>filter(DB.plu[k])).sort((a,b)=>DB.plu[a].text.localeCompare(DB.plu[b].text));if(!ks.length){toast("No matching articles");return}
+ sel("Select article",ks.map(k=>pad6(k)+"  "+DB.plu[k].text),"",v=>(ok||callPLU)(Number(v.slice(0,6))))}
+function validatePLU(p){const e=[];if(!p.text)e.push("Article text is empty");if(!DB.label[p.lab])e.push(`Label param. No. ${p.lab} not found`);if(p.aut>0&&!DB.auto[p.aut])e.push(`Auto. labeler param. No. ${p.aut} not found`);if(p.wc>0&&!DB.wc[p.wc])e.push(`Weight class No. ${p.wc} not found`);return e}
 function callPLU(n){if(S.running){toast("Stop the automat before a PLU change");return}const p=DB.plu[n];if(!p){toast(`PLU ${pad6(n||0)} not found`);return}
  const e=validatePLU(p);if(e.length){S.pluOK=false;push("pluload",e.join("; "));return}
  S.pluOK=true;openMsgs().filter(m=>m.id==="pluload").forEach(m=>m.c=true);
- S.plu=n;S.d={1:null,2:null,3:null};S.rejRun=0;loadJob();S.disp={net:null,cls:null};log(`PLU ${pad6(n)} called up · ${p.text}`);toast(`PLU ${pad6(n)} active from the next package`);S.ev["called_"+n]=true;render();checkDrills()}
+ S.plu=n;S.jobOv=null;S.d={1:null,2:null,3:null};S.rejRun=0;loadJob();S.disp={net:null,cls:null};log(`PLU ${pad6(n)} called up · ${p.text}`);toast(`PLU ${pad6(n)} active from the next package`);S.ev["called_"+n]=true;render();checkDrills()}
 function editText1(){const p=P();const cur=S.jobText[1]??DB.text[p.txt1]??"";
  textIn("Text 1 · "+pad6(S.plu),cur,v=>{S.dlg=null;sel("Save Text 1",["Save for current labeling","Save to the database"+(p.txt1>0?" (text "+p.txt1+")":"")],"Save for current labeling",c=>{
   if(c.startsWith("Save for current")){S.jobText[1]=v;log("Text 1 changed for current labeling: "+v);toast("Text 1 saved for the current labeling job only")}
   else{let n=p.txt1;if(!(n>0)){n=100;while(DB.text[n]!=null)n++;p.txt1=n}DB.text[n]=v;delete S.jobText[1];log(`Text ${n} saved to the database: ${v}`);toast(`Saved as text ${n} in the database`)}checkDrills()})})}
-function textEditor(){num("Text number","",P().txt1>0?P().txt1:"",n=>{n=Number(n);if(!(n>0)){toast("Enter a text number");return}textIn(`Text editor · text ${n}`,DB.text[n]??"",v=>{S.dlg=null;conf("Security check",`Save text ${n} in the database?`,()=>{DB.text[n]=v;log(`Text ${n} saved in the database`);toast(`Text ${n} saved`+(P().txt1===n?". The active PLU uses it.":". Point PLU data › Text 1 to "+n+" to use it."))})})})}
+function textEditor(){if(MENU_MODE==="photo"){openTED(P().txt1>0?P().txt1:0);return}num("Text number","",P().txt1>0?P().txt1:"",n=>{n=Number(n);if(!(n>0)){toast("Enter a text number");return}textIn(`Text editor · text ${n}`,DB.text[n]??"",v=>{S.dlg=null;conf("Security check",`Save text ${n} in the database?`,()=>{DB.text[n]=v;log(`Text ${n} saved in the database`);toast(`Text ${n} saved`+(P().txt1===n?". The active PLU uses it.":". Point PLU data › Text 1 to "+n+" to use it."))})})})}
 function dateDlg(n){num(`Date ${n} (DDMMYY)`,"","",v=>{const m=String(v).match(/^(\d{2})(\d{2})(\d{2})$/);if(!m){toast("Enter 6 digits DDMMYY");return}const d=new Date(2000+Number(m[3]),Number(m[2])-1,Number(m[1]));if(isNaN(d)||d.getDate()!==Number(m[1])){toast("Invalid date");return}S.d[n]=d;log(`Date ${n} entered ${fmtD(d)}`)})}
 function pkgReset(){conf("RESET","Execute package reset? Packages on the belts are forgotten; empty the conveyor belts.",()=>{$$("#belt .pk").forEach(e=>e.remove());S.dbl=0;log("Package reset");toast("Package reset done. Empty the belts.")})}
 function cancelDlg(){num("Cancel: consecutive no.","","",v=>{const c=Number(v);const e=S.list.find(x=>x.c===c&&!x.neg&&!x.rej);
@@ -434,7 +501,194 @@ function L9(){const K=(label,o)=>Object.assign({label},o);return[
  K("Send channel E",Object.assign({},SPECIAL["Send channel E"],{sec:"30.10"})),
  K("Vert. print position",Object.assign({},SPECIAL["Vert. print position"],{sec:"29.3.2"})),
  K("Hor. print position",Object.assign({},SPECIAL["Hor. print position"],{sec:"29.3.2"}))].concat((S.l9extra||[]).map(x=>{const m=S.macros.find(mm=>mm.name===x.macro);return K(x.label,{mac:"·",prot:m&&!!m.pw,sec:"10.7.5",run:()=>{if(m)startMacro(m)}})}))}
-function curList(){if(S.level===9)return L9();const n=treeAt(S.path);return n.ch.filter(c=>nodeVisible(c,S.level)).map(keyFor)}
+function curList(){if(S.level===9)return L9();if(MENU_MODE==="photo")return photoList();const n=treeAt(S.path);return n.ch.filter(c=>nodeVisible(c,S.level)).map(keyFor)}
+
+/* ============================================================ photographed main menu
+   The FP2 terminals show a grouped main menu (photos 24/10/2026): Article data, Production data,
+   Display, Configuration, Device, Service. Branches that were photographed are built key for key;
+   the others are filled with the manual's menus (marked as assumed in the manual panel). */
+let MENU_MODE=store.get("menuMode","photo");
+const FREE={free:true};
+const MK=(label,o)=>Object.assign({label},o||{});
+const PMENU=MK("Main menu",{kids:[
+ MK("Article data",{ico:"db",photo:true,kids:[
+  MK("PLU",{sk:"PLU"}),
+  MK("Edit current article data",{fn:"ace",sec:"12.6"}),
+  MK("Article data maintenance",{fn:"acm",lv:3,sec:"12.6"}),
+  MK("Templates",{photo:true,kids:[MK("Template 1",{fn:"tpl",big:"P1"}),MK("Template 2",{fn:"tpl",big:"P2"}),MK("Template 3",{fn:"tpl",big:"P3"}),MK("Template 4",{fn:"tpl"}),MK("Template 5",{fn:"tpl"}),MK("Template 6",{fn:"tpl"}),MK("Template from PLU",{fn:"tplplu",greyAlways:true}),MK("More templates",{fn:"tplmore",menuLook:true}),MK("Create/edit template",{sk:"Create/edit template",lv:3}),MK("Delete unused cells",{sk:"Delete unused cells",lv:3}),MK("Delete template",{sk:"Delete template",lv:3})]}),
+  MK("Article dataparts management",{photo:true,kids:[
+   MK("PLU",{ref:["PLU"]}),
+   MK("Texts",{photo:true,kids:[MK("General texts",{photo:true,kids:[FREE,FREE,MK("Text editor",{fn:"ted",lv:3,sec:"13.3"}),MK("Delete text",{sk:"Delete text",lv:3}),MK("Delete text range",{sk:"Delete text range",lv:3}),MK("Text No. occupied",{sk:"Text No. occupied"}),FREE,FREE]}),MK("Static texts",{ref:["Static texts"]}),MK("Date text",{ref:["Date text"]}),FREE,FREE,FREE,FREE,FREE]}),
+   MK("Labels",{refPick:[["Labels","Label data local"],["Labels","Lab. data global only"],["Labels","Lab. data glob.+local"],["Labels","Delete lab. data local."],["Labels","Delete label data"],["Labels","Delete labelLayout"],["Labels","Delete logo"],["Labels","Delete font"]]}),
+   MK("Weight class",{photo:true,kids:[MK("Load weight class",{fn:"wcload"}),MK("Edit current weight class data",{sk:"Weight class editor"}),MK("Weight class data",{sk:"Weight class data",lv:3}),MK("Delete weight class",{fn:"wcdel",lv:3}),FREE,FREE,FREE,FREE]}),
+   MK("Code",{ref:["Code"]}),MK("Automat",{ref:["Automat"]}),MK("Scanning rule",{ref:["Scanning rules"]}),MK("Tendency control",{ref:["Tendency regulation"]})]}),
+  FREE,FREE,
+  MK("Article data configuration",{refs:[["Article data"],["Prices"],["Labeling mode"],["Date"]]})]}),
+ MK("Production data",{ico:"prod",refs:[["Processing"],["Texts"],["Configure total"],["Release total"],["Totalization"],["Numerators"],["Weight class &statistics"],["Templates"]]}),
+ MK("Display",{ico:"disp",ref:["Display"]}),
+ MK("Configuration",{ico:"conf",kids:[MK("Labels",{ref:["Labels"]}),MK("Printer + interface",{ref:["Printer + interface"]}),MK("Communication configuration",{ref:["Interfaces"],note:"Name from a newer GLM manual (quoted in the gxnet notes): Configuration / Communication configuration / Del. remote softkeys, level 4. Contents filled from the manual's Interfaces menu."}),MK("Languages & characters",{ref:["Languages & characters"]}),MK("Date",{ref:["Date"]}),MK("Setup",{ref:["Setup"]}),MK("Storage medium",{ref:["Storage medium"]}),MK("Device operation",{ref:["Device operation"]})]}),
+ FREE,FREE,
+ MK("Device",{ico:"dev",split:true,ref:["Device menu"]}),
+ MK("Service",{ico:"svc",refs:[["Service menu"],["Password editor"],["Printer"],["Scale menu"],["Database"]]})]});
+function findByLabel(label,n){n=n||TREE;for(const c of n.ch){if(c.label===label)return c;const r=findByLabel(label,c);if(r)return r}return null}
+function pmKids(v){
+ if(v.kids)return v.kids.map(k=>k.free?{free:true}:k.ref?{label:k.label,m:findNode(k.ref),vk:k}:{label:k.label,v:k});
+ if(v.refs)return v.refs.map(r=>{const n=findNode(r);return n?{label:n.label,m:n}:null}).filter(Boolean);
+ if(v.refPick)return v.refPick.map(r=>{const n=findNode(r);return n?{label:n.label,m:n}:null}).filter(Boolean);
+ if(v.ref){const n=findNode(v.ref);return n?n.ch.map(c=>({label:c.label,m:c})):[]}
+ return[]}
+function pmResolve(path){let cur={v:PMENU};
+ for(const t of path){if(cur.v){if(cur.v.ref){const n=findNode(cur.v.ref);cur={m:n};}
+   if(cur.v){const e=pmKids(cur.v).find(x=>!x.free&&x.label===t);if(!e)break;cur=e.m?{m:e.m,vk:e.vk}:{v:e.v};continue}}
+  const c=cur.m.ch.find(x=>x.label===t);if(!c)break;cur={m:c}}
+ if(cur.v&&cur.v.ref)cur={m:findNode(cur.v.ref),vk:cur.v};
+ return cur}
+const PFN={
+ ace:()=>openACE("current"),
+ acm:()=>loadRecord(n=>openACE("maint",n)),
+ tpl:()=>msgDlg("Template with this number does not exist!"),
+ tplplu:()=>{},
+ tplmore:()=>num("Template number","",7,()=>msgDlg("Template with this number does not exist!")),
+ wcload:()=>loadDlg("Weight class No.",P().wc>0?P().wc:"",v=>{v=Number(v);if(!DB.wc[v]){msgDlg("Weight class with this number does not exist!");return}loading(()=>{S.wcJob=clone(DB.wc[v]);log(`Weight class table ${v} loaded for the current labeling job`);toast(`Weight class ${v} loaded for this job`)})},[]),
+ wcdel:()=>num("Delete weight class","",P().wc,v=>{v=Number(v);if(!DB.wc[v]){msgDlg("Weight class with this number does not exist!");return}if(v===P().wc){toast("The active PLU uses this table. Change the PLU first.");return}conf("Security check",`Delete weight class ${v}?`,()=>{delete DB.wc[v];log(`Weight class ${v} deleted`)})}),
+ ted:()=>openTED()};
+function vKey(e){
+ if(e.free)return{label:"Free",free:true,grey:true};
+ if(e.m){const vis=nodeVisible(e.m,S.level)||e.m.ch.some(c=>nodeVisible(c,S.level));if(!vis)return{label:"Free",free:true,grey:true};
+  const k=keyFor(e.m);k.label=e.label;if(e.m.ch.length)k.menu=true;if(e.vk&&e.vk.ico)k.icon=e.vk.ico;if(e.vk&&e.vk.split){k.split=["Stop","Start"];k.cur=()=>S.running?"Start":"Stop"}if(e.vk&&!e.vk.photo&&e.vk.ref)k.desc=e.vk.note||`Key on the photographed menu. The trainer fills it with the manual's “${e.vk.ref.join(" / ")}” menu (assumed).`;return k}
+ const v=e.v;const k={label:v.label,vnode:v};
+ if(v.kids||v.refs||v.ref||v.refPick){k.menu=true;k.icon=v.ico;k.desc=v.photo?"Photographed on the FP2 terminal.":"Group on the photographed main menu. The trainer fills it with the manual's menus: "+(v.refs||v.refPick||(v.ref?[v.ref]:(v.kids||[]).filter(x=>x.ref).map(x=>x.ref))).map(r=>r.join(" / ")).join(", ")+" (assumed grouping).";
+  if(v.split){k.split=["Stop","Start"];k.cur=()=>S.running?"Start":"Stop"}return k}
+ if(v.sk){const sp=SPECIAL[v.sk]||{};const node=findByLabel(v.sk);Object.assign(k,node?keyFor(node):{},sp);k.label=v.label;k.menu=false;if(node)k.node=node}
+ if(v.fn){k.run=PFN[v.fn];k.fnKey=true;if(v.sec)k.sec=v.sec}
+ if(v.big)k.big=v.big;if(v.menuLook)k.menu2=true;
+ if(v.greyAlways)k.grey=true;
+ if(v.lv&&S.level<v.lv){k.grey=true;k.greyWhy=`Needs authorization level ${v.lv}`}
+ return k}
+function photoList(){const cur=pmResolve(S.path);
+ if(cur.m){const L=cur.m.ch.filter(c=>nodeVisible(c,S.level)).map(keyFor);return L}
+ return pmKids(cur.v).map(vKey)}
+function crumb(){return S.path.join(" \\ ")}
+
+/* ---------------------------------------------------------------- photo dialogs */
+function msgDlg(text,ok){S.dlg={k:"msg",text,ok};render()}
+function loading(fn){S.dlg={k:"loading"};render();setTimeout(()=>{S.dlg=null;fn();render()},700)}
+/* "Load" / "Load record" dialog: PLU (0..999999), arrows step through occupied numbers */
+function loadDlg(field,cur,ok,extra,title){S.dlg={k:"load",title:title||"Load",field,val:String(cur??""),fresh:true,ok,extra:extra||[]};render()}
+function pluStep(cur,dir){const ks=Object.keys(DB.plu).map(Number).sort((a,b)=>a-b);if(!ks.length)return cur;const c=Number(cur)||0;
+ if(dir>0)return ks.find(x=>x>c)??ks[0];const r=ks.filter(x=>x<c);return r.length?r[r.length-1]:ks[ks.length-1]}
+function loadRecord(ok){loadDlg("PLU",S.plu,v=>{v=Number(v);if(!DB.plu[v]){msgDlg(`PLU ${v} does not exist. Use Next availb. no. to create a new one.`);return}ok(v)},[
+  {label:"PLU",ico:"⌕",fn:()=>pluList(()=>true,v=>ok(v))},
+  {label:"Next availb. no.",fn:()=>{let k=1;while(DB.plu[k])k++;DB.plu[k]=Object.assign(clone(DB.plu[S.plu]),{text:"",plu:k});ok(k)}},
+  {label:"Article text",ico:"⌕",fn:()=>pluList(()=>true,v=>ok(v))}],"Load record")}
+
+/* ---------------------------------------------------------------- Edit current article data / Article data maintenance
+   One table, one column per device on the line (2: Master, 3: Slave), tabs on the right as photographed. */
+const ACE_TABS={
+ General:[["text","Article text","text"],["country","Country","sel",["England","Scotland","Wales","Northern Ireland","United Kingdom"]],["upi","Unit price intervals","sel",["per unit","per kg","per 100 g"]],["unit","Price","money"],["sprice","Special price","money"],["recalc","Recalculate unit price(s)","sel",["Without recalculation","With recalculation"]],["wtypes","Weight types","ro",()=>"kg 001"],["mode","Labeling mode","sel",["Weight","Fixed price","Fixed weight","Fixed value"]],["fixw","Fixed weight","kg"],["tare","Tare","kg"],["minw","Minimum weight","kg"],["maxw","Maximum weight","kg"],["ingsel","Ingredient selection","sel",["Ingredients in %","Without"]],["ingp","Ingredient proportion","pct"],["pcs","Pieces/ package","int"],["life1","Shelf-life 1","int"],["life2","Shelf-life 2","int"],["dt1","Date text field 1","dtext"],["dt2","Date text field 2","dtext"],["dt3","Date text field 3","dtext"],["grp","Pr. group number","int"],["logo1","Logo number logo field1","logo"],["logo2","Logo number logo field2","logo"],["logo3","Logo number logo field3","logo"],["lseq","Label sequence number","roint"]],
+ Texts:[["text","Article text","text"],["txt1","Text field 1","gtext"],["tf2","Text field 2","text"],["tf3","Text field 3","text"],["tf4","Text field 4","text"],["tf5","Text field 5","text"],["tf6","Text field 6","text"],["tf7","Text field 7","text"],["tf8","Text field 8","text"],["tf9","Text field 9","text"],["tf10","Text field 10","text"]],
+ Barcode:[["cf1","Code field 1","code"],["cf2","Code field 2","code"],["cf3","Code field 3","code"],["cs1","Code sub-string 1","digits"],["cs2","Code sub-string 2","digits"],["cs3","Code sub-string 3","digits"],["cs4","Code sub-string 4","digits"],["cs5","Code sub-string 5","digits"]],
+ "Label parameters":[["lab","Label param. No.","box"],["ltype","Label type","labsel"]],
+ "Aut.lab. parameters":[["aut","Autom. labeler parameter no.","box"],["ref","Ref. point lab. distan.","asel",["Pckg. edge front side","Pckg. edge back side","Pckg. edge middle"]],["lpos","Label position","aro",()=>"Label position 1"],["opmode","Operating mode","asel",["Transport","Weighing Continuous","Weighing Start/Stop"]],["lcmode","Labeler conv. mode","aro"],["lb1","LB1 susp. path","amm"],["lb23","LB2/3 susp. path","aromm"],["dist","Label distance","amm"],["pkh","Max pckg. height","amm"],["speed","Speed","aromin"],["conv","Conveying speed","aromin"]],
+ "Package selection":[["wc","Weight class No.","wcbox"],["selcrit","Selection criteria","sel",["Unknown","Weight determination","Checking contents","Sliding contents control","Weight classification","FPV Europe","FPV Canada","IPEM","USA - Non USDA standardized","USA - USDA standardized","USA - USDA only liquid mater","Free selection"]]]};
+const ACE_ORDER=["General","Texts","Barcode","Label parameters","Aut.lab. parameters","Package selection"];
+/* job settings that the Aut.lab. tab shows live (they belong to the labeling job, not the PLU record) */
+const ACE_JOB={ref:"ref",opmode:"opmode",lcmode:"lcmode",lb1:"lb1",lb23:"lb23",dist:"dist",speed:"speed",conv:"conv"};
+function openACE(mode,plu){if(S.running&&mode==="maint"&&plu===S.plu){toast("Stop the automat before changing the running article");return}
+ const src=mode==="current"?P():DB.plu[plu];if(!src){toast("No article");return}
+ const A=AT()||{};const job={};Object.keys(ACE_JOB).forEach(k=>job[k]=S.set[ACE_JOB[k]]);job.pkh=A.pkh||0;
+ S.ace={mode,plu:mode==="current"?S.plu:plu,tab:mode==="pkg"?"Package selection":"General",data:clone(src),job,slave:clone(src.slave||{}),top:0,sel:null,dirty:false};S.editor=null;S.matrix=null;S.quick=false;render()}
+function aceVal(row,col){const A=S.ace,d=A.data,k=row[0],t=row[2];
+ const dv=(kk)=>{if(col===1&&A.slave[kk]!=null)return A.slave[kk];return A.job[kk]};
+ switch(t){
+  case"text":return d[k]||"";case"sel":return d[k]||row[3][0];case"money":return"£ "+f2(d[k]||0);
+  case"kg":return f3((d[k]||0)/1000)+"kg";case"pct":return(d[k]||0)+"%";case"int":case"roint":return String(d[k]||0);
+  case"ro":case"aro":return row[3]?row[3]():String(dv(k)??"");
+  case"dtext":return d[k]>0?d[k]+": "+(DB.dtext[d[k]]||""):"";
+  case"logo":return d[k]>0?`${d[k]} (${DB.logo[d[k]]||"?"})`:"0";
+  case"gtext":return d[k]>0?(DB.text[d[k]]??""):(S.ace.mode==="current"&&S.jobText&&S.jobText[1]!=null?S.jobText[1]:"");
+  case"code":return d[k]>0&&DB.code[d[k]]?`${DB.code[d[k]].name}\nCode substring 1: ${d.cs1}`:"";
+  case"digits":return d[k]??"0";
+  case"box":return String(d[k]??"");
+  case"labsel":{const L=DB.label[d.lab];return L?`${d.lab}: ${L.name}`:"—"}
+  case"asel":return dv(k);case"amm":case"aromm":return(dv(k)??0)+"mm";case"aromin":return(dv(k)??0)+"m/min";
+  case"wcbox":return d.wc>0?String(d.wc):"0"}
+ return""}
+function aceEdit(row,col){const A=S.ace,d=A.data,k=row[0],t=row[2];const done=()=>{A.dirty=true;render()};
+ const setDev=(v)=>{if(col===1)A.slave[k]=v;else A.job[k]=v;done()};
+ if(/^(ro|aro|aromm|aromin|roint)$/.test(t)){toast("Display only in this table");return}
+ if(t==="text")return textIn(row[1],d[k]||"",v=>{d[k]=v;done()},k==="text"?64:1700);
+ if(t==="sel")return sel(row[1],row[3],d[k]||row[3][0],v=>{d[k]=v;done()});
+ if(t==="money")return num(row[1],"£",d[k]||0,v=>{d[k]=Number(v)||0;done()});
+ if(t==="kg")return num(row[1],"kg",f3((d[k]||0)/1000),v=>{d[k]=Math.round(Number(v)*1000)||0;done()});
+ if(t==="pct"||t==="int")return num(row[1],t==="pct"?"%":"",d[k]||0,v=>{d[k]=Number(v)||0;done()});
+ if(t==="dtext")return sel(row[1],["0  none"].concat(Object.entries(DB.dtext).map(([n,x])=>n+"  "+x)),"",v=>{d[k]=Number(v.split(" ")[0]);done()});
+ if(t==="logo")return sel(row[1],["0  none"].concat(Object.entries(DB.logo).map(([n,x])=>n+"  ("+x+")")),"",v=>{d[k]=Number(v.split(" ")[0]);done()});
+ if(t==="gtext")return sel("Text field 1 · general text number",["0  none"].concat(Object.entries(DB.text).map(([n,x])=>n+"  "+x)),"",v=>{d[k]=Number(v.split(" ")[0]);done()});
+ if(t==="code")return sel(row[1],["0  none"].concat(Object.entries(DB.code).map(([n,x])=>n+"  "+x.name)),"",v=>{d[k]=Number(v.split(" ")[0]);done()});
+ if(t==="digits")return num(row[1],"",d[k]||"0",v=>{if(String(v).length>30){toast("A code substring holds max. 30 characters (GGT_CTS)");return}d[k]=String(v||"0");done()});
+ if(t==="box"){const kind=k==="lab"?"label":"auto";return num(row[1],"",d[k],v=>{v=Number(v);if(v!==0&&!DB[kind][v]){msgDlg("Table with this number does not exist!");return}d[k]=v;done()})}
+ if(t==="labsel")return sel(row[1],Object.entries(DB.label).map(([n,L])=>n+": "+L.name),"",v=>{d.lab=Number(v.split(":")[0]);done()});
+ if(t==="asel")return sel(row[1],row[3],A.job[k],setDev);
+ if(t==="amm")return num(row[1]+(col===1?" · slave":""),"mm",col===1&&A.slave[k]!=null?A.slave[k]:A.job[k],v=>setDev(Number(v)||0));
+ if(t==="wcbox")return toast("Use the Weight class button to edit the table")}
+function aceSave(close){const A=S.ace;
+ const applyJob=()=>{Object.keys(ACE_JOB).forEach(k=>{if(A.job[k]!=null)S.set[ACE_JOB[k]]=A.job[k]})};
+ if(A.mode==="current"){S.jobOv={plu:S.plu,data:Object.assign(clone(A.data),{slave:clone(A.slave)})};applyJob();A.dirty=false;log("Edit current article data: accepted for the current labeling job");toast("Changes active for the current labeling job. A PLU call-up brings back the database values.");S.ev.ace=true;if(close)S.ace=null;checkDrills();render();return}
+ const go=()=>{DB.plu[A.plu]=Object.assign(clone(A.data),{slave:clone(A.slave)});if(A.plu===S.plu){S.jobOv=null;applyJob()}A.dirty=false;log(`Article data maintenance: PLU ${A.plu} saved in the database`);
+  toast(`PLU ${A.plu} saved`+(LINE().online===false?"":". This line is online: the next BRAIN2 download overwrites it."));S.ev.acm=true;if(close)S.ace=null;checkDrills();render()};
+ conf("Security check",`Save PLU ${A.plu} in the database?`,go)}
+function aceHTML(){const A=S.ace,rows=ACE_TABS[A.tab],devs=LINE().dev;const cols=devs.length>1?[0,1]:[0];const vis=11;const top=Math.min(A.top,Math.max(0,rows.length-vis));A.top=top;
+ const title=A.mode==="maint"?`Article data maintenance - PLU: ${A.plu}`:A.mode==="pkg"?"Package selection":"Edit current article data";
+ let h=`<div class="ace"><div class="ace-t">${esc(title)}${A.dirty?' <span class="sm">· changed</span>':""}</div>
+ <div class="ace-ico"><span class="aico" data-a="acefind" title="Search">⌕</span><span class="aico" data-a="aceprint" title="Print">⎙</span><span class="aico" data-a="acehelp" title="Help">?</span></div>
+ <table class="acet"><tr><th></th>${cols.map(c=>`<th class="devh">${devs[c].bus}: ${esc(devs[c].name)}</th>`).join("")}</tr>`;
+ rows.slice(top,top+vis).forEach((r,i)=>{const ri=top+i;const ro=/^(ro|aro|aromm|aromin|roint|box|wcbox)$/.test(r[2]);
+  h+=`<tr><td><div class="rowb ${ro?"ro":""}" data-acer="${ri}">${esc(r[1])}</div></td>${cols.map(c=>{const v=aceVal(r,c);const on=A.sel&&A.sel[0]===ri&&A.sel[1]===c;
+   return`<td class="acv ${ro?"ro":""} ${on?"on":""} ${r[2]==="box"||r[2]==="wcbox"?"box":""}" data-acec="${ri},${c}"><span>${esc(v).replace(/\n/g,"<br>")}</span>${ro?"":"<i class=\"tri\"></i>"}</td>`}).join("")}${r[2]==="wcbox"?`<td class="acebtns"><div class="cbtn" data-a="acewcdel" style="width:76px;height:32px">Delete weight class</div><div class="cbtn" data-a="acewc" style="width:76px;height:32px">Weight class</div></td>`:""}</tr>`});
+ h+=`</table>`;
+ if(rows.length>vis)h+=`<div class="ace-up ${top>0?"":"dim"}" data-a="aceup">⇧</div><div class="ace-dn ${top+vis<rows.length?"":"dim"}" data-a="acedn">⇩</div>`;
+ if(A.mode!=="pkg")h+=`<div class="ace-tabs">${ACE_ORDER.map(t=>`<div class="atab ${t===A.tab?"on":""}" data-acetab="${t}">${esc(t)}</div>`).join("")}</div>`;
+ h+=`<div class="ace-bot"><div class="cbtn" data-a="aceclose" title="Close">✕</div>${A.mode==="maint"?`<div class="cbtn" data-a="acesave" title="Save">💾</div>`:""}<div class="cbtn" data-a="aceok" title="Accept"><span class="ck">✓</span></div></div></div>`;
+ return h}
+function aceClick(desc){const A=S.ace;
+ if(desc.acetab){A.tab=desc.acetab;A.top=0;A.sel=null;render();return true}
+ if(desc.acer!=null){const r=ACE_TABS[A.tab][desc.acer];showRowHelp(r);A.sel=[desc.acer,0];render();return true}
+ if(desc.acec){const [ri,c]=desc.acec.split(",").map(Number);const r=ACE_TABS[A.tab][ri];if(A.sel&&A.sel[0]===ri&&A.sel[1]===c)aceEdit(r,c);else{A.sel=[ri,c];S.aceDev=c;render()}return true}
+ const a=desc.a;if(!a||!a.startsWith("ace"))return false;
+ if(a==="aceup"){A.top=Math.max(0,A.top-6);render();return true}
+ if(a==="acedn"){A.top=A.top+6;render();return true}
+ if(a==="acefind"){sel("Find attribute",ACE_ORDER.flatMap(t=>ACE_TABS[t].map(r=>t+" › "+r[1])),"",v=>{const [t,l]=v.split(" › ");A.tab=t;const i=ACE_TABS[t].findIndex(r=>r[1]===l);A.top=Math.max(0,i-3);A.sel=[i,0]});return true}
+ if(a==="aceprint"){toast("Article record sent to the list printer (simulated)");return true}
+ if(a==="acehelp"){info(A.mode==="maint"?"Article data maintenance":"Edit current article data",A.mode==="maint"?"Changes the PLU record in this terminal's database. Save with the disk key or ✓. On an online line BRAIN2 overwrites local records at its next download, so permanent changes belong in BRAIN2.":"Changes the article for the labeling job that is running now. Nothing is written to the database: the next PLU call-up loads the stored record again. Columns are the devices on the system bus: 2 is the master, 3 the slave labeller.");return true}
+ if(a==="acewc"){SPECIAL["Weight class editor"].run();S.ace=null;render();return true}
+ if(a==="acewcdel"){PFN.wcdel();return true}
+ if(a==="aceclose"){if(A.dirty)conf("Close","Discard your changes?",()=>{S.ace=null;S.aceDev=null;render()});else{S.ace=null;S.aceDev=null}render();return true}
+ if(a==="acesave"){aceSave(false);return true}
+ if(a==="aceok"){if(!A.dirty){S.ace=null;S.aceDev=null;render();return true}if(A.mode==="current")aceSave(true);else aceSave(true);return true}
+ return false}
+function showRowHelp(r){const lbl=r[1];const node=findByLabel(lbl)||findByLabel(lbl.replace(/\s*\(s\)$/,""));if(node&&node.secs.length)showManual({label:lbl,node,sec:null});else $("#manBody").innerHTML=`<div class="t">${esc(lbl)}</div><div class="meta">Field of the article record (photographed on FP2-L04). No single manual section covers it.</div>`}
+
+/* ---------------------------------------------------------------- full-screen text editor (photographed) */
+function openTED(n){const t=n>0?(DB.text[n]??""):"";S.ted={n:n||0,val:t,shift:false,over:false,align:"Left",size:"Normal"};S.dlg=null;render()}
+function tedHTML(){const T=S.ted;const lines=T.val.split("\n");
+ const row1=[["tload","Load"],["tsize","Character size"],["talign","Alignment"],["tctrl","Add contr. characters"],["tscope","Scope"],["tover","Overwrite",true],["tsave","Save"],["texit","Exit"]];
+ let h=`<div class="ted"><div class="ted-h"><span>Text${T.n?" "+T.n:""}</span><span>Character ${T.val.length} &nbsp; Paragraph ${lines.length} &nbsp; Text length ${T.val.length} &nbsp; max text length 2000</span></div>
+ <div class="ted-a" style="text-align:${T.align.toLowerCase()}">${esc(T.val)}<span class="caret">|</span></div>
+ <div class="ted-r1">${row1.map(([a,l,sp])=>`<div class="sk2" data-a="${a}">${sp?`<span class="spl"><span class="${T.over?"":"on"}">Off</span><span class="${T.over?"on":""}">On</span></span>`:`<span class="v">▬</span>`}<span>${esc(l)}</span></div>`).join("")}</div>`;
+ h+=qwerty({shift:T.shift},true)+`</div>`;return h}
+function tedKey(k){const T=S.ted;if(k==="ESC"){S.ted=null;render();return}if(k==="SHIFT"){T.shift=!T.shift;render();return}if(k==="2ND"||k==="ALT")return;
+ if(k==="BS")T.val=T.val.slice(0,-1);else if(k==="OK")T.val+="\n";else T.val+=(/[A-ZÜÖÄ]/.test(k)&&!T.shift)?k.toLowerCase():k;if(T.val.length>2000)T.val=T.val.slice(0,2000);render()}
+function tedAct(a){const T=S.ted;
+ if(a==="tload"){num("Load text · text number","",T.n||"",v=>{v=Number(v);if(DB.text[v]==null){msgDlg("Text with this number does not exist!");return}T.n=v;T.val=DB.text[v];S.dlg=null;render()});return true}
+ if(a==="tsize"){sel("Character size",["Normal","Double height","Double width","Small"],T.size,v=>{T.size=v});return true}
+ if(a==="talign"){sel("Alignment",["Left","Center","Right"],T.align,v=>{T.align=v});return true}
+ if(a==="tctrl"){sel("Add contr. characters",["Line feed","Tab","Bold on/off","Underline on/off"],"",v=>{T.val+=v==="Line feed"?"\n":v==="Tab"?"\t":"";render()});return true}
+ if(a==="tscope"){toast("Scope: whole text");return true}
+ if(a==="tover"){T.over=!T.over;render();return true}
+ if(a==="tsave"){num("Save text · text number","",T.n||"",v=>{v=Number(v);if(!(v>0)){toast("Enter a text number");return}conf("Security check",`Save text ${v} in the database?`,()=>{DB.text[v]=T.val;T.n=v;log(`Text ${v} saved in the database (text editor)`);S.ev.tedSaved=true;toast(`Text ${v} saved`+(P().txt1===v?". The active PLU uses it in Text field 1.":""));checkDrills()})});return true}
+ if(a==="texit"){S.ted=null;render();return true}
+ return false}
 
 /* ============================================================ table editors */
 const DEFS={
@@ -482,14 +736,25 @@ function KEY(w,c){return`<svg width="${w}" height="${w*0.45}" viewBox="0 0 40 18
 function LOCK(){return`<svg width="9" height="10" viewBox="0 0 9 10" aria-hidden="true"><rect x="1" y="4" width="7" height="6" fill="#fff"/><path d="M2.5 4V2.8a2 2 0 0 1 4 0V4" fill="none" stroke="#fff" stroke-width="1.2"/></svg>`}
 function flag(){return`<svg width="30" height="20" viewBox="0 0 60 40" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 60,40 M60,0 0,40" stroke="#fff" stroke-width="8"/><path d="M0,0 60,40 M60,0 0,40" stroke="#c8102e" stroke-width="3"/><path d="M30,0v40M0,20h60" stroke="#fff" stroke-width="12"/><path d="M30,0v40M0,20h60" stroke="#c8102e" stroke-width="7"/></svg>`}
 function lblIcon(){return`<svg width="28" height="24" viewBox="0 0 28 24" aria-hidden="true"><rect x="3" y="3" width="18" height="13" fill="#fff" stroke="#555"/><path d="M6 7h12M6 10h9" stroke="#888"/><path d="M14 14c3 0 6 2 8 6l-6 2-4-5z" fill="#c9a27a" stroke="#6b4e2e"/></svg>`}
-function statusBox(){const om=openMsgs();const face=om.length?(locked()?"#e53935":"#f2b705"):"#f2b705";const dv=LINE().dev[S.dev];
+function statusBox(){const om=openMsgs();const face=om.length?(locked()?"#e53935":"#f2b705"):"#f2b705";const di=S.ace&&S.aceDev!=null&&LINE().dev[S.aceDev]?S.aceDev:S.dev;const dv=LINE().dev[di];const blue=di!==S.dev;const both=S.ted&&LINE().dev.length>1;
  return`<div class="p" style="left:402px;top:0;width:166px;height:46px;background:#5d6168;border-color:#4a4e54">
  <div style="display:flex;align-items:center;gap:7px;color:#fff;font-size:10px;height:15px;padding:1px 5px"><span style="display:inline-flex;align-items:center;gap:1px">${KEY(14,"#fff")}<b>${S.level}</b></span><span style="display:inline-block;width:12px;height:8px;border:1px solid #fff"></span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${face};border:1px solid #333;line-height:9px;text-align:center;color:#333;font-size:8px">☺</span>${S.running?'<span style="color:#9be89b">● RUN</span>':""}${locked()?'<span style="color:#ffb4ab">⛔</span>':""}</div>
- <div data-a="dev" style="background:#a8281d;color:#fff;font-size:11px;padding:1px 5px;margin:0 3px;cursor:${LINE().dev.length>1?"pointer":"default"}" title="${LINE().dev.length>1?"Switch operating connection":""}">${dv.bus}: ${esc(dv.name)}</div>
+ <div data-a="dev" style="background:${both?"#3a3c40":blue?"#2b55c7":"#a8281d"};color:#fff;font-size:11px;padding:1px 5px;margin:0 3px;cursor:${LINE().dev.length>1?"pointer":"default"}" title="${LINE().dev.length>1?"Switch operating connection":""}">${both?LINE().dev.map(d=>d.bus).join(", "):dv.bus+": "+esc(dv.name)}</div>
  <div style="padding:0 5px;line-height:0">${LOCK()}</div></div>`}
 function totBox(x,w,name,t,cons){const pre=S.set.presel[name.slice(-1)];return`<div class="p" style="left:${x}px;top:46px;width:${w}px;height:96px;padding:2px 6px;font-size:9px;line-height:1.3"><div>${name}</div><div style="display:grid;grid-template-columns:20px 1fr"><span>#</span><span style="text-align:right">${t.n}</span><span>kg</span><span style="text-align:right">${f3(t.kg)}</span><span>£</span><span style="text-align:right">${f2(t.val)}</span></div>${pre&&pre.val&&pre.type!=="None"?`<div style="display:flex;justify-content:space-between"><span>Presel.</span><span>${pre.type==="Preselect pieces"?pre.val+" #":pre.val}</span></div>`:""}${cons?`<div style="margin-top:2px">Cons.No.: ${S.cons}</div>`:""}</div>`}
+/* label 205 "M&S NFO 2" as shown in the FP2 preview: COOKS IN, USE BY date, GB 2037 health mark, Not for EU, SC1606, code line */
+function dateLabel(r,p){const dy=(r.vpos-geo().vpos+r.feed-geo().feed)*0.55,dx=-(r.hpos-geo().hpos)*0.55;const doy=Math.floor((r.d1-new Date(r.d1.getFullYear(),0,0))/864e5);
+ const tm=new Date().toTimeString().slice(0,5);return`<div style="position:absolute;left:${8+dx}px;top:${40+dy}px;width:290px;color:#111">
+ <div style="text-align:center;font-size:7px;margin-left:30px;letter-spacing:.04em">COOKS IN:</div><div style="text-align:center;font-size:8px;min-height:11px;margin-left:30px">${esc(r.t1?shortT(r.t1):"")}</div>
+ <div style="font-size:7px;margin:14px 0 0 14px">${esc((p.d2&&p.d2!=="Without"?p.d2:"Use by").toUpperCase())}</div>
+ <div style="display:flex;align-items:center;gap:14px;margin-left:12px"><span style="font-family:'Arial Narrow',Arial,sans-serif;font-stretch:condensed;font-size:40px;letter-spacing:-1px;transform:scaleX(.72);transform-origin:left;display:inline-block;width:150px;white-space:nowrap">${fmtD(r.d2)}</span>
+ <span style="display:grid;justify-items:center;gap:3px"><span style="border:1.5px solid #111;border-radius:50%;width:38px;height:30px;display:grid;place-items:center;font-size:9px;line-height:1.05;text-align:center;font-weight:700">GB<br>2037</span><span style="font-size:6px">Not for EU</span><span style="font-size:8px;font-weight:700">SC1606</span></span></div>
+ <div style="font-size:7.5px;margin:18px 0 0 14px;word-spacing:14px">${life(1)} ⧈${tm} ${esc(p.tf6||"")} ${doy}</div></div>`}
 function labelBox(r,small){if(!r)return'<div class="sm" style="padding:10px">No label printed yet.</div>';
- const p=DB.plu[r.plu]||P(),G=geo(),L=DB.label[p.lab]||REF.label[3];const big=L.size!=="58 x 40";
+ const p=DB.plu[r.plu]||P(),G=geo(),L=DB.label[p.lab]||REF.label[3];
+ const LY=DB.layouts&&L.layout&&DB.layouts[L.layout];
+ if(LY&&r.l1!=="Blank"){const k=Math.min(286/LY.w,450/LY.h);const dy=(r.vpos-G.vpos+r.feed-G.feed)*0.55,dx=-(r.hpos-G.hpos)*0.55;
+  return`<div style="position:absolute;left:${(306-LY.w*k)/2+dx}px;top:${(LY.h*k<300?120:12)+dy}px">${renderLayout(LY,p,layoutCtx(p,r,S.key,DB),k,{rot180:L.rot180==="With"})}</div>`}const big=L.size!=="58 x 40";
  const w=big?200:186,h=big?200:128;
  if(r.l1==="Blank")return`<div style="position:absolute;left:${(306-w)/2}px;top:${big?120:150}px;width:${w}px;height:${h}px;border:1px dotted #bbb"></div><div class="sm" style="position:absolute;left:0;right:0;top:${big?330:290}px;text-align:center;color:#aaa">(blank label)</div>`;
  const dy=(r.vpos-G.vpos+r.feed-G.feed)*0.55,dx=-(r.hpos-G.hpos)*0.55;
@@ -502,7 +767,9 @@ function labelBox(r,small){if(!r)return'<div class="sm" style="padding:10px">No 
   ${r.t1?`<div style="font-size:5.5px;margin-top:3px;width:175px;line-height:1.25">${esc(r.t1)}</div>`:""}<div style="margin-top:4px">${code?eanSvg(code,110):p.code?`<div style="font-size:6px">${esc(p.code.v)}</div>`:""}</div><div style="font-size:5px">${pad6(r.plu)} ${esc(r.batch)} ${String(r.c).slice(-6)}</div>`
  :`<div style="position:absolute;left:82px;top:-18px;width:20px;height:12px;border:1px solid #333;border-radius:50%"></div><div style="font-size:11px;font-weight:700">${fmtD(r.d2)}</div><div style="font-size:4.8px;margin-top:2px">${pad6(r.plu)} L${S.key.slice(-2)} ${String(r.c).slice(-6)} ${new Date().toTimeString().slice(0,5)}</div><div style="font-size:4.8px;margin-left:32px;margin-top:4px">${f3(r.w)}kg</div>${r.t1?`<div style="font-size:4.6px;margin-top:3px;width:110px;white-space:normal">${esc(r.t1)}</div>`:""}`;
  return`<div style="position:absolute;left:${(306-w)/2}px;top:${big?120:150}px;width:${w}px;height:${h}px;overflow:hidden;border:1px dotted #d0d0d0"><div style="position:absolute;left:${(big?12:40)+dx}px;top:${(big?10:44)+dy}px;color:#111;line-height:1.3">${inner}</div></div>`}
-function label2(r){if(!r)return"";const heads=LINE().heads;if(heads.length<2)return"";const h2=heads[1];
+function label2(r){if(!r)return"";const heads=LINE().heads;if(heads.length<2)return"";const h2=heads[1];const L2=DB.label[(DB.plu[r.plu]||P()).lab];
+ const LY2=L2&&DB.layouts&&DB.layouts[L2.layout];
+ if(LY2&&r.printed.includes(h2.id)&&!h2.wrap){const p2=DB.plu[r.plu]||P();const k=Math.min(300/LY2.w,290/LY2.h);return`<div style="position:absolute;left:${(320-LY2.w*k)/2}px;top:12px">${renderLayout(LY2,p2,layoutCtx(p2,r,S.key,DB),k)}</div>`}
  if(!r.printed.includes(h2.id))return`<div class="sm" style="position:absolute;left:0;right:0;top:140px;text-align:center;color:#aaa;font-size:9px">(${esc(h2.name)}: no print)</div>`;
  if(h2.wrap)return`<div style="position:absolute;left:120px;top:80px;width:60px;height:150px;border:1px solid #999;font-size:6px;padding:4px;text-align:center"><b>C-Wrap</b><br><br>${esc(DB.plu[r.plu].text.slice(0,40))}<br><br>${fmtD(r.d2)}</div>`;
  return`<div style="position:absolute;left:142px;top:100px;transform:rotate(90deg);font-size:5.5px;line-height:1.35;color:#111;white-space:nowrap"><div style="font-weight:700;font-size:6.5px">${fmtD(r.d2)}</div><div>${pad6(r.plu)}</div><div>${f3(r.w)} kg</div></div>`}
@@ -530,6 +797,8 @@ function stageHTML(){
  <div class="p" style="left:572px;top:108px;width:358px;height:34px"></div><div class="p" style="left:932px;top:108px;width:338px;height:34px"></div>
  <div class="btn" data-a="zero" style="left:14px;top:148px;width:40px;height:178px;font-size:15px;font-weight:700;color:#333" title="Zero">&gt;0&lt;</div>
  <div class="btn" data-a="startstop" style="left:14px;top:332px;width:40px;height:294px">${dia}</div>`;
+ if(S.ted){h+=tedHTML();h+=overlayHTML();return h}
+ if(S.ace){h+=aceHTML();h+=overlayHTML();return h}
  if(S.editor)h+=editorHTML();else if(S.matrix)h+=matrixHTML();else if(S.quick)h+=quickHTML();
  else{const rows=convRows();h+=`<div class="p" style="left:58px;top:142px;width:322px;height:178px;background:#e9ebed;padding:8px 10px">${rows.map(k=>{const v=S.cur[k]??0;return`<div class="cur-row"><span>${k}</span><span>${v.toFixed(1).replace(".",",")}A</span><span class="bar"><i class="${v>2.8?"hi":""}" style="width:${Math.min(100,v/3.5*100)}%"></i></span><span>3,5A</span></div>`}).join("")}</div>
   <div class="p" style="left:58px;top:320px;width:322px;height:306px">${label2(S.last)}</div>
@@ -552,15 +821,18 @@ function stageHTML(){
  return h}
 function softList(){return S.msgView&&!S.dlg?msgKeys():S.editor?edKeys():S.matrix?mxKeys():curList()}
 let lastTouched=null;
-function softkeysHTML(){if(S.softHidden)return"";
+function skIcon(n){const I={db:'<svg width="18" height="20" viewBox="0 0 18 20"><ellipse cx="9" cy="4" rx="7" ry="3" fill="none" stroke="#444" stroke-width="1.5"/><path d="M2 4v12c0 1.7 3.1 3 7 3s7-1.3 7-3V4" fill="none" stroke="#444" stroke-width="1.5"/></svg>',prod:'<svg width="22" height="20" viewBox="0 0 22 20"><rect x="2" y="2" width="11" height="13" fill="#fff" stroke="#444"/><rect x="7" y="5" width="11" height="13" fill="#ddd" stroke="#444"/><rect x="12" y="12" width="7" height="6" fill="#444"/></svg>',disp:'<svg width="24" height="20" viewBox="0 0 24 20"><rect x="2" y="2" width="20" height="13" fill="#fff" stroke="#444"/><path d="M5 12l4-5 3 3 3-4 4 6" fill="none" stroke="#444"/><rect x="8" y="16" width="8" height="2" fill="#444"/></svg>',conf:'<svg width="26" height="20" viewBox="0 0 26 20"><rect x="2" y="3" width="8" height="6" fill="#fff" stroke="#444"/><rect x="15" y="3" width="8" height="6" fill="#fff" stroke="#444"/><path d="M6 9v5h13V9M12 14v4" stroke="#444" fill="none"/></svg>',svc:'<svg width="22" height="22" viewBox="0 0 22 22"><path d="M4 18l8-8M13 3a5 5 0 0 0 6 6l-3 3-6-6z" stroke="#333" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>',dev:""};return I[n]||""}
+function softkeysHTML(){if(S.softHidden||S.ace||S.ted)return"";
  const list=softList();const pages=Math.max(1,Math.ceil(list.length/8));if(S.page>=pages)S.page=0;
  const sl=list.slice(S.page*8,S.page*8+8);let h="";
  sl.forEach((k,i)=>{const x=347+i*83;const grey=typeof k.grey==="function"?k.grey():k.grey;
-  let top;if(k.split){const cur=k.cur();top=`<span class="spl">${k.split.map(s=>`<span class="${s===cur?"on":""}">${esc(s)}</span>`).join("")}</span>`}
-  else if(k.mac)top=`<span class="mac">${k.mac} ⊙⊙ ${k.prot?"#":""}</span>`;else if(k.val&&k.val()!=="")top=`<span class="v">${esc(k.val())}</span>`;else if(k.menu)top=`<span class="v">▸</span>`;else if(k.ico)top=`<span class="v">${k.ico}</span>`;else top=`<span class="v"></span>`;
-  h+=`<div class="sk ${grey?"grey":""} ${lastTouched===k.label?"hl":""}" data-sk="${i}" style="left:${x}px">${top}<span class="lb">${esc(k.label)}</span></div>`});
+  if(k.free){h+=`<div class="sk free" style="left:${x}px"><span class="lb">Free</span></div>`;return}
+  const pm=MENU_MODE==="photo";let top;if(k.split){const cur=k.cur();top=`<span class="spl">${k.split.map(s=>`<span class="${s===cur?"on":""}">${esc(s)}</span>`).join("")}</span>`}
+  else if(k.mac)top=`<span class="mac">${k.mac} ⊙⊙ ${k.prot?"#":""}</span>`;else if(k.val&&k.val()!=="")top=`<span class="v">${esc(k.val())}</span>`;else if(k.menu||k.menu2)top=`<span class="v">${pm?"▾":"▸"}</span>`;else if(pm)top=`<span class="v fnm">▬</span>`;else if(k.ico)top=`<span class="v">${k.ico}</span>`;else top=`<span class="v"></span>`;
+  const mid=k.big?`<span class="bigk">${esc(k.big)}</span>`:k.icon&&skIcon(k.icon)?`<span class="ski">${skIcon(k.icon)}</span>`:"";
+  h+=`<div class="sk ${grey?"grey":""} ${lastTouched===k.label?"hl":""}" data-sk="${i}" style="left:${x}px">${top}${mid}<span class="lb">${esc(k.label)}</span></div>`});
  h+=`<div class="sk" data-a="etc" style="left:1013px;width:54px"><span class="v">${pages>1?(S.page+1)+"/"+pages:""}</span><span>⇆<br>ETC</span></div>`;
- if(S.level!==9&&!S.editor&&!S.msgView)h+=`<div class="path">${esc(["Main menu",...S.path].join(" / "))}</div>`;
+ if(S.level!==9&&!S.editor&&!S.msgView){if(MENU_MODE==="photo"){if(S.path.length)h+=`<div class="crumb">${esc(crumb())}</div>`}else h+=`<div class="path">${esc(["Main menu",...S.path].join(" / "))}</div>`}
  return h}
 const WCROWS=[["wc","Weight class"],["lab","Labeling mode"],["stat","Statistics"],["art","Article parameters"],["stop","Automat stops after .."],["tot","Totalization"],["dp","Deactivate print!"]];
 function wcCell(W,r,i){const c=W.cols[i];switch(r){
@@ -616,13 +888,16 @@ function msgEnable(){const m=openMsgs()[S.msgView?.i||0];if(!m){S.msgView=null;r
 function msgAll(){let n=0;openMsgs().forEach(m=>{if(m.id!=="pluload"&&MSG[m.id].ok()){m.c=true;n++}});log(`Accept all: ${n} cleared, package reset`);$$("#belt .pk").forEach(e=>e.remove());toast(`${n} cleared. Package reset: empty the belts.`);S.msgView=openMsgs().length?{i:0,m:"t"}:null;checkDrills()}
 function overlayHTML(){const d=S.dlg;
  if(!d&&S.msgView){const L=openMsgs();if(!L.length){S.msgView=null;return""}const i=Math.min(S.msgView.i,L.length-1),m=L[i],M=MSG[m.id];
-  let b=`<div><b>${esc(M.t)}</b>${M.sim?' <span class="sm">(trainer message)</span>':""}</div>`;
+  let b=`<div><b>${esc(M.t)}</b>${M.gx?` <span class="sm">(GX status ${M.gx})</span>`:""}${M.sim?' <span class="sm">(trainer message)</span>':""}</div>`;
   if(S.msgView.m==="d")b+=`<div class="det"><b>Cause:</b> ${esc(M.cause)}${m.x?`<br><b>Details:</b> ${esc(m.x)}`:""}</div>`;
   if(S.msgView.m==="s")b+=`<div class="det"><b>Remedy:</b> ${esc(M.fix)}</div>`;
   if(S.msgView.m==="l")b+=`<div class="det">${L.map((x,j)=>`${j+1}. ${esc(MSG[x.id].t)}${MSG[x.id].lock?" (lock)":""}`).join("<br>")}</div>`;
   return`<div class="ov part"><div class="msgbox ${M.lock?"":"warn"}"><h4>${M.lock?"Process blocked":"Message"} ${i+1}/${L.length}</h4><div class="bd">${b}<div class="sm">Softkeys: Details, Solve problem, Enable. The Clear key shows messages again.</div></div></div></div>`}
  if(!d)return"";
  const btns=(okLabel)=>`<div style="display:grid;gap:6px;align-content:center"><div class="cbtn" data-a="dcancel">Cancel<span class="x">✕</span></div><div class="cbtn" data-a="dok">${okLabel||"OK"}<span class="ck">✓</span></div></div>`;
+ if(d.k==="msg")return`<div class="ov"><div class="dbox mbox"><div class="mt">${esc(d.text)}</div><div style="display:flex;justify-content:flex-end"><div class="cbtn" data-a="dok">OK<span class="ck">✓</span></div></div></div></div>`;
+ if(d.k==="loading")return`<div class="ov"><div class="dbox mbox" style="width:150px;left:565px"><div class="mt">Loading data</div><div class="spin"></div></div></div>`;
+ if(d.k==="load"){const isP=d.field==="PLU";return`<div class="ov"><div class="band"><div class="dbox ldbox"><div class="ldt">${esc(d.title)}</div><div style="display:flex;gap:6px;align-items:center"><div class="dlbl" style="width:96px">${esc(d.field)}<br><span class="sm">(0 .. 999999)</span></div><div class="inp ldv"><span class="${d.fresh?"hlv":""}">${esc(d.val)}</span></div><div class="cbtn big" data-a="ldn">▼</div><div class="cbtn big" data-a="lup">▲</div></div><div style="display:flex;gap:6px;justify-content:flex-end">${d.extra.map((x,i)=>`<div class="cbtn" style="width:auto;padding:0 8px;height:34px" data-x="${i}">${esc(x.label)}${x.ico?` <span style="color:#3a7bd5">${x.ico}</span>`:""}</div>`).join("")}<div class="cbtn" data-a="dcancel" style="height:34px;width:60px">Cancel<span class="x">✕</span></div><div class="cbtn" data-a="dok" style="height:34px;width:52px">OK<span class="ck">✓</span></div></div></div>${keypad(false)}</div></div>`}
  if(d.k==="auth")return`<div class="ov"><div class="band"><div class="dbox" style="left:425px;top:24px;width:320px;height:182px"><div class="dlbl" style="width:86px">Authorization level</div><div class="lst" style="width:180px;height:170px">${d.opts.map((l,i)=>`<div data-li="${i}" class="${i===d.ix?"on":""}">${l===0?"0: ":l+" "}${LVN[l]}</div>`).join("")}</div>${btns()}</div>${keypad(true)}</div></div>`;
  if(d.k==="macro")return`<div class="ov"><div class="dbox macro" style="left:470px;top:60px;width:300px;height:470px;background:#f2f0e6;flex-direction:column"><div style="font-size:15px;text-align:center;border-bottom:1px solid #999;padding-bottom:6px">Macro menu</div><div style="display:flex;gap:10px;flex:1"><div class="lst mlst" style="width:170px">${MACRO_ITEMS.map((it,i)=>`<div data-li="${i}" class="${i===d.ix?"on":""} ${d.dis[i]?"dis":""}">${it}</div>`).join("")}</div><div style="display:grid;gap:8px;align-content:end"><div class="cbtn" data-a="dcancel" style="width:70px;height:50px">Cancel<span class="x">✕</span></div><div class="cbtn" data-a="dok" style="width:70px;height:50px">OK<span class="ck">✓</span></div></div></div></div></div>`;
  if(d.k==="sel")return`<div class="ov"><div class="band"><div class="dbox" style="left:300px;top:10px;width:600px;height:208px"><div class="dlbl">${esc(d.title)}</div><div class="lst" style="width:400px;height:194px">${d.opts.map((o,i)=>`<div data-li="${i}" class="${i===d.ix?"on":""}">${esc(o)}</div>`).join("")}</div>${btns()}</div></div></div>`;
@@ -644,20 +919,24 @@ function qwerty(d){const rows=[["1","2","3","4","5","6","7","8","9","0"],["Q","W
 /* ============================================================ manual panel */
 function showManual(k){const ids=[];if(k.node)ids.push(...k.node.secs);if(k.sec){const i=MAN.findIndex(s=>s.num===k.sec);if(i>=0)ids.push(i)}
  const uniq=[...new Set(ids)].slice(0,3);const body=$("#manBody");
- if(!uniq.length){body.innerHTML=`<div class="t">${esc(k.label)}</div><div class="meta">No manual section is linked to this softkey${S.level===9?" (customer level 9 layout)":""}.</div>`;return}
- const pth=k.node?["Main menu",...S.path,k.label].join(" / "):"Level 9 · "+k.label;
+ if(!uniq.length){body.innerHTML=`<div class="t">${esc(k.label)}</div><div class="meta">${k.desc?esc(k.desc):"No manual section is linked to this softkey"+(S.level===9?" (customer level 9 layout)":"")+"."}</div>`;return}
+ const pth=S.level===9?"Level 9 · "+k.label:["Main menu",...S.path,k.label].join(" / ");
  body.innerHTML=`<div class="meta" style="margin-bottom:4px">${esc(pth)}</div>`+uniq.map(i=>{const s=MAN[i];const lv=s.paths.map(p=>`manual level ${p.level??"?"} → site ${siteLv(p.level??s.levels[0])}: ${p.path.map(cleanTok).join(" / ")}`);return`<div class="sec"><div class="t">${esc(s.num)} ${esc(s.title)}</div><div class="meta">Manual p. ${s.page}${lv.length?" · "+esc(lv.slice(0,3).join(" | ")):""}</div><pre>${esc(s.text)}</pre></div>`}).join("")}
 
 /* ============================================================ render */
 function render(){if(!S)return;$("#stage").innerHTML=stageHTML();$("#pwrLed").classList.toggle("off",!S.power);
  const dv=LINE().dev[S.dev];$("#bezelInfo").textContent=`${LINE().model} · ${dv.bus}: ${dv.name} · BRAIN2 ${LINE().online===false?"offline: change data at this terminal":"online"} · ${LINE().note}`;
  renderQA();renderLog();if(!$("#tab-hw").hidden)renderHWState()}
-function renderLines(){$("#lines").innerHTML=Object.entries(LINES).map(([k,L])=>`<button aria-pressed="${S&&S.key===k}" data-line="${k}"><b>${esc(L.tab)}</b>${esc(L.model)}</button>`).join("");
- $$("#lines [data-line]").forEach(b=>b.addEventListener("click",()=>useLine(b.dataset.line)));
+function renderLines(){const seen=new Set();$("#lines").innerHTML=Object.entries(LINES).filter(([k,L])=>{const g=grpOf(k);if(seen.has(g))return false;seen.add(g);return true}).map(([k,L])=>{const g=grpOf(k),on=S&&grpOf(S.key)===g;const tgt=on?S.key:(L.grp?store.get("fp2sub",k):k);
+  return`<button aria-pressed="${on}" data-line="${tgt}"><b>${esc(L.tab)}</b>${esc(L.model)}</button>`+(L.grp&&on?`<span class="subsw" role="group" aria-label="Line number">${Object.entries(LINES).filter(([kk,LL])=>LL.grp===g).map(([kk,LL])=>`<button aria-pressed="${S.key===kk}" data-line="${kk}">${esc(LL.sub.replace("Line ","L"))}</button>`).join("")}</span>`:"")}).join("");
+ $$("#lines [data-line]").forEach(b=>b.addEventListener("click",()=>{const k=b.dataset.line;if(LINES[k].grp)store.set("fp2sub",k);useLine(k)}));
  const L=LINE();$("#belt").innerHTML=[["Infeed (IC)",0],["Separation (SC)",16],["Weighing (WC)",32]].concat(L.heads.map((h,i)=>[h.name,48+i*16])).concat([["Ejector",88]]).map(([n,x])=>`<span class="z" style="left:${x}%">${esc(n)}</span>`).join("")}
 function renderQA(){const L=S.lastPacks;$("#lineInfo").textContent=`${LINE().tab} · good packs in a row: ${S.good}`;
  $("#qa").innerHTML=`<table><tr><th>Cons.No.</th><th>Weight</th><th>Class</th><th>Print</th><th>Label pos.</th><th>Heads</th><th>Text 1</th><th>Ejected</th><th>Result</th></tr>${L.length?L.map(r=>`<tr><td>${r.c}</td><td>${f4(r.w)}</td><td>${r.cls}</td><td>${r.printed.length?r.l1:"–"}</td><td>${r.l1off==null?"–":(r.l1off===0?"on target":(r.l1off>0?"+":"")+r.l1off+" mm")}</td><td>${r.printed.join(", ")||"–"}</td><td title="${esc(r.t1)}">${r.printed.length?esc(shortT(r.t1))+` <span style="color:#5b6670">(${r.t1src==="wc"?"WC class "+r.t1cls:r.t1src==="job"?"job":r.t1src==="plu"?"PLU":"–"})</span>`:"–"}</td><td>${r.ej?"yes":"no"}</td><td class="${r.ok?"okc":"badc"}">${esc(r.note)}</td></tr>`).join(""):'<tr><td colspan="9" class="note">Press the green start key on the terminal to run packs. This is the check a line leader does by eye; the terminal itself does not show it.</td></tr>'}</table>`}
-function renderLog(){const r=S.last;$("#lg1").innerHTML=r?`<div style="position:relative;height:300px;background:#fff;border:1px solid #e3e7ea;max-width:306px">${labelBox(r)}</div><div class="note">Cons.No. ${r.c} · ${r.printed.join(", ")} · ${fmtD(r.d2)} · ${f3(r.w)} kg</div>`:"No label yet.";
+/* the printed label at a readable size (long labels like 77-test are tiny in the terminal preview) */
+function bigLabel(r){const p=DB.plu[r.plu]||P();const L=DB.label[p.lab];const LY=L&&L.layout&&DB.layouts&&DB.layouts[L.layout];if(!LY)return"";const k=Math.min(5,560/LY.w);
+ return`<details class="biglbl" ${S.bigOpen?"open":""}><summary>Printed label at full size · layout ${String(LY.no).padStart(3,"0")} ${esc(LY.name)}${L.rot180==="With"?" · rotation 180°":""}</summary><div class="biglbl-in">${renderLayout(LY,p,layoutCtx(p,r,S.key,DB),k,{rot180:L.rot180==="With"})}</div></details>`}
+function renderLog(){const r=S.last;$("#lg1").innerHTML=r?`<div style="position:relative;height:300px;background:#fff;border:1px solid #e3e7ea;max-width:306px;overflow:hidden">${labelBox(r)}</div><div class="note">Cons.No. ${r.c} · ${r.printed.join(", ")} · ${fmtD(r.d2)} · ${f3(r.w)} kg</div>${bigLabel(r)}`:"No label yet.";
  const T=S.lastTotal;$("#lg2").innerHTML=T?`<div class="kv"><span>Total</span><span>${T.n}</span><span>PLU</span><span>${pad6(T.plu)}</span><span>Packs</span><span>${T.t.n}</span><span>Net weight</span><span>${f3(T.t.kg)} kg</span><span>End of Batch PLU</span><span>${T.eob||"–"}</span><span>Case size (price list)</span><span>${T.case||"–"}</span><span>Basket tare</span><span>${esc(T.basket||"–")}</span><span>Released</span><span>${T.at.toTimeString().slice(0,8)} by ${T.why}</span></div>`:"No total released yet.";
  $("#lgLog").innerHTML=S.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>No events yet.</div>"}
 
@@ -666,11 +945,11 @@ let explain=false;
 function toggleExplain(){explain=!explain;$("#explain").setAttribute("aria-pressed",explain);$("#stageWrap").classList.toggle("explain",explain);toast(explain?"Explain ON (E): softkeys show their manual section and don't run":"Explain OFF (E): softkeys work normally")}
 $("#explain").addEventListener("click",toggleExplain);
 document.addEventListener("keydown",e=>{if(e.key!=="e"&&e.key!=="E")return;if(e.ctrlKey||e.metaKey||e.altKey)return;if(e.target&&e.target.closest&&e.target.closest("input,select,textarea"))return;if(S&&S.dlg)return;e.preventDefault();toggleExplain()});
-function descOf(t){const D=t.dataset;if(D.qt)return{qt:D.qt};if(D.q)return{q:D.q};if(D.cell)return{cell:D.cell};if(D.mxp!=null)return{mxp:Number(D.mxp)};if(D.mxg!=null)return{mxg:Number(D.mxg)};if(D.mx!=null)return{mx:Number(D.mx)};if(D.row!=null)return{row:Number(D.row)};
+function descOf(t){const D=t.dataset;if(D.acetab)return{acetab:D.acetab};if(D.acer!=null)return{acer:Number(D.acer)};if(D.acec)return{acec:D.acec};if(D.qt)return{qt:D.qt};if(D.q)return{q:D.q};if(D.cell)return{cell:D.cell};if(D.mxp!=null)return{mxp:Number(D.mxp)};if(D.mxg!=null)return{mxg:Number(D.mxg)};if(D.mx!=null)return{mx:Number(D.mx)};if(D.row!=null)return{row:Number(D.row)};
  if(D.li!=null)return{li:Number(D.li)};if(D.kp!=null)return{kp:D.kp};if(D.kb!=null)return{kb:D.kb};if(D.x!=null)return{x:Number(D.x)};if(D.sk!=null){const k=softList()[S.page*8+Number(D.sk)];return k?{sk:k.label}:null}if(D.a)return{a:D.a};return null}
 const NOREC=new Set(["xshift","xalt","x2nd","xrec","xfeed","xprint","xpause","win"]);
 $("#stage").addEventListener("click",e=>{if(!S.power||S.boot>0)return;
- const t=e.target.closest("[data-a],[data-sk],[data-li],[data-kp],[data-kb],[data-x],[data-row],[data-q],[data-qt],[data-cell],[data-mx],[data-mxp],[data-mxg]");if(!t)return;
+ const t=e.target.closest("[data-a],[data-sk],[data-li],[data-kp],[data-kb],[data-x],[data-row],[data-q],[data-qt],[data-cell],[data-mx],[data-mxp],[data-mxg],[data-acetab],[data-acer],[data-acec]");if(!t)return;
  const desc=descOf(t);if(!desc)return;
  if(S.awaitAssign&&!S.dlg&&(desc.sk||(desc.a&&!NOREC.has(desc.a)))){finishMacro(desc);return}
  if(S.awaitPlay&&!S.dlg&&(desc.sk||(desc.a&&!NOREC.has(desc.a)))){S.awaitPlay=false;const m=S.macros.find(m=>JSON.stringify(m.key)===JSON.stringify(desc));if(!m){toast("No macro on that key in this level");render();return}startMacro(m);return}
@@ -691,15 +970,18 @@ function handle(desc){const d=S.dlg;
  if(desc.x!=null){const x=d.extra[desc.x];S.dlg=null;x.fn();render();return}
  const a=desc.a;
  if(a==="dcancel"){S.dlg=null;render();return}
+ if((a==="ldn"||a==="lup")&&d&&d.k==="load"){if(d.field==="PLU")d.val=String(pluStep(d.val,a==="lup"?1:-1));else{const ks=Object.keys(DB.wc).map(Number).sort((x,y)=>x-y);const c=Number(d.val)||0;d.val=String(a==="lup"?(ks.find(x=>x>c)??ks[0]):([...ks].reverse().find(x=>x<c)??ks[ks.length-1]))}d.fresh=true;render();return}
  if(a==="dok"){dlgOK();return}
  if(a==="dyes"){S.dlg=null;d.yes();render();return}
  if(a==="dno"){S.dlg=null;if(d.no)d.no();render();return}
  if(a==="chanset"){const c=CHANS[d.ix];const h=LINE().heads.find(x=>x.ch===c);if(!h){toast("No labeller on this channel");return}const work=d.work;S.dlg=null;sel(`Print channel ${c==="internal"?"internal":c}`,CHAN_OPTS,work[c],v=>{work[c]=v;S.dlg={k:"chan",ix:CHANS.indexOf(c),work}});return}
  if(a==="chansave"){conf("Security check","Save the print channel settings for the current labeling job?",()=>{Object.entries(d.work).forEach(([c,v])=>{const h=LINE().heads.find(x=>x.ch===c);if(h){S.heads[h.id].chan=v;S.heads[h.id].pairActive=null}});log("Print chan. control saved: "+Object.entries(d.work).map(([c,v])=>c+"="+v).join(", "));S.ev.chan=true;checkDrills()});return}
  if(d)return;
+ if(S.ace&&aceClick(desc))return;
+ if(S.ted&&a&&tedAct(a))return;
  if(desc.sk!=null){if(S.level===0)return;const k=findSk(desc.sk);if(!k){toast(`Softkey “${desc.sk}” is not on this screen`);if(S.playing)abortMacro("step not possible");render();return}lastTouched=k.label;showManual(k);
   if(explain&&!S.msgView&&!S.editor&&!S.playing){render();return}
-  const grey=typeof k.grey==="function"?k.grey():k.grey;if(grey){toast(k.label==="LB1 susp. path"?"Display only at level 9. Change it at level 1 or higher: Device menu / LB1 susp. path":"Display only at this level");render();return}
+  if(k.free)return;const grey=typeof k.grey==="function"?k.grey():k.grey;if(grey){toast(k.greyWhy||(k.label==="LB1 susp. path"?"Display only at level 9. Change it at level 1 or higher: "+(MENU_MODE==="photo"?"Device › ":"Device menu / ")+"LB1 susp. path":"Not available here"));render();return}
   if(k.menu){S.path.push(k.label);S.page=0;render();return}
   if(k.run)k.run();render();return}
  if(a==="xshift"){S.mod.shift=!S.mod.shift;render();return}
@@ -749,26 +1031,30 @@ function abortMacro(why){if(!S.playing)return;log("Macro "+why+": "+S.playing.m.
 function copyMacroToSoftkey(){if(S.level!==9){toast("Copying macros to softkeys works in mode level T (your level 9), manual p. 124");return}if(!S.macros.length){toast("No macro to copy");return}
  sel("Copy macro to an empty softkey",S.macros.map(m=>m.name),"",n=>{const m=S.macros.find(x=>x.name===n);S.l9extra=S.l9extra||[];S.l9extra.push({label:m.name,macro:m.name});log(`Macro “${m.name}” copied to a level 9 softkey`);toast("Copied to a softkey on the last level 9 page");S.ev.macroCopied=true;checkDrills()})}
 function dlgOK(){const d=S.dlg;if(!d)return;
+ if(d.k==="msg"){S.dlg=null;if(d.ok)d.ok();render();return}
+ if(d.k==="loading")return;
+ if(d.k==="load"){const v=d.val;S.dlg=null;d.ok(v);render();return}
  if(d.k==="auth"){const l=d.opts[d.ix];S.dlg=null;setLevel(l);render();return}
  if(d.k==="sel"){const v=d.opts[d.ix];S.dlg=null;d.ok(v);render();return}
  if(d.k==="macro"){if(d.dis[d.ix]){toast("Not available now");return}const it=MACRO_ITEMS[d.ix];S.dlg=null;if(it!=="Exit macro menu")macroChoose(it);render();return}
  if(d.k==="num"||d.k==="pw"){const v=d.val;S.dlg=null;d.ok(v);render();return}
  S.dlg=null;render()}
-function padKey(k){const d=S.dlg;if(!d)return;
+function padKey(k){const d=S.dlg;if(!d)return;if(d.k==="msg"||d.k==="loading")return;
  if(d.k==="auth"){const i=d.opts.indexOf(k==="T"?9:Number(k));if(i>=0)d.ix=i;render();return}
  if(d.fresh){d.val="";d.fresh=false}
  if(k==="⌫")d.val=d.val.slice(0,-1);else if(k==="−")d.val=d.val.startsWith("-")?d.val.slice(1):"-"+d.val;else d.val+=k;render()}
-function kbKey(k){const d=S.dlg;if(!d)return;
+function kbKey(k){const d=S.dlg;if(!d){if(S.ted)tedKey(k);return}
  if(k==="ESC"){S.dlg=null;render();return}if(k==="OK"){dlgOK();return}
  if(k==="SHIFT"){d.shift=!d.shift;render();return}if(k==="2ND"||k==="ALT")return;
+ if(k!=="BS"&&d.max&&d.val.length>=d.max){toast(`Maximum ${d.max} characters`);return}
  if(k==="BS")d.val=d.val.slice(0,-1);else d.val+=(/[A-ZÜÖÄ]/.test(k)&&!d.shift)?k.toLowerCase():k;render()}
 document.addEventListener("keydown",e=>{if(!S)return;const d=S.dlg;if(!d||(e.target&&e.target.closest&&e.target.closest("input,select,textarea")))return;
  if(e.key==="Escape"){S.dlg=null;render();e.preventDefault();return}
  if(e.key==="Enter"){dlgOK();e.preventDefault();return}
  if(d.k==="sel"||d.k==="auth"||d.k==="chan"){const n=d.k==="chan"?8:d.opts.length;if(e.key==="ArrowDown"){d.ix=Math.min(n-1,d.ix+1);render();e.preventDefault()}else if(e.key==="ArrowUp"){d.ix=Math.max(0,d.ix-1);render();e.preventDefault()}else if(d.k==="auth"&&/^[0-9]$/.test(e.key))padKey(e.key);return}
- if(d.k!=="num"&&d.k!=="pw")return;
+ if(d.k!=="num"&&d.k!=="pw"&&d.k!=="load")return;
  if(e.key==="Backspace"){if(d.fresh){d.val="";d.fresh=false}d.val=d.val.slice(0,-1);render();e.preventDefault();return}
- if(e.key.length===1){if(d.k==="num"){if(!/[0-9.\-]/.test(e.key))return;if(d.fresh){d.val="";d.fresh=false}}d.val+=e.key;render();e.preventDefault()}});
+ if(e.key.length===1){if(d.k==="num"||d.k==="load"){if(!/[0-9.\-]/.test(e.key))return;if(d.fresh){d.val="";d.fresh=false}}if(d.max&&d.val.length>=d.max){toast(`Maximum ${d.max} characters`);e.preventDefault();return}d.val+=e.key;render();e.preventDefault()}});
 
 /* motor currents + boot timer */
 setInterval(()=>{if(!S)return;if(S.boot>0){S.boot=Math.max(0,S.boot-10);if(S.boot===0){log("Device ready");S.ev.booted=true;checkDrills()}render();return}
@@ -776,7 +1062,7 @@ setInterval(()=>{if(!S)return;if(S.boot>0){S.boot=Math.max(0,S.boot-10);if(S.boo
  const tg=r?{IC:.6+S.set.speed/100,SC:.8+S.set.speed/90,WC:.5,"LC 1":jam?3.1:.9,"LC 2":.7}:{IC:0,SC:0,WC:.1,"LC 1":.1,"LC 2":.4};
  let ch=false;for(const k in tg){const n=Math.max(0,+(tg[k]+(r?j():0)).toFixed(1));if(n!==S.cur[k]){S.cur[k]=n;ch=true}}if(ch&&!S.dlg&&!S.editor&&!S.quick&&S.power)render()},1200);
 let viewMode=store.get("viewMode","laptop");
-function setMode(m){viewMode=m;store.set("viewMode",m);document.body.classList.toggle("laptop",m==="laptop");$("#mLaptop").setAttribute("aria-pressed",m==="laptop");$("#mDesk").setAttribute("aria-pressed",m!=="laptop");fit();setTimeout(fit,30)}
+function setMode(m){viewMode=m;store.set("viewMode",m);document.body.classList.toggle("laptop",m==="laptop");$("#mLaptop").setAttribute("aria-pressed",m==="laptop");$("#mDesk").setAttribute("aria-pressed",m!=="laptop");fit();setTimeout(()=>{fit();b2Fit()},30)}
 function fit(){const term=$("#term"),wrap=$("#stageWrap"),bez=$(".bezel");let s;
  if(viewMode==="laptop"){
   const top=term.getBoundingClientRect().top+window.scrollY;const chrome=(bez.querySelector(".brand").offsetHeight||22)+16;
@@ -859,7 +1145,7 @@ $("#tab-hw").addEventListener("click",e=>{const fg=e.target.closest("[data-fig]"
   if(k==="down"){H.height=Math.max(20,H.height-5);log(`${hd.name}: height ${H.height} mm`)}
   if(k==="vac"){H.vac=!H.vac;if(!H.vac&&S.running)push("vac")}
   if(k==="low"){H.roll.left=30}}
- if(k==="brain"){if(LINE().online===false){toast("This line is not online: BRAIN2 can't send data to it. Change PLU, weight class and text data locally at the terminal.");return}conf2("BRAIN2 download","Download PLU data, texts and weight class tables from BRAIN2? Local changes on this line are overwritten.",()=>{DB=DBS[S.key]=freshDB();S.wcJob=null;S.jobText={};loadJob();log("BRAIN2 download: local PLU, text and weight class data overwritten");toast("BRAIN2 download complete");S.ev.brain=true;render();renderHWState()});return}
+ if(k==="brain"){if(LINE().online===false){toast("This line is not online: BRAIN2 can't send data to it. Change PLU, weight class and text data locally at the terminal.");return}conf2("BRAIN2 download","Download PLU data, texts and weight class tables from BRAIN2? Local changes on this line are overwritten.",()=>{b2Download(S.key,{plu:true,text:true,wc:true});DB=DBS[S.key];toast("BRAIN2 download complete");render();renderHWState()});return}
  if(k==="power"){if(S.power){stop("Main switch off");S.power=false;log("Main switch OFF")}else{S.power=true;S.boot=100;S.level=9;S.path=[];log("Main switch ON · booting")}}
  if(k==="estop"){S.estop=!S.estop;log(S.estop?"E-stop pressed":"E-stop released");if(S.estop){stop("E-stop");push("estop")}}
  if(k==="air"){S.air=!S.air;log(S.air?"Air valve opened":"Air valve closed");if(!S.air&&S.running)push("air")}
@@ -890,6 +1176,8 @@ const SCN={
  height:{set:()=>{const h=LINE().heads[0];S.heads[h.id].height=geo().pkh-5},fixed:()=>{const h=S.heads[LINE().heads[0].id].height;return h>=geo().pkh+3&&h<=geo().pkh+60}},
  air:{set:()=>{S.airBar=3},fixed:()=>S.air&&S.airBar>=4&&!openMsgs().some(m=>m.id==="air")},
  estop:{set:()=>{S.estop=true;push("estop")},fixed:()=>!S.estop&&!openMsgs().some(m=>m.id==="estop")},
+ layout:{set:()=>{const L=LT();if(L&&L.layout&&DB.layouts)delete DB.layouts[L.layout]},fixed:()=>layoutOK()&&!openMsgs().some(m=>m.id==="layout")},
+ cts:{set:()=>{const p=P();if(!(p.cf1>0))p.cf1=1;p.cs1=""},fixed:()=>ctsOK()&&!openMsgs().some(m=>m.id==="cts")},
  pair:{set:()=>{const hs=LINE().heads;if(hs.length>1){S.heads[hs[0].id].roll.left=6;S.heads[hs[0].id].chan="Pair1 (start) change on paper end";S.heads[hs[1].id].chan="Pair1 (Standby) Change on paper end";S.heads[hs[0].id].pairActive=null}},fixed:()=>(S.ev.rollChange||0)>0&&S.heads[LINE().heads[0].id].roll.left>40}
 };
 const DRILLS=[
@@ -900,7 +1188,7 @@ const DRILLS=[
  {g:"Terminal basics",id:"cancel",t:"Cancel a package by its consecutive number",d:"Take a Cons.No. from the right-hand list and cancel it so it comes off the totals.",h:"Level 2: Processing › Cancel. & minus › Cancel via cons. no. Not possible if a total was released after that pack (manual p. 341).",ck:()=>S.ev.cancelled},
  {g:"Terminal basics",id:"macro",t:"Record and play a macro",d:"Record a short macro, e.g. the path Date › Set date/time › Date 2, save it on a key, then play it with Record + that key. Your level 9 keys marked ⊙⊙ (plu change, RESET) are macros like this.",h:"▭ shows the extra key row. Shift + Record › Recording start, do the steps, Shift + Record › Recording end, press the key to assign, give it a name and (optionally) a password. Play: Record, then the key (manual pp. 103–111).",ck:()=>S.ev.macroPlayed},
  {g:"Terminal basics",id:"matrix",t:"Weight class totals in the preselection matrix",d:"Switch totalization to weight class-related, give one weight class a preset total, run until that class prints its own total.",h:"Level 4: Totalization › Totaliz. mode = Weight class-related. Level 2: Configure total › Presel. total › Preselect tot. matrix. Select a column, set Preset total 1 (manual p. 299).",ck:()=>(S.ev.mxRelease||0)>=1&&S.set.totaliz==="Weight class-related"},
- {g:"Terminal basics",id:"brain",t:"Why online lines need BRAIN2 for permanent changes",d:"On an FP2 line, change a text or weight class in the terminal's database, then do a BRAIN2 download (Hardware › GT terminal) and check your change is gone.",h:"Online lines get their PLU, text and weight class data from BRAIN2. A download overwrites local changes, so permanent changes belong in BRAIN2. FP1 Line 3 is the exception: it's offline.",ck:()=>S.ev.brain&&S.key.startsWith("FP2")},
+ {g:"Terminal basics",id:"brain",t:"Why online lines need BRAIN2 for permanent changes",d:"On an FP2 line, change a text or weight class in the terminal's database, then do a BRAIN2 download (Hardware › GT terminal) and check your change is gone.",h:"Online lines get their PLU, text and weight class data from BRAIN2. A download overwrites local changes, so permanent changes belong in BRAIN2. Download from the BRAIN2 tab (Process data › Devices) or Hardware › GT terminal. FP1 Line 3 is the exception: BRAIN2 can't send it master data.",ck:()=>S.ev.brain&&S.key.startsWith("FP2")},
  {g:"Terminal basics",id:"tareov",t:"Overwrite the tare for one job",d:"A different tray is being used. Overwrite the tare, see TARE change on screen, then call the PLU again to restore the table value.",h:"Level 2: Article data › Weight › Tare. A star appears next to TARE while overwritten.",ck:()=>S.ev.tare},
  {g:"Cooking time (exercise with Victor)",id:"ct_job",t:"Cooking time for this job only · fixed-weight product",d:"Call up a fixed-weight product (a portion pack with a fixed weight in its name, e.g. 600G). Change Text 1 to a new cooking time for the current labeling only, then run 3 good packs and check the label and the Text 1 column.",h:"Level 2: Texts › General texts 1-20 › Text 1 (level 1: Texts › Text 1). Type the text, OK, then choose “Save for current labeling”. Calling up the PLU again brings back the database text (manual p. 177).",ck:()=>(S.ev.ctJob||0)>=3},
  {g:"Cooking time (exercise with Victor)",id:"ct_db",t:"Cooking time saved in the database",d:"Make the new cooking time survive a PLU change. Two ways in: save Text 1 “to the database”, or edit the text in Text › Text editor local (level 3) and check PLU data › Text 1 points to that text number. Call the PLU up again and run 3 good packs.",h:"Level 3 password needed for the text editor and PLU data. The PLU's Text 1 is a text number (Parameters field); the words live in the text table (manual pp. 170, 177).",ck:()=>(S.ev.ctDb||0)>=3},
@@ -923,20 +1211,29 @@ const DRILLS=[
  {g:"Settings faults",id:"s_rel",sc:"release",t:"Packs pass with no label",d:"The line weighs but prints nothing.",h:"Level 2: Processing › Release mode › Process → Start autom. labeler (manual p. 274).",n:8},
  {g:"Settings faults",id:"s_trans",sc:"transport",t:"Line in transport operation",d:"Packs pass unweighed and unlabelled.",h:"Device menu › Operating mode → Weighing Continuous (manual p. 264).",n:8},
  {g:"Settings faults",id:"s_tare",sc:"tare",t:"Net weights reading heavy",d:"Every pack's net is about 40 g higher than it should be.",h:"Someone overwrote the tare. Compare TARE on screen with the price list; call the PLU again or set Article data › Weight › Tare.",n:8},
+ {g:"Settings faults",id:"s_layout",sc:"layout",t:"“Layout missing” (GX status 107)",d:"The label table points to a layout the device doesn't have. Find where layouts come from and put it back.",h:"Layouts only reach a line from BRAIN2: Label Designer › File › Export to… › tick the layout › tick this line's devices. Then Clear › Enable › Start.",n:8},
+ {g:"Settings faults",id:"s_cts",sc:"cts",t:"“Data error: code substring missing” (GX status 129)",d:"The barcode can't be built because the article leaves a code substring empty.",h:"Article data › Edit current article data › Barcode › Code sub-string 1 (the M&S product code from the price list, e.g. 00015035). Max. 30 characters. Then Enable.",n:8},
  {g:"Settings faults",id:"s_plu",sc:"wrongplu",t:"Wrong article loaded",d:"The automat stops after repeated wrong-weight packs.",h:"Compare the article text with the product on the belt. Change back to the right PLU.",n:8}
 ];
+/* drill hints are written with the manual's paths; on the photographed menu they gain the group key in front */
+function hintPath(s){if(MENU_MODE!=="photo")return s;
+ s=s.replace(/Weight class › Weight class data/g,"Article data › Article dataparts management › Weight class › Weight class data").replace(/Text › Text editor local/g,"Article data › Article dataparts management › Texts › General texts › Text editor").replace(/Article data › Weight › Tare/g,"Article data › Edit current article data › General › Tare (job only) or Production data › Processing")
+ const G={"Processing":"Production data","Configure total":"Production data","Totalization":"Production data","Texts":"Production data","Release total":"Production data","Labels":"Configuration","Date":"Configuration"};
+ return s.replace(/(^|: |\(|\. |, |or |then |Level \d\+?: )(Processing|Configure total|Totalization|Texts|Release total|Labels|Date|Device menu) ›/g,(m,pre,t)=>t==="Device menu"?pre+"Device ›":pre+G[t]+" › "+t+" ›")}
 function startScn(id){const D=DRILLS.find(x=>x.id===id);if(S.running)stop("Stopped for scenario");S.sc=D.sc;S.scDrill=id;S.biasLow=0;S.product=null;SCN[D.sc].set();S.good=0;log("Scenario started: "+D.t);toast("Fault loaded. Run the line and investigate.");render();renderDrills();renderHWState()}
 let done=store.get("glmi-done-v4",{});
+/* Lines 3 and 4 on FP2 are one tab now: carry old per-line progress over */
+Object.keys(done).forEach(k=>{const m=k.match(/^FP2-L0[34]:(.*)$/);if(m){done["FP2:"+m[1]]=true;delete done[k]}});
 function checkDrills(){if(!S)return;let ch=false;
- DRILLS.forEach(D=>{const key=S.key+":"+D.id;if(done[key])return;let ok=false;
+ DRILLS.forEach(D=>{const key=DK(D);if(done[key])return;let ok=false;
   if(D.sc)ok=S.scDrill===D.id&&SCN[D.sc].fixed()&&S.good>=D.n;else ok=!!D.ck();
   if(ok){done[key]=true;ch=true;toast("Drill complete: "+D.t);if(D.sc){S.sc=null;S.scDrill=null;S.biasLow=0;S.product=null}}});
  if(ch){store.set("glmi-done-v4",done);renderDrills()}}
-function renderDrills(){if(!S)return;const n=DRILLS.filter(d=>done[S.key+":"+d.id]).length;
+function renderDrills(){if(!S)return;const n=DRILLS.filter(d=>done[DK(d)]).length;
  const sp=store.get("sitepw",null);
- let h=`<h2>Drills on ${esc(LINE().tab)} · ${n}/${DRILLS.length}</h2><p class="note">Fault drills load a problem as if the last shift left it. Fix it and run 8 good packs in a row. Progress is kept per line. Passwords: ${sp&&sp.lower?"your site passwords from Settings":"training passwords 2222 / 3333 / 4444 (add your site passwords in Settings)"}; standby unlock 183.</p>`;
- let g="";DRILLS.forEach((D,i)=>{if(D.g!==g){g=D.g;h+=`<div class="dgroup">${esc(g)}</div>`}const key=S.key+":"+D.id;
-  h+=`<div class="drill ${done[key]?"done":""} ${S.scDrill===D.id?"live":""}"><div class="ck">${done[key]?"✓":i+1}</div><div><b>${esc(D.t)}</b><p>${esc(D.d)}</p><details><summary>Hint</summary><p>${esc(D.h)}</p></details></div>${D.sc?`<button class="go" data-sc="${D.id}">${S.scDrill===D.id?"Running":"Start fault"}</button>`:"<span></span>"}</div>`});
+ let h=`<h2>Drills on ${esc(LINE().tab)} · ${n}/${DRILLS.length}</h2><p class="note">Fault drills load a problem as if the last shift left it. Fix it and run 8 good packs in a row. Progress is kept per line. PLU change on level 9 (plu change, m&s plu only) asks for the label checker password${pwStore().lower?"":" (training 1111)"}; levels 2, 3, 4 and 5 ask for the higher password${pwStore().higher?"":" (training 2222)"}. Save your site passwords in Settings. Levels 1 and 9 are open; from standby, 183 unlocks them.</p>`;
+ let g="";DRILLS.forEach((D,i)=>{if(D.g!==g){g=D.g;h+=`<div class="dgroup">${esc(g)}</div>`}const key=DK(D);
+  h+=`<div class="drill ${done[key]?"done":""} ${S.scDrill===D.id?"live":""}"><div class="ck">${done[key]?"✓":i+1}</div><div><b>${esc(D.t)}</b><p>${esc(hintPath(D.d))}</p><details><summary>Hint</summary><p>${esc(hintPath(D.h))}</p></details></div>${D.sc?`<button class="go" data-sc="${D.id}">${S.scDrill===D.id?"Running":"Start fault"}</button>`:"<span></span>"}</div>`});
  $("#tab-drills").innerHTML=h;$$("#tab-drills [data-sc]").forEach(b=>b.addEventListener("click",()=>startScn(b.dataset.sc)))}
 
 /* ============================================================ price list import
@@ -995,10 +1292,10 @@ function plCSV(){const q=v=>{v=v==null?"":String(v);return /[",\n\r]/.test(v)?'"
 /* ============================================================ price list, settings, reference */
 function renderPLSrc(){
  const demo=usingDemo();
- $("#plSrc").innerHTML=`<div class="srcrow"><div><b>${demo?"Demo price list":"Your price list"}</b>
-   <div class="note" style="margin:2px 0 0">${demo?`${PRODUCTS.length} fictional articles shipped with the trainer. Nothing here is real site data.`
+ $("#plSrc").innerHTML=`<div class="srcrow"><div><b>${demo?"Built-in price list":"Your price list"}</b>
+   <div class="note" style="margin:2px 0 0">${demo?`Scunthorpe Retail Product Information Sheet w/c 16/10/2026 · ${PRODUCTS.length} rows. Internal data: keep this page private.`
     :`${esc(PLU_SRC.name||"imported file")} · ${PRODUCTS.length} articles · loaded ${esc(PLU_SRC.when||"")} · kept in this browser only`}</div></div>
-  <div class="ctl"><button id="plLoad">Load price list…</button><button id="plCsv">Export CSV</button><button id="plJson">Export JSON</button>${demo?"":`<button id="plClear">Remove and use demo data</button>`}</div></div>
+  <div class="ctl"><button id="plLoad">Load price list…</button><button id="plCsv">Export CSV</button><button id="plJson">Export JSON</button>${demo?"":`<button id="plClear">Remove and use the built-in list</button>`}</div></div>
   <input type="file" id="plFile" accept=".csv,.json,.txt,text/csv,application/json" style="display:none">
   <div class="plmsg" id="plMsg" role="alert" hidden></div>
   <p class="note" style="margin:6px 0 0">CSV or JSON. The CSV header row takes the names the Retail Product Information Sheet uses — <b>Bizerba PLU</b>, <b>Product</b>, <b>Tray + film</b>, <b>Case Size</b>, <b>Pack Barcode</b>, <b>End of Batch</b>, <b>PZ PLU</b>, <b>Basket Tare</b> — and ignores any column it doesn't know. Export CSV first if you want a template to fill in. The file is read on this device; it is never uploaded and never becomes part of the page.</p>`;
@@ -1023,12 +1320,15 @@ function renderPL(){const q=($("#plSearch").value||"").toLowerCase();
 $("#plSearch").addEventListener("input",renderPL);
 $("#plTable").addEventListener("click",e=>{const tr=e.target.closest("[data-plu]");if(!tr)return;const p=DB.plu[tr.dataset.plu];if(!p)return;
  const W=DB.wc[p.wc];toast(`PLU ${p.plu}: ${p.mode}${p.mode==="Fixed weight"?" "+p.fixw+" g":""} · tare ${p.tare} g · class ${W?W.lower+"–"+W.upper+" g":"–"} · case ${p.pre1||"–"}`)});
-function renderSet(){const sp=store.get("sitepw",{lower:"",lowerLv:"2",higher:"",higherLv:"3,4"});
- $("#tab-set").innerHTML=`<h2>Site passwords</h2><p class="note">Saved only in this browser on this device. They aren't written into the page, so sharing the link doesn't share them. Clear them before handing the device to someone else.</p>
- <div class="row"><label>Label checker (lower)<input id="pwL" type="password" autocomplete="off" value="${esc(sp.lower||"")}"></label><label>Used for level<select id="pwLL">${[1,2].map(l=>`<option value="${l}" ${String(sp.lowerLv)===String(l)?"selected":""}>${l} ${LVN[l]}</option>`).join("")}</select></label></div>
- <div class="row"><label>Technical services (higher)<input id="pwH" type="password" autocomplete="off" value="${esc(sp.higher||"")}"></label><label>Used for levels<select id="pwHL"><option value="3,4" ${sp.higherLv==="3,4"?"selected":""}>3 and 4</option><option value="3" ${sp.higherLv==="3"?"selected":""}>3 only</option><option value="4" ${sp.higherLv==="4"?"selected":""}>4 only</option></select></label></div>
+function renderSet(){const sp=store.get("sitepw",{})||{};
+ const pp=pwStore();
+ $("#tab-set").innerHTML=`<h2>Terminal passwords</h2><p class="note">Saved only in this browser on this device. They aren't written into the page, so sharing the link doesn't share them. Clear them before handing the device to someone else.</p>
+ <div class="row"><label>Label checker password<input id="pwL" type="password" autocomplete="off" value="${esc(pp.lower)}"></label><span class="note" style="max-width:46ch">PLU change from level 9: the # macros <b>plu change</b> and <b>m&amp;s plu only</b>. Training default 1111.</span></div>
+ <div class="row"><label>Higher password<input id="pwH" type="password" autocomplete="off" value="${esc(pp.higher)}"></label><span class="note" style="max-width:46ch">Authorization levels 2, 3, 4 and 5: changing settings and modes. Training default 2222.</span></div>
  <div class="ctl"><button id="pwSave">Save passwords</button><button id="pwClear">Clear passwords</button></div>
- <p class="note">The lower password is also used for protected macros (#) such as plu change. Which level each password opens on your line is my assumption; change it here if it's different.</p>
+ <p class="note">Levels 0, 1 and 9 have no password; going down a level never asks. From standby (level 0) the code 183 opens level 1 or 9.</p>
+ <h3>Terminal menu layout</h3><div class="row"><label>Main menu<select id="menuMode"><option value="photo" ${MENU_MODE==="photo"?"selected":""}>As photographed on FP2 (grouped)</option><option value="manual" ${MENU_MODE!=="photo"?"selected":""}>As in the GLM-I manual (menu type 1)</option></select></label></div>
+ <p class="note">The site terminals group the menus under Article data, Production data, Display, Configuration, Device and Service. The manual layout lists the same functions without the groups.</p>
  <h3>Your site</h3><p class="note">Nothing site-specific is built into the trainer. Fill these in and they are saved in this browser only, like the passwords and the price list.</p>
  <div class="row"><label>Site or factory name<input id="siteName" autocomplete="off" placeholder="shown under the title" value="${esc(SITE.name||"")}"></label></div>
  <div class="row"><label>Level 9 customer macro · key label<input id="siteML" maxlength="18" autocomplete="off" placeholder="${esc(DEF_SITE.macroLabel)}" value="${esc(SITE.macroLabel===DEF_SITE.macroLabel?"":SITE.macroLabel||"")}"></label>
@@ -1038,29 +1338,45 @@ function renderSet(){const sp=store.get("sitepw",{lower:"",lowerLv:"2",higher:""
  <h3>Price list</h3><p class="note" id="setPl"></p>
  <h3>Level mapping</h3><p class="note">The manual's mode levels are 1 Standard operation, 2 Extended settings, 3 Local data, 4 Global data, 5 Service. Your terminal shows 1 Check settings, 2 Article change, 3 Create and maintain article, 4 Service / Configuration, 5 BIZERBA, 9 Customer. The trainer maps manual 1→1, 2→2, 3 and 4→3, 5→4.</p>`;
  $("#setPl").innerHTML=usingDemo()
-  ?`The trainer is running on <b>${PRODUCTS.length} fictional demo articles</b>. Load your own price list in the Price list tab to practise on real PLUs — it is read on this device and stored in this browser only.`
+  ?`The trainer is running on the built-in Scunthorpe price list (w/c 16/10/2026, ${PRODUCTS.length} rows). Load a newer sheet in the Price list tab; it is read on this device and stored in this browser only.`
   :`Running on <b>${PRODUCTS.length} articles</b> from ${esc(PLU_SRC.name||"your imported file")}, loaded ${esc(PLU_SRC.when||"")}. Stored in this browser only; remove it from the Price list tab.`;
+ $("#menuMode").addEventListener("change",e=>{MENU_MODE=e.target.value;store.set("menuMode",MENU_MODE);S.path=[];S.page=0;render();renderDrills();toast("Menu layout changed")});
  $("#siteSave").addEventListener("click",()=>{SITE={name:$("#siteName").value.trim(),macroLabel:$("#siteML").value.trim()||DEF_SITE.macroLabel,macroFilter:$("#siteMF").value.trim()};
   store.set(SITE_KEY,SITE);renderHead();render();toast("Site details saved in this browser")});
  $("#siteClear").addEventListener("click",()=>{try{localStorage.removeItem(SITE_KEY)}catch(e){}SITE=Object.assign({},DEF_SITE);renderSet();renderHead();render();toast("Site details cleared")});
- $("#pwSave").addEventListener("click",()=>{store.set("sitepw",{lower:$("#pwL").value.trim(),lowerLv:$("#pwLL").value,higher:$("#pwH").value.trim(),higherLv:$("#pwHL").value});toast("Passwords saved in this browser");renderDrills()});
+ $("#pwSave").addEventListener("click",()=>{store.set("sitepw",{lower:$("#pwL").value.trim(),higher:$("#pwH").value.trim()});toast("Passwords saved in this browser");renderDrills()});
  $("#pwClear").addEventListener("click",()=>{try{localStorage.removeItem("sitepw")}catch(e){}renderSet();renderDrills();toast("Passwords cleared")})}
 function renderRef(){let count=0;const walk=(n,d)=>{n.ch.forEach(c=>{count++;walk(c,d+1)})};walk(TREE,0);
  const ph='<span class="tag photo">photo</span>',dc=p=>`<span class="tag doc">manual p.${p}</span>`,inf='<span class="tag inf">inferred</span>',site='<span class="tag site">site data</span>';
- const rows=[["Authorization level names and dialog",ph],["Level 9 softkeys (both pages)",ph+" FP2-L03 only; used on all lines"],["Screen layout, status box, totals, motor currents, weighing list",ph+" "+dc(63)],["Menu tree: "+count+" softkeys from "+MAN.filter(s=>s.paths.length).length+" manual sections",dc("26–452")],["Level mapping manual → site",inf],["PLU database: "+PRODUCTS.length+(usingDemo()?" fictional demo articles":" articles from the price list you loaded")+" · tare, case, End of Batch, PZ PLU, barcode",usingDemo()?inf+" sample data, invented for this repository":site],["Labeling mode and weight limits derived from product names",inf+" (ranges and FW weights in the name)"],["Shelf-life 8 days for every product",inf],["Messages and remedies",dc("349–355")],["Print chan. control options",dc(284)],["Send channel A–E",dc(419)+" use is customer-specific; assumed per line"],["Position trigger 2",inf+" treated as ejector timing"],["Label layouts",inf],["Hardware: label roll change steps",dc(58)],["Hardware: height keys, main switch, warm-up",dc("35, 46, 334")],["Line models, master/slave on FP1-L03",'<span class="tag site">you</span>'],["C-Wrap station layout",inf+" from Bizerba product picture"]];
+ const rows=[["Authorization level names and dialog",ph],["Level 9 softkeys (both pages)",ph+" FP2-L03 only; used on all lines"],["Screen layout, status box, totals, motor currents, weighing list",ph+" "+dc(63)],["Menu tree: "+count+" softkeys from "+MAN.filter(s=>s.paths.length).length+" manual sections",dc("26–452")],["Level mapping manual → site",inf],["PLU database: "+PRODUCTS.length+(usingDemo()?" rows from the built-in price list w/c 16/10/2026":" articles from the price list you loaded")+" · tare, case, End of Batch, PZ PLU, barcode",site],["Labeling mode and weight limits derived from product names",inf+" (ranges and FW weights in the name)"],["Shelf-life 8 days for every product",inf],["Messages and remedies",dc("349–355")],["Print chan. control options",dc(284)],["Send channel A–E",dc(419)+" use is customer-specific; assumed per line"],["Position trigger 2",inf+" treated as ejector timing"],["Label layouts",inf],["Hardware: label roll change steps",dc(58)],["Hardware: height keys, main switch, warm-up",dc("35, 46, 334")],["Line models, master/slave on FP1-L03",'<span class="tag site">you</span>'],["C-Wrap station layout",inf+" from Bizerba product picture"],
+ ["Grouped main menu: Article data, Production data, Display, Configuration, Device (Stop/Start), Service",ph+" FP2-L04, 24/10/2026"],
+ ["Bizerba Brain 2: bottom bar (… Product data, Process data, Result data, Reporting, Jobs, System data), Product data modules, user and server in the footer",ph+" 27/10/2026"],
+ ["Label Designer: menus, three toolbar rows, Project view (077.77-test … 092.92 M&S Truffle), Property window (General, Position, Appearance, Settings, mm/Dot), Text field editor, status bar, print legend",ph+" 27/10/2026"],
+ ["Label Designer: what each blurred toolbar icon does",inf+" tooltips say when an icon is read from a blurred photo"],
+ ["Field types (Text field, Simple text, Static text, Multi, Date 1 Julian / Date 2 use by, Clock, Weight, Price, Unit price, Device number, Code, Logo)",ph+" + your notes; the right-click list order is assumed"],
+ ["Layout 077 77-test and the printed test labels (unit price, text field 1, price, weight, device no. 11, logo, Date 2, fixed text TEST 1, clock, codes 1/3/9/EAN, text fields 2–10)",ph+" 27/10/2026"],
+ ["Layout 173 Co-op fields from Victor's annotated label; code line = device number, clock, Text field 6, Date 1 Julian",ph],
+ ["Layouts 082, 083, 085, 087, 091, 092: names photographed, contents",inf],
+ ["Data Management (dataMaintenance.BRAIN 3.92) tree, Articles and all 10 tabs, Texts lookup dialog, General Text list and details, Label Parameters, Download Data options and tables",ph+" 27/10/2026"],
+ ["Data Management: Tare Values, Date Text, Code Structures, Article Exceptions, Inspection System, Auto Labeler Parameters, Weight Classes, Locations, Lines, Devices, Upload Data screens",inf+" not photographed; built in the same style"],
+ ["0 = keep previously loaded data, -1 = remove / deactivate (or No text)",ph+" Labeling, Texts and Codes tabs"],
+ ["Unit price 0.00 in Data Management keeps the terminal's price",inf+" explains the £15.99 on the test labels"],
+ ["Send format Yes/No when saving an article: Yes = small text format, No = layout font",'<span class="tag site">you</span>'+" question wording assumed"],
+ ["Weight class 7929 cooking-time bands",inf+" texts 11xxx/12xxx as in the General Text list"],
+ ["FP2 lines 03–06 and their M/S devices",ph+" Download Data device tree; IP addresses and device numbers assumed"],["Article data, Templates, Article dataparts management, Texts › General texts, Weight class submenus",ph],["Contents of Production data, Display, Configuration, Device, Service and the unphotographed submenus",inf+" filled from the manual's menus"],
+ ["Edit current article data / Article data maintenance: tabs, rows, Master + Slave columns, PLU 6419 values",ph],["Load / Load record dialog, Package selection and Selection criteria list, Template message, Loading data",ph],["Full-screen text editor with Load, Character size, Alignment, Add contr. characters, Overwrite, Save, Exit",ph],
+ ["Label 205 M&S NFO 2 preview: COOKS IN, USE BY, GB 2037, Not for EU, SC1606, code line",ph],["Text field 10 formula: GL0A = GGL_HALTBAR1 (shelf-life 1)",'<span class="tag doc">gxnet</span> token table; the photo is blurred'],["Text field 5 wording (Scunthorpe, North Lincolnshire)",inf+" blurred in the photo"],
+ ["One password for levels 2, 3, 4, 5",'<span class="tag site">you</span>'],["FP2 Lines 3 and 4 identical",'<span class="tag site">you</span>'],
+ ["BRAIN2 shell: categories Product data / Process data / Result data / Reporting; Product data modules; Label Designer window, Project view, Property window, Text field editor, Export to… wizard, _connect.BRAIN dialog, device names FP1-L03-Glmi-M/S",ph+" BRAIN2 screen"],
+ ["BRAIN2 Process data, Result data, Reporting and … modules",inf+" from Bizerba product pages (Data_Maintenance, Capture, Device_Access, Safety_Service)"],["FP1 Line 3 accepts layouts from BRAIN2 but refuses master data",inf+" from your note and the export photo"],["Slave labeller values as master data exceptions",inf],["Audit trail and result history rows before today",inf+" trainer examples"],
+ ["Two terminal passwords: label checker (PLU change on level 9), higher (levels 2–5)",'<span class="tag site">you</span>'],
+ ["GX status codes 107 / 120 / 129, package error flags (PL13), labeller state (SW98), last package info (SV70), memory-card polling every 5 s",'<span class="tag doc">gxnet</span> machine notes (github.com/taubedonner/gxnet)'],
+ ["Code build rule identifiers (CODE_KONST, CODE_TEILSTR1–7, CODE_ETX, CODE_GS, CODE_FNC1), text limits (article text 64, code substring 30, code build rule 749)",'<span class="tag doc">gxnet</span> notes'],
+ ["Configuration › Communication configuration (Del. remote softkeys, level 4)",'<span class="tag doc">gxnet</span> quoting a newer GLM manual'],["Level 9 = GxNet “TERMINAL” level, built by copying softkeys and macros",'<span class="tag doc">gxnet</span> notes']];
  $("#tab-ref").innerHTML=`<h2>What's real and what's assumed</h2><p class="note"><span class="tag photo">photo</span> your terminal · <span class="tag doc">manual</span> GLM-I instruction manual 38.019.129.001 en · <span class="tag site">site data</span> the price list you loaded · <span class="tag inf">inferred</span> my reading, not confirmed.</p><div class="tw"><table class="ref"><tr><th>Item</th><th>Source</th></tr>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("")}</table></div>
  <h3>Full menu tree from the manual</h3><p class="note">Every path, with the site level that opens it. Tap a row to read the section.</p><div class="tw" style="max-height:480px;overflow:auto"><table class="ref" id="treeTable"><tr><th>Path</th><th>Site level</th><th>Section</th></tr>${MAN.flatMap((s,i)=>s.paths.map(p=>`<tr class="click" data-sec="${i}"><td>${esc(p.path.map(cleanTok).filter(t=>!["Main menu","Etc","ETC"].includes(t)).join(" / "))}</td><td>${siteLv(p.level??s.levels[0])}</td><td>${esc(s.num)} ${esc(s.title)} · p.${s.page}</td></tr>`)).join("")}</table></div>
- <h3>Not modelled yet</h3><p class="note">GT-SoftControl layouts, macro contents, the key under the flag, real label layouts per customer, BRAIN2 (download/upload, Label_Designer), and service functions beyond navigation.</p>`;
+ <h3>Not modelled yet</h3><p class="note">GT-SoftControl layouts, the key under the flag, real label layouts for customers other than M&amp;S 205 (the others are generic retail layouts), BRAIN2 user log-on, and service functions beyond navigation.</p>`;
  $("#treeTable").addEventListener("click",e=>{const tr=e.target.closest("[data-sec]");if(!tr)return;const s=MAN[Number(tr.dataset.sec)];$("#manBody").innerHTML=`<div class="sec"><div class="t">${esc(s.num)} ${esc(s.title)}</div><div class="meta">Manual p. ${s.page}</div><pre>${esc(s.text)}</pre></div>`;$("#man").scrollIntoView({behavior:reduced()?"auto":"smooth"})})}
 
 $$(".tabs button").forEach(b=>b.addEventListener("click",()=>{$$(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));["drills","hw","pl","log","set","ref"].forEach(t=>$("#tab-"+t).hidden=t!==b.dataset.tab);if(b.dataset.tab==="hw")renderHW();if(b.dataset.tab==="pl"){renderPLSrc();renderPL()}}));
 
-/* the subtitle names the site only if you filled it in under Settings */
-function renderHead(){const n=(SITE.name||"").trim();
- $("#subtitle").textContent=`Replica of the Bizerba GLM-I weigh-price labeller terminal${n?" at "+n:"s"}. The menu tree is built from the GLM-I instruction manual; the article database comes from the price list you load in the Price list tab.`}
-
-/* boot */
-const startLine=store.get("line","FP2-L03");useLine(LINES[startLine]?startLine:"FP2-L03");
-setMode(viewMode);renderHead();renderSet();renderRef();setTimeout(fit,60);
-window.__trainer={get S(){return S},get DB(){return DB},get PRODUCTS(){return PRODUCTS},TREE,MAN,importPLU,parseCSV};
-})();
