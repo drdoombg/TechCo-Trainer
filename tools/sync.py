@@ -4,6 +4,7 @@
     python3 tools/sync.py                 # all apps listed in apps.json
     python3 tools/sync.py bizerba         # just one
     python3 tools/sync.py --local ../Bizerba-Trainer bizerba
+    python3 tools/sync.py --reinject      # only put the Main menu button back
 
 Each app keeps its own index.html exactly as its own repo built it; the only
 change is a small home button injected between the TECHCO markers at the end of
@@ -16,13 +17,13 @@ START, END = "<!--TECHCO:HOME-START-->", "<!--TECHCO:HOME-END-->"
 
 HOME_BUTTON = START + """
 <style>
-#techco-home{position:fixed;z-index:2147483000;right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:rgba(17,25,34,.92);color:#fff;border:1px solid rgba(255,255,255,.22);text-decoration:none;font:600 12px/1 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;opacity:.42;transition:opacity .15s,transform .15s;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#techco-home{position:fixed;z-index:2147483000;right:calc(12px + env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:7px;height:34px;padding:0 13px 0 11px;border-radius:999px;background:#111922;color:#fff;border:1px solid rgba(255,255,255,.2);text-decoration:none;font:600 12.5px/1 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;letter-spacing:.01em;opacity:.8;transition:opacity .15s,transform .15s;box-shadow:0 2px 10px rgba(0,0,0,.3)}
 #techco-home:hover,#techco-home:focus-visible{opacity:1;transform:translateY(-1px);outline:none}
 #techco-home:focus-visible{box-shadow:0 0 0 2px #0b5fa5}
-#techco-home svg{width:15px;height:15px}
+#techco-home svg{width:15px;height:15px;flex:none}
 @media print{#techco-home{display:none}}
 </style>
-<a id="techco-home" href="../../index.html" title="TechCo Trainer home (Alt+H)" aria-label="Back to TechCo Trainer home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></a>
+<a id="techco-home" href="../../index.html" title="Back to the TechCo Trainer menu (Alt+H)" aria-label="Back to the TechCo Trainer main menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Main menu</a>
 <script>document.addEventListener("keydown",function(e){if(e.altKey&&!e.ctrlKey&&!e.metaKey&&(e.key==="h"||e.key==="H")){e.preventDefault();e.stopPropagation();location.href="../../index.html"}},true);</script>
 """ + END
 
@@ -46,6 +47,9 @@ def fetch(src: str) -> str:
 
 def main() -> int:
     args = [a for a in sys.argv[1:]]
+    reinject = "--reinject" in args
+    if reinject:
+        args.remove("--reinject")
     local = None
     if "--local" in args:
         k = args.index("--local")
@@ -58,6 +62,12 @@ def main() -> int:
             continue
         out = ROOT / "apps" / app["id"]
         out.mkdir(parents=True, exist_ok=True)
+        if reinject:
+            f = out / "index.html"
+            if f.exists():
+                f.write_text(inject(f.read_text(encoding="utf-8")), encoding="utf-8")
+                print("%-9s Main menu button in place" % app["id"])
+            continue
         src = app.get("source")
         if local:
             src = str(pathlib.Path(local) / "index.html")
@@ -69,6 +79,12 @@ def main() -> int:
         html = fetch(src)
         (out / "index.html").write_text(inject(html), encoding="utf-8")
         print("%-9s %7.0f KB  <- %s" % (app["id"], len(html) / 1024, src))
+        for d in app.get("dirs", []):
+            srcdir = pathlib.Path(src).parent / d
+            if srcdir.is_dir():
+                shutil.rmtree(out / d, ignore_errors=True)
+                shutil.copytree(srcdir, out / d)
+                print("          %s/ copied" % d)
         for extra in app.get("files", []):
             base = src.rsplit("/", 1)[0]
             try:

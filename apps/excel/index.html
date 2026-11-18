@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Excel Trainer</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="app">
+
+  <div class="xt-topbar">
+    <div class="xt-brand">Excel Trainer<span>formula sandbox</span></div>
+    <select id="scenarioPick" class="xt-tool" title="Which toolkit to work in"></select>
+    <button id="btnCheck" class="xt-tool primary" title="Ctrl+Enter">Check</button>
+    <button id="btnHint" class="xt-tool">Hint</button>
+    <button id="btnShowMe" class="xt-tool">Show me</button>
+    <button id="btnReset" class="xt-tool">Reset</button>
+    <span class="xt-spacer"></span>
+    <button id="btnFillDown" class="xt-tool" title="Ctrl+D">Fill &darr;</button>
+    <button id="btnFillRight" class="xt-tool" title="Ctrl+R">Fill &rarr;</button>
+    <button id="btnFormulas" class="xt-tool" title="Ctrl+`">Formulas</button>
+    <button id="btnUndo" class="xt-tool" title="Ctrl+Z">Undo</button>
+    <button id="btnMore" class="xt-tool" title="More tools">More &#9662;</button>
+    <button id="btnTheme" class="xt-tool" title="Light / dark">&#9681;</button>
+  </div>
+  <div class="xt-topbar xt-more hidden" id="moreBar">
+    <button id="btnPaste" class="xt-tool">Paste export&hellip;</button>
+    <button id="btnTrace" class="xt-tool">Trace arrows</button>
+    <span class="xt-muted" style="font-size:11.5px">F2 edit &middot; F4 cycles $ &middot;
+      Ctrl+Shift+Enter array formula &middot; Ctrl+V pastes tab-separated text onto the grid</span>
+  </div>
+
+  <div class="xt-body">
+    <div class="xt-left">
+      <div class="xt-fbar">
+        <input id="namebox" class="xt-namebox" spellcheck="false" autocomplete="off">
+        <div class="xt-fx">fx</div>
+        <input id="finput" class="xt-finput" spellcheck="false" autocomplete="off"
+               placeholder="Type a formula, starting with =">
+      </div>
+      <div id="fhint" class="xt-fhint"></div>
+      <div id="grid"></div>
+      <div id="tabs" class="xt-tabs"></div>
+      <div class="xt-status">
+        <span id="statusCell"></span>
+        <span id="statusMsg"></span>
+        <span class="xt-spacer" style="flex:1"></span>
+        <span>F2 edit &middot; F4 cycles $ &middot; Ctrl+D fill down &middot; Ctrl+R fill right
+          &middot; Ctrl+Enter check</span>
+      </div>
+    </div>
+
+    <div class="xt-right">
+      <div id="ptabs" class="xt-ptabs"></div>
+      <div id="pbody" class="xt-pbody"></div>
+    </div>
+  </div>
+</div>
+
+<div id="ac" class="xt-ac" style="display:none"></div>
+
+<div id="pasteModal" class="xt-modal hidden">
+  <div class="box">
+    <h3 style="margin-top:0">Paste an export</h3>
+    <p class="xt-muted">This is what a real export puts on the clipboard: tab-separated,
+      with trailing spaces, numbers stored as text, zero-padded codes and the odd blank row
+      left in. It pastes at the current selection.</p>
+    <textarea id="pasteText" spellcheck="false"></textarea>
+    <div class="xt-row">
+      <button class="xt-tool" onclick="XT.App.doPaste(false)">Paste</button>
+      <button class="xt-tool" onclick="XT.App.doPaste(true)">Paste values</button>
+      <button class="xt-tool" id="pasteClose">Cancel</button>
+    </div>
+    <p class="xt-muted" style="font-size:11.5px">You can also just copy a block out of
+      Excel, or anything tab-separated, and press Ctrl+V on the grid.
+      <strong>Paste overwrites formulas.</strong> That is deliberate: it is how a re-paste
+      into the wrong sheet quietly breaks a real workbook.</p>
+  </div>
+</div>
+
+<!-- Engine. Classic scripts in dependency order: ES modules do not load from
+     file://, and running by double-clicking index.html is the whole point. -->
+<script src="js/engine/values.js"></script>
+<script src="js/engine/refs.js"></script>
+<script src="js/engine/dates.js"></script>
+<script src="js/engine/formats.js"></script>
+<script src="js/engine/criteria.js"></script>
+<script src="js/engine/tokenizer.js"></script>
+<script src="js/engine/parser.js"></script>
+<script src="js/engine/registry.js"></script>
+<script src="js/engine/functions/logic.js"></script>
+<script src="js/engine/functions/lookup.js"></script>
+<script src="js/engine/functions/math.js"></script>
+<script src="js/engine/functions/text.js"></script>
+<script src="js/engine/functions/datetime.js"></script>
+<script src="js/engine/functions/info.js"></script>
+<script src="js/engine/evaluator.js"></script>
+<script src="js/engine/workbook.js"></script>
+<script src="js/engine/shape.js"></script>
+
+<!-- Data -->
+<script src="data/patterns.js"></script>
+<script src="data/fixtures.js"></script>
+<script src="data/toolkits.js"></script>
+
+<!-- Trainer -->
+<script src="js/trainer/progress.js"></script>
+<script src="js/trainer/grader.js"></script>
+<script src="js/trainer/levels.js"></script>
+<script src="js/trainer/formulas.js"></script>
+
+<!-- UI -->
+<script src="js/ui/grid.js"></script>
+<script src="js/ui/panels.js"></script>
+<script src="js/ui/app.js"></script>
+<!--TECHCO:HOME-START-->
+<style>
+#techco-home{position:fixed;z-index:2147483000;right:calc(12px + env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:7px;height:34px;padding:0 13px 0 11px;border-radius:999px;background:#111922;color:#fff;border:1px solid rgba(255,255,255,.2);text-decoration:none;font:600 12.5px/1 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;letter-spacing:.01em;opacity:.8;transition:opacity .15s,transform .15s;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+#techco-home:hover,#techco-home:focus-visible{opacity:1;transform:translateY(-1px);outline:none}
+#techco-home:focus-visible{box-shadow:0 0 0 2px #0b5fa5}
+#techco-home svg{width:15px;height:15px;flex:none}
+@media print{#techco-home{display:none}}
+</style>
+<a id="techco-home" href="../../index.html" title="Back to the TechCo Trainer menu (Alt+H)" aria-label="Back to the TechCo Trainer main menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Main menu</a>
+<script>document.addEventListener("keydown",function(e){if(e.altKey&&!e.ctrlKey&&!e.metaKey&&(e.key==="h"||e.key==="H")){e.preventDefault();e.stopPropagation();location.href="../../index.html"}},true);</script>
+<!--TECHCO:HOME-END-->
+</body>
+</html>

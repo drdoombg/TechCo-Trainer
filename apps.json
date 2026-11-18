@@ -16,5 +16,17 @@
     "name": "Ishida",
     "source": "apps/ishida/source/index.html",
     "note": "Hand-built single file; apps/ishida/source/index.html is the source."
+  },
+  {
+    "id": "excel",
+    "name": "Excel",
+    "source": null,
+    "dirs": [
+      "css",
+      "js",
+      "data",
+      "docs"
+    ],
+    "note": "Multi-file app, edited in place. To refresh it from the working copy: python3 tools/sync.py --local \"<Excel Trainer>/app\" excel"
   }
 ]

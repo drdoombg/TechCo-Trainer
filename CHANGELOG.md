@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-18 — Excel Trainer added
+- Fourth plate: the Excel Trainer (formula sandbox, shelf life / nutritional / micro schedule toolkits), copied in from the work laptop with its engine, levels and formula catalogue.
+- The corner button in every trainer now reads **Main menu** instead of being an icon on its own.
+- `tools/sync.py --reinject` puts that button back in every trainer, and `"dirs"` in `apps.json` lets a multi-file trainer be refreshed folder and all.
+
 ## 2026-11-18 — TechCo Trainer
 This repository was the Bizerba trainer. It now holds all of the machine trainers behind one home screen, and is renamed to match.
 

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Excel Trainer — Conformance Suite</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --panel: #ffffff; --ink: #1b1d21; --muted: #5d6470;
+    --line: #d8dbe0; --pass: #1a7f45; --passbg: #e9f6ee;
+    --faildk: #a31919; --failbg: #fdeced; --open: #8a5a00; --openbg: #fdf4e0;
+    --accent: #1f5fa8; --mono: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15171a; --panel: #1d2024; --ink: #e8eaed; --muted: #9aa2ad;
+      --line: #2e3238; --pass: #5bd48c; --passbg: #14301f;
+      --faildk: #ff8a8a; --failbg: #351618; --open: #e8b84b; --openbg: #332a12;
+      --accent: #74a9e8;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { padding: 20px 16px 12px; max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 13px; max-width: 70ch; }
+  main { max-width: 1100px; margin: 0 auto; padding: 0 16px 60px; }
+  .bar { position: sticky; top: 0; z-index: 5; background: var(--bg);
+    padding: 10px 0; border-bottom: 1px solid var(--line); margin-bottom: 14px;
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .pill { font: 600 12px/1 var(--mono); padding: 6px 10px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--panel); }
+  .pill.ok { color: var(--pass); background: var(--passbg); border-color: transparent; }
+  .pill.bad { color: var(--faildk); background: var(--failbg); border-color: transparent; }
+  .pill.open { color: var(--open); background: var(--openbg); border-color: transparent; }
+  button { font: inherit; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  button:hover { border-color: var(--accent); }
+  h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted); margin: 22px 0 6px; }
+  table { width: 100%; border-collapse: collapse; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  td { padding: 5px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+  tr:first-child td { border-top: 0; }
+  td.s { width: 62px; font: 600 11px/1.6 var(--mono); text-align: center; white-space: nowrap; }
+  td.s.pass { color: var(--pass); background: var(--passbg); }
+  td.s.fail { color: var(--faildk); background: var(--failbg); }
+  td.s.open { color: var(--open); background: var(--openbg); }
+  td.n { font-family: var(--mono); font-size: 12.5px; word-break: break-word; }
+  .why { color: var(--faildk); font-family: var(--mono); font-size: 12px;
+    white-space: pre-wrap; margin-top: 4px; }
+  .note { color: var(--open); font-size: 12px; margin-top: 4px; }
+  .ref { display: inline-block; font: 600 10px/1.4 var(--mono); padding: 1px 5px;
+    border-radius: 4px; background: var(--bg); border: 1px solid var(--line);
+    color: var(--muted); margin-left: 6px; }
+  .hide-pass tr.pass { display: none; }
+  footer { max-width: 1100px; margin: 0 auto; padding: 0 16px 50px;
+    color: var(--muted); font-size: 12.5px; }
+  code { font-family: var(--mono); font-size: 0.95em; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Excel Trainer — conformance suite</h1>
+  <p class="sub">
+    Built before the lessons, because every exercise is only as trustworthy as the engine
+    underneath it. <strong>Green</strong> passes. <strong>Red</strong> is a real failure.
+    <strong>Amber</strong> is a case listed in <code>docs/OPEN_QUESTIONS.md</code> — the
+    expected answer still needs confirming against real Excel, and it is never counted as
+    a pass.
+  </p>
+</header>
+
+<main>
+  <div class="bar">
+    <span class="pill" id="total">running…</span>
+    <span class="pill ok" id="passed">—</span>
+    <span class="pill bad" id="failed">—</span>
+    <span class="pill open" id="opened">—</span>
+    <span class="pill" id="ms">—</span>
+    <button id="toggle">Hide passing</button>
+    <button id="rerun">Re-run</button>
+  </div>
+  <div id="out"></div>
+</main>
+
+<footer>
+  Engine files under test: <code>values · refs · dates · formats · criteria · tokenizer ·
+  parser · registry · functions/* · evaluator · workbook · shape</code>.
+  The last group replays 400 real formulas taken from the scan of 152 workbooks
+  (formula text only — no workbook data appears anywhere in this trainer).
+</footer>
+
+<!-- Engine. Plain classic scripts in dependency order: ES modules do not load
+     from file://, which is the whole point of this build. -->
+<script src="js/engine/values.js"></script>
+<script src="js/engine/refs.js"></script>
+<script src="js/engine/dates.js"></script>
+<script src="js/engine/formats.js"></script>
+<script src="js/engine/criteria.js"></script>
+<script src="js/engine/tokenizer.js"></script>
+<script src="js/engine/parser.js"></script>
+<script src="js/engine/registry.js"></script>
+<script src="js/engine/functions/logic.js"></script>
+<script src="js/engine/functions/lookup.js"></script>
+<script src="js/engine/functions/math.js"></script>
+<script src="js/engine/functions/text.js"></script>
+<script src="js/engine/functions/datetime.js"></script>
+<script src="js/engine/functions/info.js"></script>
+<script src="js/engine/evaluator.js"></script>
+<script src="js/engine/workbook.js"></script>
+<script src="js/engine/shape.js"></script>
+
+<!-- Data the suite reads -->
+<script src="data/patterns.js"></script>
+<script src="data/shape-corpus.js"></script>
+
+<!-- The cases -->
+<script src="js/tests.js"></script>
+
+<script>
+(function () {
+  'use strict';
+  var out = document.getElementById('out');
+
+  function esc(s) {
+    return String(s).replace(/[&<>]/g, function (c) {
+      return c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;';
+    });
+  }
+
+  function run() {
+    out.innerHTML = '';
+    var t0 = performance.now();
+    var cases = XT.testCases || [];
+    var counts = { pass: 0, fail: 0, open: 0 };
+    var groups = [], byGroup = {};
+
+    cases.forEach(function (c) {
+      var status, why = null;
+      try {
+        c.fn();
+        status = c.open ? 'open' : 'pass';
+      } catch (e) {
+        status = c.open ? 'open' : 'fail';
+        why = e && e.message ? e.message : String(e);
+      }
+      counts[status]++;
+      if (!byGroup[c.group]) { byGroup[c.group] = []; groups.push(c.group); }
+      byGroup[c.group].push({ c: c, status: status, why: why });
+    });
+
+    groups.forEach(function (g) {
+      var rows = byGroup[g];
+      var nf = rows.filter(function (r) { return r.status === 'fail'; }).length;
+      var h = document.createElement('h2');
+      h.textContent = g + '  (' + rows.length + (nf ? ', ' + nf + ' failing' : '') + ')';
+      out.appendChild(h);
+
+      var tb = document.createElement('table');
+      rows.forEach(function (r) {
+        var tr = document.createElement('tr');
+        tr.className = r.status;
+        var label = r.status === 'pass' ? 'PASS' : (r.status === 'fail' ? 'FAIL' : 'OPEN');
+        var body = '<td class="s ' + r.status + '">' + label + '</td><td class="n">' +
+          esc(r.c.name) + (r.c.ref ? '<span class="ref">' + esc(r.c.ref) + '</span>' : '');
+        if (r.why && r.status === 'fail') body += '<div class="why">' + esc(r.why) + '</div>';
+        if (r.c.note) body += '<div class="note">open question: ' + esc(r.c.note) + '</div>';
+        if (r.why && r.status === 'open') body += '<div class="note">current engine answer differs: ' +
+          esc(r.why) + '</div>';
+        body += '</td>';
+        tr.innerHTML = body;
+        tb.appendChild(tr);
+      });
+      out.appendChild(tb);
+    });
+
+    var ms = Math.round(performance.now() - t0);
+    document.getElementById('total').textContent = cases.length + ' cases';
+    document.getElementById('passed').textContent = counts.pass + ' pass';
+    document.getElementById('failed').textContent = counts.fail + ' fail';
+    document.getElementById('opened').textContent = counts.open + ' open';
+    document.getElementById('ms').textContent = ms + ' ms';
+    document.title = (counts.fail ? '✖ ' + counts.fail + ' failing' : '✔ all green') +
+      ' — Excel Trainer tests';
+  }
+
+  document.getElementById('rerun').addEventListener('click', run);
+  document.getElementById('toggle').addEventListener('click', function () {
+    out.classList.toggle('hide-pass');
+    this.textContent = out.classList.contains('hide-pass') ? 'Show passing' : 'Hide passing';
+  });
+
+  run();
+})();
+</script>
+</body>
+</html>
