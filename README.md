@@ -1,6 +1,6 @@
 # TechCo Trainer
 
-One home screen for the trainers used at 2 Sisters Food Group, Scunthorpe. Open the page, pick a trainer, start. Everything runs in the browser with no install and no connection to any real factory system.
+One home screen for the machine and software trainers. Open the page, pick a trainer, start. Everything runs in the browser with no install and no connection to any real factory system.
 
 | Plate | What it practises | Programs inside |
 |---|---|---|

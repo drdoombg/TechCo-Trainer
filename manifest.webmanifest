@@ -1,7 +1,7 @@
 {
   "name": "TechCo Trainer",
   "short_name": "TechCo",
-  "description": "Home screen for the 2SFG Scunthorpe factory software trainers: Bizerba, Hellenic and Ishida.",
+  "description": "Home screen for the machine and software trainers: Bizerba, Hellenic, Ishida and Excel.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
